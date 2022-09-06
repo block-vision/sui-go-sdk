@@ -1,0 +1,7 @@
+# gen by ide
+.idea
+.vscode
+# log files
+*.log*
+# gen by Makefile
+/build/bin
