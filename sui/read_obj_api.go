@@ -3,9 +3,9 @@ package sui
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -33,8 +33,8 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 	if err != nil {
 		return models.GetObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -56,8 +56,8 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context,
 	if err != nil {
 		return models.GetObjectsOwnedByAddressResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetObjectsOwnedByAddressResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetObjectsOwnedByAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -79,8 +79,8 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, 
 	if err != nil {
 		return models.GetObjectsOwnedByObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetObjectsOwnedByObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetObjectsOwnedByObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -102,8 +102,8 @@ func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.
 	if err != nil {
 		return models.GetRawObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetRawObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetRawObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {

@@ -3,9 +3,9 @@ package sui
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -38,8 +38,8 @@ func (s *suiReadTransactionFromSuiImpl) GetRecentTransactions(ctx context.Contex
 	if err != nil {
 		return models.GetRecentTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetRecentTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetRecentTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -65,6 +65,9 @@ func (s *suiReadTransactionFromSuiImpl) GetTotalTransactionNumber(ctx context.Co
 	if err != nil {
 		return models.GetTotalTransactionNumberResponse{}, err
 	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTotalTransactionNumberResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
 	rsp.TotalNumberOfTransaction = gjson.ParseBytes(respBytes).Get("result").Uint()
 	return rsp, nil
 }
@@ -81,6 +84,9 @@ func (s *suiReadTransactionFromSuiImpl) GetTransaction(ctx context.Context, req 
 	})
 	if err != nil {
 		return models.GetTransactionResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
@@ -102,8 +108,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByInputObject(ctx context
 	if err != nil {
 		return models.GetTransactionsByInputObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsByInputObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsByInputObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -133,8 +139,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMoveFunction(ctx contex
 	if err != nil {
 		return models.GetTransactionsByMoveFunctionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsByMoveFunctionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsByMoveFunctionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -162,8 +168,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMutatedObject(ctx conte
 	if err != nil {
 		return models.GetTransactionsByMutatedObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsByMutatedObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsByMutatedObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -191,8 +197,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsFromAddress(ctx context.C
 	if err != nil {
 		return models.GetTransactionsFromAddressResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsFromAddressResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsFromAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -221,8 +227,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsInRange(ctx context.Conte
 	if err != nil {
 		return models.GetTransactionsInRangeResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsInRangeResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsInRangeResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {
@@ -251,8 +257,8 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsToAddress(ctx context.Con
 	if err != nil {
 		return models.GetTransactionsToAddressResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetTransactionsToAddressResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionsToAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	results := gjson.ParseBytes(respBytes).Get("result").Array()
 	for i := range results {

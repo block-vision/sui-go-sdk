@@ -3,9 +3,9 @@ package sui
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -38,8 +38,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByEventType(ctx context.Context, req 
 	if err != nil {
 		return models.GetEventsByEventTypeResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsByEventTypeResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsByEventTypeResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -65,8 +65,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByModule(ctx context.Context, req mod
 	if err != nil {
 		return models.GetEventsByModuleResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsByModuleResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsByModuleResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -91,8 +91,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByObject(ctx context.Context, req mod
 	if err != nil {
 		return models.GetEventsByObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsByObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsByObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -117,8 +117,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByOwner(ctx context.Context, req mode
 	if err != nil {
 		return models.GetEventsByOwnerResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsByOwnerResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsByOwnerResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -143,8 +143,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsBySender(ctx context.Context, req mod
 	if err != nil {
 		return models.GetEventsBySenderResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsBySenderResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsBySenderResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -166,8 +166,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByTransaction(ctx context.Context, re
 	if err != nil {
 		return models.GetEventsByTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetEventsByTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetEventsByTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {

@@ -1,10 +1,14 @@
 # Sui-Go-SDK
-[![License Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-red.svg)](LICENSE)
-[![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/block-vision/sui-go-sdk)
+
+<p align="center">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-red.svg"></a>
+    <a href="https://goreportcard.com/report/github.com/block-vision/sui-go-sdk"><img src="https://goreportcard.com/badge/github.com/securego/gosec"></a>
+    <a href="https://discord.gg/Re6prK86Tr"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true"></a>
+</p>
 
 ##
-sui-go-sdk is project [Sui]() SDK for Go programming language.  
-
+sui-go-sdk is go language sdk for Project 
+sui-go-sdk is project [Sui]() SDK for Go programming language.
 
 ### Notices
 + You don't need to load your `sui.keystore` file if you just want to send some unsigned transactions.
@@ -35,7 +39,7 @@ go get github.com/block-vision/sui-go-sdk
 
 ## Examples
 
-
+### Get start
 ```go
 package main
 
@@ -78,17 +82,86 @@ func main() {
 
 ### Send unsigned transactions
 
+```go
+func main() {
+	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+
+	keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println(keystoreCli.Keys())
+	fmt.Println(keystoreCli.GetKey("your-address"))
+
+	resp, err := cli.MoveCall(context.Background(), models.MoveCallRequest{
+		Signer:          "0x4d6f1a54e805038f44ecd3112927af147e9b9ecb",
+		PackageObjectId: "0x0000000000000000000000000000000000000002",
+		Module:          "devnet_nft",
+		Function:        "mint",
+		TypeArguments:   []interface{}{},
+		Arguments:       []interface{}{"blockvision", "blockvision", "testurl"},
+		Gas:             "0x14802aeff2f444c888303f8fbba6d4e8451c38f8",
+		GasBudget:       1000,
+	})
+	
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(resp)
+}
+```
 
 
 ### Send signed transactions
 
+```go
+func main() {
+    cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+
+    keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+	}
+
+    fmt.Println(keystoreCli.Keys())
+    fmt.Println(keystoreCli.GetKey("your-address"))
+
+    resp, err := cli.MoveCallAndExecuteTransaction(context.Background(), models.MoveCallAndExecuteTransactionRequest{
+        MoveCallRequest: models.MoveCallRequest{
+            Signer:          "0x4d6f1a54e805038f44ecd3112927af147e9b9ecb",
+            PackageObjectId: "0x0000000000000000000000000000000000000002",
+            Module:          "devnet_nft",
+            Function:        "mint",
+            TypeArguments:   []interface{}{},
+            Arguments:       []interface{}{"blockvision", "blockvision", "testurl"},
+            Gas:             "0x14802aeff2f444c888303f8fbba6d4e8451c38f8",
+            GasBudget:       1000,
+        },
+    })
+    if err != nil {
+        fmt.Println(err.Error())
+        return
+    }
+    fmt.Println(resp)
+}
+```
 
 ## Contribution  
+Contributions are welcomed and greatly appreciated. 
+Please follow the PR/issue template. 
+Thank you to all the people who participate in building better infrastructure! 
 
 ## Resources
 + [SDK Examples]()
 + [Sui](https://github.com/MystenLabs/sui)
 
+
+## License 
+[Apache 2.0 license](LICENSE)
 
 
 

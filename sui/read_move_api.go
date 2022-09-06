@@ -3,9 +3,9 @@ package sui
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -35,8 +35,8 @@ func (s *suiReadMoveFromSuiImpl) GetMoveFunctionArgTypes(ctx context.Context, re
 	if err != nil {
 		return models.GetMoveFunctionArgTypesResponse{}, nil
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetMoveFunctionArgTypesResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetMoveFunctionArgTypesResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -57,8 +57,8 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModulesByPackage(ctx context.C
 	if err != nil {
 		return models.GetNormalizedMoveModulesByPackageResponse{}, nil
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetNormalizedMoveModulesByPackageResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetNormalizedMoveModulesByPackageResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -80,8 +80,8 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModule(ctx context.Context, re
 	if err != nil {
 		return models.GetNormalizedMoveModuleResponse{}, nil
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetNormalizedMoveModuleResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetNormalizedMoveModuleResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -104,8 +104,8 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveStruct(ctx context.Context, re
 	if err != nil {
 		return models.GetNormalizedMoveStructResponse{}, nil
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetNormalizedMoveStructResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetNormalizedMoveStructResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
@@ -128,8 +128,8 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveFunction(ctx context.Context, 
 	if err != nil {
 		return models.GetNormalizedMoveFunctionResponse{}, nil
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.GetNormalizedMoveFunctionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetNormalizedMoveFunctionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {

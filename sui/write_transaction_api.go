@@ -3,9 +3,9 @@ package sui
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -43,8 +43,8 @@ func (s *suiWriteTransactionImpl) MoveCall(ctx context.Context, req models.MoveC
 	if err != nil {
 		return models.MoveCallResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.MoveCallResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.MoveCallResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -68,8 +68,8 @@ func (s *suiWriteTransactionImpl) MergeCoins(ctx context.Context, req models.Mer
 	if err != nil {
 		return models.MergeCoinsResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.MergeCoinsResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.MergeCoinsResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -93,8 +93,8 @@ func (s *suiWriteTransactionImpl) SplitCoin(ctx context.Context, req models.Spli
 	if err != nil {
 		return models.SplitCoinResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.SplitCoinResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.SplitCoinResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -118,8 +118,8 @@ func (s *suiWriteTransactionImpl) SplitCoinEqual(ctx context.Context, req models
 	if err != nil {
 		return models.SplitCoinEqualResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.SplitCoinEqualResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.SplitCoinEqualResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -142,8 +142,8 @@ func (s *suiWriteTransactionImpl) Publish(ctx context.Context, req models.Publis
 	if err != nil {
 		return models.PublishResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.PublishResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.PublishResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -167,8 +167,8 @@ func (s *suiWriteTransactionImpl) TransferObject(ctx context.Context, req models
 	if err != nil {
 		return models.TransferObjectResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.TransferObjectResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.TransferObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -192,8 +192,8 @@ func (s *suiWriteTransactionImpl) TransferSui(ctx context.Context, req models.Tr
 	if err != nil {
 		return models.TransferSuiResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.TransferSuiResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.TransferSuiResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -216,8 +216,8 @@ func (s *suiWriteTransactionImpl) BatchTransaction(ctx context.Context, req mode
 	if err != nil {
 		return models.BatchTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.BatchTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.BatchTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -240,8 +240,8 @@ func (s *suiWriteTransactionImpl) ExecuteTransaction(ctx context.Context, req mo
 	if err != nil {
 		return models.ExecuteTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.ExecuteTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.ExecuteTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {

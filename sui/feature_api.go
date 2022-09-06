@@ -69,7 +69,7 @@ func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req 
 	if _keypair.Flag == keypair.Ed25519Flag {
 		scheme = "ED25519"
 	} else if _keypair.Flag == keypair.Secp256k1Flag {
-		scheme = "SECP256K1"
+		scheme = "Secp256k1"
 	} else {
 		return models.MoveCallAndExecuteTransactionResponse{}, sui_error.ErrUnknownSignatureScheme
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/sui"
 )
@@ -38,5 +37,4 @@ func main() {
 		return
 	}
 	fmt.Println(resp)
-
 }
