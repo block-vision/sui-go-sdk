@@ -1,0 +1,45 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+jobs:
+  test:
+    if: ${{ github.event_name == 'push' || !github.event_pull_request.draft }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: git submodule update --init --recursive --force
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: Install dependencies on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt update && sudo apt install build-essential
+
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            ~/go/pkg/mod
+          key: go-${{ matrix.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: go-${{ matrix.os }}-
+
+      - name: Test
+        run: make test
+
