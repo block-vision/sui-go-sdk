@@ -20,6 +20,8 @@ type suiReadObjectFromSuiImpl struct {
 	conn *httpconn.HttpConn
 }
 
+// GetObject implements method `sui_getObject`.
+// Returns object details
 func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error) {
 	var rsp models.GetObjectResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -41,6 +43,8 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 	return rsp, nil
 }
 
+// GetObjectsOwnedByAddress implements method `sui_getObjectsOwnedByAddress`.
+// Returns an array of object information
 func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error) {
 	var rsp models.GetObjectsOwnedByAddressResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -62,6 +66,8 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context,
 	return rsp, nil
 }
 
+// GetObjectsOwnedByObject implements method `sui_getObjectsOwnedByObject`.
+// Returns an array of object information
 func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error) {
 	var rsp models.GetObjectsOwnedByObjectResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -83,6 +89,8 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, 
 	return rsp, nil
 }
 
+// GetRawObject implements method `sui_getRawObject`.
+// Returns object details
 func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error) {
 	var rsp models.GetRawObjectResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{

@@ -22,7 +22,8 @@ type suiReadEventFromSuiImpl struct {
 	conn *httpconn.HttpConn
 }
 
-//GetEventsByEventType
+// GetEventsByEventType implements method `sui_getEventsByEventType`.
+// Returns an array of EventEnvelops according to your filter request condition.
 func (s *suiReadEventFromSuiImpl) GetEventsByEventType(ctx context.Context, req models.GetEventsByEventTypeRequest, opts ...interface{}) (models.GetEventsByEventTypeResponse, error) {
 	var rsp models.GetEventsByEventTypeResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -47,6 +48,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByEventType(ctx context.Context, req 
 	return rsp, nil
 }
 
+// GetEventsByModule implements method `sui_getEventsByModule`.
+// Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByModule(ctx context.Context, req models.GetEventsByModuleRequest, opts ...interface{}) (models.GetEventsByModuleResponse, error) {
 	var rsp models.GetEventsByModuleResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -72,6 +75,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByModule(ctx context.Context, req mod
 	return rsp, nil
 }
 
+// GetEventsByObject implements method `sui_getEventsByObject`.
+// Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByObject(ctx context.Context, req models.GetEventsByObjectRequest, opts ...interface{}) (models.GetEventsByObjectResponse, error) {
 	var rsp models.GetEventsByObjectResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -96,6 +101,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByObject(ctx context.Context, req mod
 	return rsp, nil
 }
 
+// GetEventsByOwner implements method `sui_getEventsByOwner`.
+// Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByOwner(ctx context.Context, req models.GetEventsByOwnerRequest, opts ...interface{}) (models.GetEventsByOwnerResponse, error) {
 	var rsp models.GetEventsByOwnerResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -120,6 +127,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsByOwner(ctx context.Context, req mode
 	return rsp, nil
 }
 
+// GetEventsBySender implements method `sui_getEventsBySender`.
+// Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsBySender(ctx context.Context, req models.GetEventsBySenderRequest, opts ...interface{}) (models.GetEventsBySenderResponse, error) {
 	var rsp models.GetEventsBySenderResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -144,6 +153,8 @@ func (s *suiReadEventFromSuiImpl) GetEventsBySender(ctx context.Context, req mod
 	return rsp, nil
 }
 
+// GetEventsByTransaction implements method `sui_getEventsByTransaction`.
+// Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByTransaction(ctx context.Context, req models.GetEventsByTransactionRequest, opts ...interface{}) (models.GetEventsByTransactionResponse, error) {
 	var rsp models.GetEventsByTransactionResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{

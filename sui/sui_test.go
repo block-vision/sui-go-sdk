@@ -129,7 +129,6 @@ func TestOnReadObjectFromSui(t *testing.T) {
 		}
 		fmt.Println(resp)
 
-		//TODO Mark different results
 		resp2, err := cli.SuiCall(ctx, "sui_getObject", []interface{}{
 			"0x869afb00e643e1f09af0e12d4732ccd71dfca6e2",
 		})

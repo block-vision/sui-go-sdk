@@ -21,6 +21,7 @@ type suiReadMoveFromSuiImpl struct {
 	conn *httpconn.HttpConn
 }
 
+// GetMoveFunctionArgTypes implements method `sui_getMoveFunctionArgTypes`
 func (s *suiReadMoveFromSuiImpl) GetMoveFunctionArgTypes(ctx context.Context, req models.GetMoveFunctionArgTypesRequest, opts ...interface{}) (models.GetMoveFunctionArgTypesResponse, error) {
 	var rsp models.GetMoveFunctionArgTypesResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -44,6 +45,7 @@ func (s *suiReadMoveFromSuiImpl) GetMoveFunctionArgTypes(ctx context.Context, re
 	return rsp, nil
 }
 
+// GetNormalizedMoveModulesByPackage implements method `sui_getNormalizedMoveModulesByPackage`
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest, opts ...interface{}) (models.GetNormalizedMoveModulesByPackageResponse, error) {
 	var rsp models.GetNormalizedMoveModulesByPackageResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -65,6 +67,7 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModulesByPackage(ctx context.C
 	return rsp, nil
 }
 
+// GetNormalizedMoveModule implements method `sui_getNormalizedMoveModule`.
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModule(ctx context.Context, req models.GetNormalizedMoveModuleRequest, opts ...interface{}) (models.GetNormalizedMoveModuleResponse, error) {
 	var rsp models.GetNormalizedMoveModuleResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -87,6 +90,7 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModule(ctx context.Context, re
 	return rsp, nil
 }
 
+// GetNormalizedMoveStruct implements method `sui_getNormalizedMoveStruct`.
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveStruct(ctx context.Context, req models.GetNormalizedMoveStructRequest, opts ...interface{}) (models.GetNormalizedMoveStructResponse, error) {
 	var rsp models.GetNormalizedMoveStructResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
@@ -110,6 +114,7 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveStruct(ctx context.Context, re
 	return rsp, nil
 }
 
+// GetNormalizedMoveFunction implements method `sui_getNormalizedMoveFunction`.
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveFunction(ctx context.Context, req models.GetNormalizedMoveFunctionRequest, opts ...interface{}) (models.GetNormalizedMoveFunctionResponse, error) {
 	var rsp models.GetNormalizedMoveFunctionResponse
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
