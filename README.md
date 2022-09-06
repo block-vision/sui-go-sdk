@@ -1,6 +1,7 @@
 # Sui-Go-SDK
 
 <p align="center">
+    <a href="https://github.com/block-vision/sui-go-sdk/blob/main/.github/workflows/ci.yml"><img src="https://github.com/block-vision/sui-go-sdk/actions/workflows/ci.yml/badge.svg"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-red.svg"></a>
     <a href="https://goreportcard.com/report/github.com/block-vision/sui-go-sdk"><img src="https://goreportcard.com/badge/github.com/securego/gosec"></a>
     <a href="https://discord.gg/Re6prK86Tr"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true"></a>
@@ -156,7 +157,7 @@ Please follow the PR/issue template.
 Thank you to all the people who participate in building better infrastructure! 
 
 ## Resources
-+ [SDK Examples]()
++ [SDK Examples](https://github.com/block-vision/sui-go-sdk/tree/main/examples)
 + [Sui](https://github.com/MystenLabs/sui)
 
 
