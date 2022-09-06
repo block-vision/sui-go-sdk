@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"github.com/block-vision/sui-go-sdk/httpconn"
 	"github.com/block-vision/sui-go-sdk/keypair"
 	"github.com/block-vision/sui-go-sdk/models"
@@ -42,8 +43,8 @@ func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req 
 	if err != nil {
 		return models.MoveCallAndExecuteTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.MoveCallAndExecuteTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.MoveCallAndExecuteTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	var moveCallRsp models.MoveCallResponse
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &moveCallRsp)
@@ -86,8 +87,8 @@ func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req 
 	if err != nil {
 		return models.MoveCallAndExecuteTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.MoveCallAndExecuteTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.MoveCallAndExecuteTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -113,8 +114,8 @@ func (s *suiFeatureImpl) BatchAndExecuteTransaction(ctx context.Context, req mod
 	if err != nil {
 		return models.BatchAndExecuteTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(batchTxBytes) {
-		return models.BatchAndExecuteTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(batchTxBytes).Get("error").Exists() {
+		return models.BatchAndExecuteTransactionResponse{}, errors.New(gjson.ParseBytes(batchTxBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(batchTxBytes).Get("result").String()), &batchTxRsp)
 	if err != nil {
@@ -156,8 +157,8 @@ func (s *suiFeatureImpl) BatchAndExecuteTransaction(ctx context.Context, req mod
 	if err != nil {
 		return models.BatchAndExecuteTransactionResponse{}, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return models.BatchAndExecuteTransactionResponse{}, sui_error.ErrInvalidJson
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.BatchAndExecuteTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
