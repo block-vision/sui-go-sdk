@@ -1,4 +1,6 @@
 # Sui-Go-SDK
+[![License Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-red.svg)](LICENSE)
+[![GoReport](https://goreportcard.com/badge/github.com/securego/gosec)](https://goreportcard.com/report/github.com/block-vision/sui-go-sdk)
 
 ## 
 
