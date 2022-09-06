@@ -37,7 +37,7 @@ go get github.com/block-vision/sui-go-sdk
 ### Go Version
 | Golang Version |
 |----------------|
-| \>= 1.18.1     | 
+| \>= 1.17.3     | 
 
 ## Examples
 
@@ -153,8 +153,8 @@ func main() {
 ```
 
 ## Contribution  
-Contributions are welcomed and greatly appreciated. 
-Please follow the PR/issue template. 
+Contributions are welcomed and greatly appreciated.   
+Please follow the PR/issue template.  
 Thank you to all the people who participate in building better infrastructure! 
 
 ## Resources
