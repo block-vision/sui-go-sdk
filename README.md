@@ -10,7 +10,7 @@
 
 ##
 sui-go-sdk is go language sdk for Project 
-sui-go-sdk is project [Sui]() SDK for Go programming language.
+sui-go-sdk is project [Sui](https://github.com/MystenLabs/sui) SDK for Go programming language.
 
 ### Notices
 + You don't need to load your `sui.keystore` file if you just want to send some unsigned transactions.
