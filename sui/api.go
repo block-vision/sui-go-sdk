@@ -1,7 +1,7 @@
 package sui
 
 import (
-	"github.com/block-vision/sui-go-sdk/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
 )
 
 type ISuiAPI interface {

@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/block-vision/sui-go-sdk/httpconn"
-	"github.com/block-vision/sui-go-sdk/keypair"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/keypair"
+	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui_error"
 	"github.com/tidwall/gjson"
 )
 

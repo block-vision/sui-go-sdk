@@ -2,12 +2,12 @@ package sui
 
 import (
 	"crypto/sha256"
-	"github.com/block-vision/sui-go-sdk/sui_error"
+	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"github.com/ledgerwatch/secp256k1"
 	"sync"
 
+	"github.com/block-vision/sui-go-sdk/common/keypair"
 	"github.com/block-vision/sui-go-sdk/config"
-	"github.com/block-vision/sui-go-sdk/keypair"
 	"github.com/block-vision/sui-go-sdk/models"
 	"golang.org/x/crypto/ed25519"
 )
