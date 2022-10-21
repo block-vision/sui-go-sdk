@@ -143,3 +143,17 @@ type ExecuteTransactionResponse struct {
 	TimestampMs uint64                                     `json:"timestamp_ms"`
 	ParsedData  interface{}                                `json:"parsed_data"`
 }
+
+type DryRunTransactionRequest struct {
+	TxBytes   string `json:"txBytes"`
+	SigScheme string `json:"sigScheme"`
+	Signature string `json:"signature"`
+	PubKey    string `json:"pubKey"`
+}
+
+type DryRunTransactionResponse struct {
+	TransactionBytes string                 `json:"transactionBytes"`
+	Gas              sui_types.SuiObjectRef `json:"gas"`
+	InputObject      interface{}            `json:"inputObject"`
+	TxBytes          string                 `json:"txBytes"`
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -14,6 +15,7 @@ type IReadObjectFromSuiAPI interface {
 	GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error)
 	GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error)
 	GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error)
+	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -108,6 +110,32 @@ func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.GetRawObjectResponse{}, err
+	}
+	return rsp, nil
+}
+
+// TryGetPastObject implements method `sui_tryGetPastObject`
+// Note there is no software-level guarantee/SLA that objects with past versions can be retrieved by this API,
+// even if the object and version exists/existed.
+// The result may vary across nodes depending on their pruning policies.
+// Return the object information for a specified version
+func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opts ...interface{}) (models.TryGetPastObjectResponse, error) {
+	var rsp models.TryGetPastObjectResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_tryGetPastObject",
+		Params: []interface{}{
+			req.ObjectID,
+		},
+	})
+	if err != nil {
+		return models.TryGetPastObjectResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.TryGetPastObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.TryGetPastObjectResponse{}, err
 	}
 	return rsp, nil
 }

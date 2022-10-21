@@ -48,3 +48,19 @@ type GetRawObjectResponse struct {
 	} `json:"details"`
 	Status string `json:"status"`
 }
+
+type TryGetPastObjectRequest struct {
+	ObjectID string `json:"objectID"`
+	Version  uint64 `json:"version"`
+}
+
+type TryGetPastObjectResponse struct {
+	Status  string `json:"status"`
+	Details struct {
+		Data sui_json_rpc_types.SuiParsedMoveObject `json:"data"`
+		sui_json_rpc_types.OwnedObjectRef
+		PreviousTransaction string                 `json:"previousTransaction"`
+		StorageRebate       uint64                 `json:"storageRebate"`
+		Reference           sui_types.SuiObjectRef `json:"reference"`
+	} `json:"details"`
+}

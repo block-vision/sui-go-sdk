@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -19,6 +20,7 @@ type IWriteTransactionAPI interface {
 	TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error)
 	BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error)
 	ExecuteTransaction(ctx context.Context, req models.ExecuteTransactionRequest, opts ...interface{}) (models.ExecuteTransactionResponse, error)
+	DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error)
 }
 
 type suiWriteTransactionImpl struct {
@@ -246,6 +248,30 @@ func (s *suiWriteTransactionImpl) ExecuteTransaction(ctx context.Context, req mo
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.ExecuteTransactionResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error) {
+	var rsp models.DryRunTransactionResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_dryRunTransaction",
+		Params: []interface{}{
+			req.TxBytes,
+			req.SigScheme,
+			req.Signature,
+			req.PubKey,
+		},
+	})
+	if err != nil {
+		return models.DryRunTransactionResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.DryRunTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.DryRunTransactionResponse{}, err
 	}
 	return rsp, nil
 }
