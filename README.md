@@ -55,7 +55,7 @@ import (
 
 func main() {
 	// configure your endpoint here
-	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 	resp, err := cli.GetRecentTransactions(context.Background(), models.GetRecentTransactionRequest{
 		Count: 5,
 	})
@@ -86,7 +86,7 @@ func main() {
 
 ```go
 func main() {
-	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 
 	keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
 	if err != nil {
@@ -121,7 +121,7 @@ func main() {
 
 ```go
 func main() {
-    cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+    cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 
     keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
     if err != nil {

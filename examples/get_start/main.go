@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 	resp, err := cli.GetRecentTransactions(context.Background(), models.GetRecentTransactionRequest{
 		Count: 5,
 	})

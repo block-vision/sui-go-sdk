@@ -10,7 +10,7 @@ import (
 
 //send signed transactions
 func main() {
-	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 
 	keystoreCli, err := sui.SetAccountKeyStore("../../config/sui.keystore.fortest")
 	if err != nil {

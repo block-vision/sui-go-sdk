@@ -10,7 +10,7 @@ import (
 
 //send unsigned transactions
 func main() {
-	cli := sui.NewSuiClient("https://gateway.devnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 
 	resp, err := cli.MoveCall(context.Background(), models.MoveCallRequest{
 		Signer:          "0x4d6f1a54e805038f44ecd3112927af147e9b9ecb",
