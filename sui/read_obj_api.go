@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -27,7 +26,7 @@ type suiReadObjectFromSuiImpl struct {
 // Returns object details
 func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error) {
 	var rsp models.GetObjectResponse
-	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getObject",
 		Params: []interface{}{
 			req.ObjectID,
@@ -50,7 +49,7 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 // Returns an array of object information
 func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error) {
 	var rsp models.GetObjectsOwnedByAddressResponse
-	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getObjectsOwnedByAddress",
 		Params: []interface{}{
 			req.Address,
@@ -73,7 +72,7 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context,
 // Returns an array of object information
 func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error) {
 	var rsp models.GetObjectsOwnedByObjectResponse
-	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getObjectsOwnedByObject",
 		Params: []interface{}{
 			req.ObjectID,
@@ -96,7 +95,7 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, 
 // Returns object details
 func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error) {
 	var rsp models.GetRawObjectResponse
-	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getRawObject",
 		Params: []interface{}{
 			req.ObjectID,
@@ -122,7 +121,7 @@ func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.
 // Return the object information for a specified version
 func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opts ...interface{}) (models.TryGetPastObjectResponse, error) {
 	var rsp models.TryGetPastObjectResponse
-	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_tryGetPastObject",
 		Params: []interface{}{
 			req.ObjectID,
