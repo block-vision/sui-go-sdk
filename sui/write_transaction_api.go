@@ -11,17 +11,22 @@ import (
 )
 
 type IWriteTransactionAPI interface {
+	BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error)
+	DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error)
+	ExecuteTransaction(ctx context.Context, req models.ExecuteTransactionRequest, opts ...interface{}) (models.ExecuteTransactionResponse, error)
+
+	Pay(ctx context.Context, req models.PayRequest, opts ...interface{}) (models.PayResponse, error)
+	PayAllSui(ctx context.Context, req models.PayAllSuiRequest, opts ...interface{}) (models.PayAllSuiResponse, error)
+	PaySui(ctx context.Context, req models.PaySuiRequest, opts ...interface{}) (models.PaySuiResponse, error)
+
 	MoveCall(ctx context.Context, req models.MoveCallRequest, opts ...interface{}) (models.MoveCallResponse, error)
 	MergeCoins(ctx context.Context, req models.MergeCoinsRequest, opts ...interface{}) (models.MergeCoinsResponse, error)
 	SplitCoin(ctx context.Context, req models.SplitCoinRequest, opts ...interface{}) (models.SplitCoinResponse, error)
 	SplitCoinEqual(ctx context.Context, req models.SplitCoinEqualRequest, opt ...interface{}) (models.SplitCoinEqualResponse, error)
+
 	Publish(ctx context.Context, req models.PublishRequest, opts ...interface{}) (models.PublishResponse, error)
 	TransferObject(ctx context.Context, req models.TransferObjectRequest, opts ...interface{}) (models.TransferObjectResponse, error)
 	TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error)
-	BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error)
-	Pay(ctx context.Context, req models.PayRequest, opts ...interface{}) (models.PayResponse, error)
-	ExecuteTransaction(ctx context.Context, req models.ExecuteTransactionRequest, opts ...interface{}) (models.ExecuteTransactionResponse, error)
-	DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error)
 }
 
 type suiWriteTransactionImpl struct {
@@ -299,6 +304,54 @@ func (s *suiWriteTransactionImpl) Pay(ctx context.Context, req models.PayRequest
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.PayResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) PayAllSui(ctx context.Context, req models.PayAllSuiRequest, opts ...interface{}) (models.PayAllSuiResponse, error) {
+	var rsp models.PayAllSuiResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_payAllSui",
+		Params: []interface{}{
+			req.Signer,
+			req.InputCoins,
+			req.Recipient,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.PayAllSuiResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.PayAllSuiResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.PayAllSuiResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) PaySui(ctx context.Context, req models.PaySuiRequest, opts ...interface{}) (models.PaySuiResponse, error) {
+	var rsp models.PaySuiResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_paySui",
+		Params: []interface{}{
+			req.Signer,
+			req.InputCoins,
+			req.Recipient,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.PaySuiResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.PaySuiResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.PaySuiResponse{}, err
 	}
 	return rsp, nil
 }

@@ -173,3 +173,31 @@ type PayResponse struct {
 	InputObject      interface{}            `json:"inputObject"`
 	TxBytes          string                 `json:"txBytes"`
 }
+
+type PayAllSuiRequest struct {
+	Signer     string   `json:"suiAddress,omitempty"`
+	InputCoins []string `json:"inputCoins,omitempty"`
+	Recipient  string   `json:"recipient,omitempty"`
+	GasBudget  uint64   `json:"gasBudget,omitempty"`
+}
+
+type PayAllSuiResponse struct {
+	TransactionBytes string                 `json:"transactionBytes"`
+	Gas              sui_types.SuiObjectRef `json:"gas"`
+	InputObject      interface{}            `json:"inputObject"`
+	TxBytes          string                 `json:"txBytes"`
+}
+
+type PaySuiRequest struct {
+	Signer     string   `json:"signer,omitempty"`
+	InputCoins []string `json:"inputCoins,omitempty"`
+	Recipient  []string `json:"recipient,omitempty"`
+	GasBudget  uint64   `json:"gasBudget,omitempty"`
+}
+
+type PaySuiResponse struct {
+	TransactionBytes string                 `json:"transactionBytes"`
+	Gas              sui_types.SuiObjectRef `json:"gas"`
+	InputObject      interface{}            `json:"inputObject"`
+	TxBytes          string                 `json:"txBytes"`
+}
