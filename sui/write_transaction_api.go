@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
@@ -19,17 +20,18 @@ type IWriteTransactionAPI interface {
 	TransferObject(ctx context.Context, req models.TransferObjectRequest, opts ...interface{}) (models.TransferObjectResponse, error)
 	TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error)
 	BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error)
+	Pay(ctx context.Context, req models.PayRequest, opts ...interface{}) (models.PayResponse, error)
 	ExecuteTransaction(ctx context.Context, req models.ExecuteTransactionRequest, opts ...interface{}) (models.ExecuteTransactionResponse, error)
 	DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error)
 }
 
 type suiWriteTransactionImpl struct {
-	conn *httpconn.HttpConn
+	cli *rpc_client.RPCClient
 }
 
 func (s *suiWriteTransactionImpl) MoveCall(ctx context.Context, req models.MoveCallRequest, opts ...interface{}) (models.MoveCallResponse, error) {
 	var rsp models.MoveCallResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_moveCall",
 		Params: []interface{}{
 			req.Signer,
@@ -57,7 +59,7 @@ func (s *suiWriteTransactionImpl) MoveCall(ctx context.Context, req models.MoveC
 
 func (s *suiWriteTransactionImpl) MergeCoins(ctx context.Context, req models.MergeCoinsRequest, opts ...interface{}) (models.MergeCoinsResponse, error) {
 	var rsp models.MergeCoinsResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_mergeCoins",
 		Params: []interface{}{
 			req.Signer,
@@ -82,7 +84,7 @@ func (s *suiWriteTransactionImpl) MergeCoins(ctx context.Context, req models.Mer
 
 func (s *suiWriteTransactionImpl) SplitCoin(ctx context.Context, req models.SplitCoinRequest, opts ...interface{}) (models.SplitCoinResponse, error) {
 	var rsp models.SplitCoinResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_splitCoin",
 		Params: []interface{}{
 			req.Signer,
@@ -107,7 +109,7 @@ func (s *suiWriteTransactionImpl) SplitCoin(ctx context.Context, req models.Spli
 
 func (s *suiWriteTransactionImpl) SplitCoinEqual(ctx context.Context, req models.SplitCoinEqualRequest, opts ...interface{}) (models.SplitCoinEqualResponse, error) {
 	var rsp models.SplitCoinEqualResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_splitCoinEqual",
 		Params: []interface{}{
 			req.Signer,
@@ -132,7 +134,7 @@ func (s *suiWriteTransactionImpl) SplitCoinEqual(ctx context.Context, req models
 
 func (s *suiWriteTransactionImpl) Publish(ctx context.Context, req models.PublishRequest, opts ...interface{}) (models.PublishResponse, error) {
 	var rsp models.PublishResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_publish",
 		Params: []interface{}{
 			req.Sender,
@@ -156,7 +158,7 @@ func (s *suiWriteTransactionImpl) Publish(ctx context.Context, req models.Publis
 
 func (s *suiWriteTransactionImpl) TransferObject(ctx context.Context, req models.TransferObjectRequest, opts ...interface{}) (models.TransferObjectResponse, error) {
 	var rsp models.TransferObjectResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_transferObject",
 		Params: []interface{}{
 			req.Signer,
@@ -181,7 +183,7 @@ func (s *suiWriteTransactionImpl) TransferObject(ctx context.Context, req models
 
 func (s *suiWriteTransactionImpl) TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error) {
 	var rsp models.TransferSuiResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_transferSui",
 		Params: []interface{}{
 			req.Signer,
@@ -206,7 +208,7 @@ func (s *suiWriteTransactionImpl) TransferSui(ctx context.Context, req models.Tr
 
 func (s *suiWriteTransactionImpl) BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error) {
 	var rsp models.BatchTransactionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_batchTransaction",
 		Params: []interface{}{
 			req.Signer,
@@ -230,7 +232,7 @@ func (s *suiWriteTransactionImpl) BatchTransaction(ctx context.Context, req mode
 
 func (s *suiWriteTransactionImpl) ExecuteTransaction(ctx context.Context, req models.ExecuteTransactionRequest, opts ...interface{}) (models.ExecuteTransactionResponse, error) {
 	var rsp models.ExecuteTransactionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_executeTransaction",
 		Params: []interface{}{
 			req.TxBytes,
@@ -254,7 +256,7 @@ func (s *suiWriteTransactionImpl) ExecuteTransaction(ctx context.Context, req mo
 
 func (s *suiWriteTransactionImpl) DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error) {
 	var rsp models.DryRunTransactionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_dryRunTransaction",
 		Params: []interface{}{
 			req.TxBytes,
@@ -272,6 +274,32 @@ func (s *suiWriteTransactionImpl) DryRunTransaction(ctx context.Context, req mod
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.DryRunTransactionResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) Pay(ctx context.Context, req models.PayRequest, opts ...interface{}) (models.PayResponse, error) {
+	var rsp models.PayResponse
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
+		Method: "sui_pay",
+		Params: []interface{}{
+			req.Signer,
+			req.InputCoins,
+			req.Recipient,
+			req.Amounts,
+			req.Gas,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.PayResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.PayResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.PayResponse{}, err
 	}
 	return rsp, nil
 }

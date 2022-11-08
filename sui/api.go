@@ -1,7 +1,7 @@
 package sui
 
 import (
-	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 )
 
 type ISuiAPI interface {
@@ -25,24 +25,24 @@ type Client struct {
 }
 
 func NewSuiClient(dest string) ISuiAPI {
-	conn := httpconn.NewHttpConn(dest)
+	cli := rpc_client.NewRPCClient(dest)
 	return &Client{
 		IWriteTransactionAPI: &suiWriteTransactionImpl{
-			conn: conn,
+			cli: cli,
 		},
 		IReadEventFromSuiAPI: &suiReadEventFromSuiImpl{
-			conn: conn,
+			cli: cli,
 		},
 		IReadMoveFromSuiAPI: &suiReadMoveFromSuiImpl{
-			conn: conn,
+			cli: cli,
 		},
 		IReadObjectFromSuiAPI: &suiReadObjectFromSuiImpl{
-			conn: conn,
+			cli: cli,
 		},
 		IReadTransactionFromSuiAPI: &suiReadTransactionFromSuiImpl{
-			conn: conn,
+			cli: cli,
 		},
-		IBaseAPI:       &suiBaseImpl{conn: conn},
-		IFeatureSuiAPI: &suiFeatureImpl{conn: conn},
+		IBaseAPI:       &suiBaseImpl{cli: cli},
+		IFeatureSuiAPI: &suiFeatureImpl{cli: cli},
 	}
 }

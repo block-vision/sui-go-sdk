@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/ledgerwatch/secp256k1 v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

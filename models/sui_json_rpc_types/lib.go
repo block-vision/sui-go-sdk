@@ -55,6 +55,10 @@ type Publish struct {
 	Modules [][]byte `json:"modules,omitempty"`
 }
 
+type CoinBalanceChange struct {
+	PackageID string `json:"packageID,omitempty"`
+}
+
 type Call struct {
 	Package       sui_types.SuiObjectRef `json:"package"`
 	Module        string                 `json:"module"`
@@ -107,10 +111,16 @@ type OwnedObjectRef struct {
 type SuiEvent struct {
 	MoveEvent MoveEvent `json:"moveEvent,omitempty"`
 	Publish   Publish   `json:"publish,omitempty"`
+	CoinBalanceChange
 }
 
 type MoveEvent struct {
-	PackageID string `json:"packageID,omitempty"`
+	PackageID         string      `json:"packageID,omitempty"`
+	TransactionModule string      `json:"transactionModule,omitempty"`
+	Sender            string      `json:"sender,omitempty"`
+	Type_             string      `json:"type_,omitempty"`
+	Fields            interface{} `json:"field,omitempty"`
+	BSC               []uint8     `json:"bcs,omitempty"`
 }
 
 type SuiParsedMoveObject struct {

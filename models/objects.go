@@ -4,7 +4,7 @@ import "github.com/block-vision/sui-go-sdk/models/sui_types"
 
 type SuiObjectInfo struct {
 	sui_types.SuiObjectRef
-	Type string `json:"type_"`
+	Type string `json:"type"`
 	sui_types.Owner
 	PreviousTransaction string `json:"previousTransaction"`
 }

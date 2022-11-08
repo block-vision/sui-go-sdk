@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/block-vision/sui-go-sdk/common/httpconn"
+
+	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
@@ -19,14 +20,14 @@ type IReadEventFromSuiAPI interface {
 }
 
 type suiReadEventFromSuiImpl struct {
-	conn *httpconn.HttpConn
+	cli *rpc_client.RPCClient
 }
 
 // GetEventsByEventType implements method `sui_getEventsByEventType`.
 // Returns an array of EventEnvelops according to your filter request condition.
 func (s *suiReadEventFromSuiImpl) GetEventsByEventType(ctx context.Context, req models.GetEventsByEventTypeRequest, opts ...interface{}) (models.GetEventsByEventTypeResponse, error) {
 	var rsp models.GetEventsByEventTypeResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsByEventType",
 		Params: []interface{}{
 			req.EventType,
@@ -52,7 +53,7 @@ func (s *suiReadEventFromSuiImpl) GetEventsByEventType(ctx context.Context, req 
 // Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByModule(ctx context.Context, req models.GetEventsByModuleRequest, opts ...interface{}) (models.GetEventsByModuleResponse, error) {
 	var rsp models.GetEventsByModuleResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsByModule",
 		Params: []interface{}{
 			req.Package,
@@ -79,7 +80,7 @@ func (s *suiReadEventFromSuiImpl) GetEventsByModule(ctx context.Context, req mod
 // Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByObject(ctx context.Context, req models.GetEventsByObjectRequest, opts ...interface{}) (models.GetEventsByObjectResponse, error) {
 	var rsp models.GetEventsByObjectResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsByObject",
 		Params: []interface{}{
 			req.Object,
@@ -105,7 +106,7 @@ func (s *suiReadEventFromSuiImpl) GetEventsByObject(ctx context.Context, req mod
 // Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByOwner(ctx context.Context, req models.GetEventsByOwnerRequest, opts ...interface{}) (models.GetEventsByOwnerResponse, error) {
 	var rsp models.GetEventsByOwnerResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsByOwner",
 		Params: []interface{}{
 			req.Owner,
@@ -131,7 +132,7 @@ func (s *suiReadEventFromSuiImpl) GetEventsByOwner(ctx context.Context, req mode
 // Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsBySender(ctx context.Context, req models.GetEventsBySenderRequest, opts ...interface{}) (models.GetEventsBySenderResponse, error) {
 	var rsp models.GetEventsBySenderResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsBySender",
 		Params: []interface{}{
 			req.Sender,
@@ -157,7 +158,7 @@ func (s *suiReadEventFromSuiImpl) GetEventsBySender(ctx context.Context, req mod
 // Returns an array of EventEnvelops according to your filter request condition
 func (s *suiReadEventFromSuiImpl) GetEventsByTransaction(ctx context.Context, req models.GetEventsByTransactionRequest, opts ...interface{}) (models.GetEventsByTransactionResponse, error) {
 	var rsp models.GetEventsByTransactionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_getEventsByTransaction",
 		Params: []interface{}{
 			req.Digest,

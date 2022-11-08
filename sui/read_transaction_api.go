@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
@@ -22,7 +24,7 @@ type IReadTransactionFromSuiAPI interface {
 }
 
 type suiReadTransactionFromSuiImpl struct {
-	conn *httpconn.HttpConn
+	cli *rpc_client.RPCClient
 }
 
 // GetRecentTransactions implements method `sui_getRecentTransactions`.
@@ -31,7 +33,7 @@ func (s *suiReadTransactionFromSuiImpl) GetRecentTransactions(ctx context.Contex
 	var rsp models.GetRecentTransactionResponse
 	reqList := make([]interface{}, 0)
 	reqList = append(reqList, req.Count)
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getRecentTransactions",
 		Params: reqList,
 	})
@@ -58,7 +60,7 @@ func (s *suiReadTransactionFromSuiImpl) GetRecentTransactions(ctx context.Contex
 // Returns a number of total transactions
 func (s *suiReadTransactionFromSuiImpl) GetTotalTransactionNumber(ctx context.Context, req models.GetTotalTransactionNumberRequest, opts ...interface{}) (models.GetTotalTransactionNumberResponse, error) {
 	var rsp models.GetTotalTransactionNumberResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTotalTransactionNumber",
 		Params: []interface{}{},
 	})
@@ -76,7 +78,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTotalTransactionNumber(ctx context.Co
 // Returns detail info of the transaction
 func (s *suiReadTransactionFromSuiImpl) GetTransaction(ctx context.Context, req models.GetTransactionRequest, opts ...interface{}) (models.GetTransactionResponse, error) {
 	var rsp models.GetTransactionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransaction",
 		Params: []interface{}{
 			req.Digest,
@@ -99,7 +101,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransaction(ctx context.Context, req 
 // Returns an array of transactions' metadata
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsByInputObject(ctx context.Context, req models.GetTransactionsByInputObjectRequest, opts ...interface{}) (models.GetTransactionsByInputObjectResponse, error) {
 	var rsp models.GetTransactionsByInputObjectResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsByInputObject",
 		Params: []interface{}{
 			req.ObjectID,
@@ -128,7 +130,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByInputObject(ctx context
 // Returns an array of transactions' metadata.
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMoveFunction(ctx context.Context, req models.GetTransactionsByMoveFunctionRequest, opts ...interface{}) (models.GetTransactionsByMoveFunctionResponse, error) {
 	var rsp models.GetTransactionsByMoveFunctionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsByInputObject",
 		Params: []interface{}{
 			req.Package,
@@ -159,7 +161,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMoveFunction(ctx contex
 // Returns an array of transactions' metadata.
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMutatedObject(ctx context.Context, req models.GetTransactionsByMutatedObjectRequest, opts ...interface{}) (models.GetTransactionsByMutatedObjectResponse, error) {
 	var rsp models.GetTransactionsByMutatedObjectResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsByMutatedObject",
 		Params: []interface{}{
 			req.ObjectID,
@@ -188,7 +190,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMutatedObject(ctx conte
 // Returns an array of transactions' metadata.
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsFromAddress(ctx context.Context, req models.GetTransactionsFromAddressRequest, opts ...interface{}) (models.GetTransactionsFromAddressResponse, error) {
 	var rsp models.GetTransactionsFromAddressResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsFromAddress",
 		Params: []interface{}{
 			req.Addr,
@@ -217,7 +219,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsFromAddress(ctx context.C
 // Returns an array of transactions' metadata.
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsInRange(ctx context.Context, req models.GetTransactionsInRangeRequest, opts ...interface{}) (models.GetTransactionsInRangeResponse, error) {
 	var rsp models.GetTransactionsInRangeResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsInRange",
 		Params: []interface{}{
 			req.Start,
@@ -247,7 +249,7 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsInRange(ctx context.Conte
 // Returns an array of transactions' metadata.
 func (s *suiReadTransactionFromSuiImpl) GetTransactionsToAddress(ctx context.Context, req models.GetTransactionsToAddressRequest, opts ...interface{}) (models.GetTransactionsToAddressResponse, error) {
 	var rsp models.GetTransactionsToAddressResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, httpconn.Operation{
 		Method: "sui_getTransactionsToAddress",
 		Params: []interface{}{
 			req.Addr,

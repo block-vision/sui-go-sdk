@@ -5,8 +5,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"github.com/block-vision/sui-go-sdk/common/httpconn"
+
 	"github.com/block-vision/sui-go-sdk/common/keypair"
+	"github.com/block-vision/sui-go-sdk/common/rpc_client"
 	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -20,14 +21,14 @@ type IFeatureSuiAPI interface {
 }
 
 type suiFeatureImpl struct {
-	conn *httpconn.HttpConn
+	cli *rpc_client.RPCClient
 }
 
 // MoveCallAndExecuteTransaction is a combination of `sui_moveCall` and `sui_executeTransaction`.
 // This function free you from setting parameters when you want to execute the transaction of previous `sui_moveCall`
 // but you need to `SetAccountKeyStore` first otherwise you cannot sign your transaction
 func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req models.MoveCallAndExecuteTransactionRequest, opts ...interface{}) (models.MoveCallAndExecuteTransactionResponse, error) {
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_moveCall",
 		Params: []interface{}{
 			req.Signer,
@@ -74,7 +75,7 @@ func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req 
 	} else {
 		return models.MoveCallAndExecuteTransactionResponse{}, sui_error.ErrUnknownSignatureScheme
 	}
-	respBytes, err = s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err = s.cli.Request(ctx, models.Operation{
 		Method: "sui_executeTransaction",
 		Params: []interface{}{
 			moveCallRsp.TxBytes,
@@ -102,7 +103,7 @@ func (s *suiFeatureImpl) MoveCallAndExecuteTransaction(ctx context.Context, req 
 // but you need to `SetAccountKeyStore` first otherwise you cannot sign your transactions
 func (s *suiFeatureImpl) BatchAndExecuteTransaction(ctx context.Context, req models.BatchAndExecuteTransactionRequest, opts ...interface{}) (models.BatchAndExecuteTransactionResponse, error) {
 	var batchTxRsp models.BatchTransactionResponse
-	batchTxBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	batchTxBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_batchTransaction",
 		Params: []interface{}{
 			req.Signer,
@@ -144,7 +145,7 @@ func (s *suiFeatureImpl) BatchAndExecuteTransaction(ctx context.Context, req mod
 	} else {
 		return models.BatchAndExecuteTransactionResponse{}, sui_error.ErrUnknownSignatureScheme
 	}
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "sui_executeTransaction",
 		Params: []interface{}{
 			batchTxRsp.TxBytes,

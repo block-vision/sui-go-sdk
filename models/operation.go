@@ -1,4 +1,4 @@
-package httpconn
+package models
 
 type Operation struct {
 	Method string

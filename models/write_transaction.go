@@ -157,3 +157,19 @@ type DryRunTransactionResponse struct {
 	InputObject      interface{}            `json:"inputObject"`
 	TxBytes          string                 `json:"txBytes"`
 }
+
+type PayRequest struct {
+	Signer     string   `json:"signer"`
+	InputCoins []string `json:"inputCoins"`
+	Recipient  []string `json:"recipient"`
+	Amounts    []string `json:"amounts"`
+	Gas        string   `json:"gas"`
+	GasBudget  uint64   `json:"gasBudget"`
+}
+
+type PayResponse struct {
+	TransactionBytes string                 `json:"transactionBytes"`
+	Gas              sui_types.SuiObjectRef `json:"gas"`
+	InputObject      interface{}            `json:"inputObject"`
+	TxBytes          string                 `json:"txBytes"`
+}
