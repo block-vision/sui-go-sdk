@@ -5,3 +5,5 @@
 *.log*
 # gen by Makefile
 /build/bin
+*.key
+sui.keystore.fortest
