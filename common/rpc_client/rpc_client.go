@@ -103,3 +103,28 @@ func (r *RPCClient) httpRequest(ctx context.Context, op models.Operation) ([]byt
 	}
 	return bodyBytes, nil
 }
+
+func (r *RPCClient) PostMultiple(ctx context.Context, method string, params [][]interface{}) ([]byte, error) {
+	defaultRequest := []map[string]interface{}{}
+	for i := range params {
+		defaultRequest = append(defaultRequest, map[string]interface{}{
+			"jsonrpc": "2.0",
+			"id":      1,
+			"method":  method,
+			"params":  params[i],
+		})
+	}
+	reqBody, err := json.Marshal(defaultRequest)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := r.httpClient.Post(r.baseUrl, "application/json", bytes.NewReader(reqBody))
+	if err != nil {
+		return nil, err
+	}
+	if resp == nil {
+		return nil, nil
+	}
+	defer resp.Body.Close()
+	return ioutil.ReadAll(resp.Body)
+}
