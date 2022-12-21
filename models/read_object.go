@@ -64,3 +64,16 @@ type TryGetPastObjectResponse struct {
 		Reference           sui_types.SuiObjectRef `json:"reference"`
 	} `json:"details"`
 }
+
+type GetCoinMetadataRequest struct {
+	CoinType string
+}
+
+type GetCoinMetadataResponse struct {
+	Decimals    uint8  `json:"decimals"`
+	Description string `json:"description"`
+	IconUrl     string `json:"iconUrl,omitempty"`
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Symbol      string `json:"symbol"`
+}

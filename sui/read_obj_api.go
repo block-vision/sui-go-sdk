@@ -16,6 +16,7 @@ type IReadObjectFromSuiAPI interface {
 	GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error)
 	GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error)
 	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
+	GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -136,6 +137,27 @@ func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req mod
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.TryGetPastObjectResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error) {
+	var rsp models.GetCoinMetadataResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_getCoinMetadata",
+		Params: []interface{}{
+			req.CoinType,
+		},
+	})
+	if err != nil {
+		return models.GetCoinMetadataResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetCoinMetadataResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetCoinMetadataResponse{}, err
 	}
 	return rsp, nil
 }
