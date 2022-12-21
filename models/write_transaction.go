@@ -201,3 +201,12 @@ type PaySuiResponse struct {
 	InputObject      interface{}            `json:"inputObject"`
 	TxBytes          string                 `json:"txBytes"`
 }
+
+type MintNFTRequest struct {
+	Signer         string
+	NFTName        string
+	NFTDescription string
+	NFTUrl         string
+	GasObject      string
+	GasBudget      uint64
+}

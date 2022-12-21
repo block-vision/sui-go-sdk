@@ -27,6 +27,8 @@ type IWriteTransactionAPI interface {
 	Publish(ctx context.Context, req models.PublishRequest, opts ...interface{}) (models.PublishResponse, error)
 	TransferObject(ctx context.Context, req models.TransferObjectRequest, opts ...interface{}) (models.TransferObjectResponse, error)
 	TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error)
+
+	MintNFT(ctx context.Context, req models.MintNFTRequest, opt ...interface{}) (models.MoveCallResponse, error)
 }
 
 type suiWriteTransactionImpl struct {
@@ -352,6 +354,44 @@ func (s *suiWriteTransactionImpl) PaySui(ctx context.Context, req models.PaySuiR
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.PaySuiResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) MintNFT(ctx context.Context, req models.MintNFTRequest, opt ...interface{}) (models.MoveCallResponse, error) {
+	moveCallReq := models.MoveCallRequest{
+		Signer:          req.Signer,
+		PackageObjectId: "0x0000000000000000000000000000000000000002",
+		Module:          "devnet_nft",
+		Function:        "mint",
+		TypeArguments:   []interface{}{},
+		Arguments:       []interface{}{req.NFTName, req.NFTDescription, req.NFTUrl},
+		Gas:             req.GasObject,
+		GasBudget:       req.GasBudget,
+	}
+	var rsp models.MoveCallResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_moveCall",
+		Params: []interface{}{
+			moveCallReq.Signer,
+			moveCallReq.PackageObjectId,
+			moveCallReq.Module,
+			moveCallReq.Function,
+			moveCallReq.TypeArguments,
+			moveCallReq.Arguments,
+			moveCallReq.Gas,
+			moveCallReq.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.MoveCallResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.MoveCallResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.MoveCallResponse{}, err
 	}
 	return rsp, nil
 }
