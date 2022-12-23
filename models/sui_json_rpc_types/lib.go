@@ -136,9 +136,9 @@ type SuiObjectInfo struct {
 }
 
 type SuiEventEnvelop struct {
-	Timestamp uint64 `json:"timestamp"`
-	TxDigest  string `json:"txDigest,omitempty"`
-	SuiEvent
+	Timestamp uint64   `json:"timestamp"`
+	TxDigest  string   `json:"txDigest,omitempty"`
+	SuiEvent  SuiEvent `json:"event"`
 }
 
 type SuiMoveModuleId struct {
