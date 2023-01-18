@@ -30,7 +30,6 @@
 go get github.com/block-vision/sui-go-sdk
 ```
 
-### Go Version
 | Golang Version |
 |----------------|
 | \>= 1.17.3     | 
