@@ -10,6 +10,8 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+var _ IWriteTransactionAPI = (*suiWriteTransactionImpl)(nil)
+
 type IWriteTransactionAPI interface {
 	BatchTransaction(ctx context.Context, req models.BatchTransactionRequest, opts ...interface{}) (models.BatchTransactionResponse, error)
 	DryRunTransaction(ctx context.Context, req models.DryRunTransactionRequest, opts ...interface{}) (models.DryRunTransactionResponse, error)
@@ -29,6 +31,10 @@ type IWriteTransactionAPI interface {
 	TransferSui(ctx context.Context, req models.TransferSuiRequest, opts ...interface{}) (models.TransferSuiResponse, error)
 
 	MintNFT(ctx context.Context, req models.MintNFTRequest, opt ...interface{}) (models.MoveCallResponse, error)
+
+	RequestAddDelegation(ctx context.Context, req models.RequestAddDelegationRequest, opts ...interface{}) (models.RequestAddDelegationResponse, error)
+	RequestSwitchDelegation(ctx context.Context, req models.RequestSwitchDelegationRequest, opts ...interface{}) (models.RequestSwitchDelegationResponse, error)
+	RequestWithdrawDelegation(ctx context.Context, req models.RequestWithdrawDelegationRequest, opts ...interface{}) (models.ReuqestWithdrawDelegationResponse, error)
 }
 
 type suiWriteTransactionImpl struct {
@@ -392,6 +398,84 @@ func (s *suiWriteTransactionImpl) MintNFT(ctx context.Context, req models.MintNF
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.MoveCallResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) RequestAddDelegation(ctx context.Context, req models.RequestAddDelegationRequest, opts ...interface{}) (models.RequestAddDelegationResponse, error) {
+	var rsp models.RequestAddDelegationResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_requestAddDelegation",
+		Params: []interface{}{
+			req.Signer,
+			req.Coins,
+			req.Amount,
+			req.Validator,
+			req.Gas,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.RequestAddDelegationResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.RequestAddDelegationResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.RequestAddDelegationResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) RequestSwitchDelegation(ctx context.Context, req models.RequestSwitchDelegationRequest, opts ...interface{}) (models.RequestSwitchDelegationResponse, error) {
+	var rsp models.RequestSwitchDelegationResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_requestSwitchDelegation",
+		Params: []interface{}{
+			req.Signer,
+			req.Delegation,
+			req.StakedSui,
+			req.NewValidatorAddress,
+			req.Gas,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.RequestSwitchDelegationResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.RequestSwitchDelegationResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.RequestSwitchDelegationResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiWriteTransactionImpl) RequestWithdrawDelegation(ctx context.Context, req models.RequestWithdrawDelegationRequest, opts ...interface{}) (models.ReuqestWithdrawDelegationResponse, error) {
+	var rsp models.ReuqestWithdrawDelegationResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_requestWithdrawDelegation",
+		Params: []interface{}{
+			req.Signer,
+			req.Delegation,
+			req.StakedSui,
+			req.PrincipalWithdrawAmount,
+			req.Gas,
+			req.GasBudget,
+		},
+	})
+	if err != nil {
+		return models.ReuqestWithdrawDelegationResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.ReuqestWithdrawDelegationResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.ReuqestWithdrawDelegationResponse{}, err
 	}
 	return rsp, nil
 }

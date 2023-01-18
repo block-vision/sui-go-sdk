@@ -20,6 +20,7 @@ type IReadTransactionFromSuiAPI interface {
 	GetTransactionsFromAddress(ctx context.Context, req models.GetTransactionsFromAddressRequest, opts ...interface{}) (models.GetTransactionsFromAddressResponse, error)
 	GetTransactionsInRange(ctx context.Context, req models.GetTransactionsInRangeRequest, opts ...interface{}) (models.GetTransactionsInRangeResponse, error)
 	GetTransactionsToAddress(ctx context.Context, req models.GetTransactionsToAddressRequest, opts ...interface{}) (models.GetTransactionsToAddressResponse, error)
+	GetTransactionAuthSigners(ctx context.Context, req models.GetTransactionAuthSignersRequest, opts ...interface{}) (models.GetTransactionAuthSignersResponse, error)
 }
 
 type suiReadTransactionFromSuiImpl struct {
@@ -270,6 +271,27 @@ func (s *suiReadTransactionFromSuiImpl) GetTransactionsToAddress(ctx context.Con
 			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
 			TransactionDigest:  results[i].Array()[1].String(),
 		})
+	}
+	return rsp, nil
+}
+
+func (s *suiReadTransactionFromSuiImpl) GetTransactionAuthSigners(ctx context.Context, req models.GetTransactionAuthSignersRequest, opts ...interface{}) (models.GetTransactionAuthSignersResponse, error) {
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_getTransactionAuthSigners",
+		Params: []interface{}{
+			req.Digest,
+		},
+	})
+	if err != nil {
+		return models.GetTransactionAuthSignersResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionAuthSignersResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	var rsp models.GetTransactionAuthSignersResponse
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetTransactionAuthSignersResponse{}, err
 	}
 	return rsp, nil
 }
