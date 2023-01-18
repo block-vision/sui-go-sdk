@@ -77,3 +77,19 @@ type GetCoinMetadataResponse struct {
 	Name        string `json:"name"`
 	Symbol      string `json:"symbol"`
 }
+
+type GetDynamicFieldObejctRequest struct {
+	ParentObjectID string
+	Name           string
+}
+
+type GetDynamicFieldObjectResponse struct {
+	Details struct {
+		Data sui_json_rpc_types.SuiParsedMoveObject `json:"data"`
+		sui_json_rpc_types.OwnedObjectRef
+		PreviousTransaction string                 `json:"previousTransaction"`
+		StorageRebate       uint64                 `json:"storageRebate"`
+		Reference           sui_types.SuiObjectRef `json:"reference"`
+	} `json:"details"`
+	Status string `json:"status"`
+}
