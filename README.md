@@ -8,17 +8,14 @@
     <a href="https://discord.gg/Re6prK86Tr"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true"></a>
 </p>
 
-##
-sui-go-sdk is go language sdk for Project 
-Project [Sui](https://github.com/MystenLabs/sui) SDK for Go programming language.
 
-### Notices
+## Notices
 + You don't need to load your `sui.keystore` file if you just want to send some unsigned transactions.
 + File `sui.keystore` in config folder is test-only. Replace and load your own sui.keystore if your need to sign transactions. 
 + PRs are open to everyone and let's build useful tools for Sui community!
 
 
-### Features
+## Features
 + Load your keystore file and sign your messages with specific address.
 + Provide methods `MoveCallAndExecuteTransaction`/`BatchAndExecuteTransaction`.
 + Customized request method `SuiCall`.
@@ -27,9 +24,8 @@ Project [Sui](https://github.com/MystenLabs/sui) SDK for Go programming language
 * [Quick Start](#Quick-Start)
 * [Examples](#Examples)
 
-## Quick Start
 
-### Install 
+## Install 
 ```shell
 go get github.com/block-vision/sui-go-sdk
 ```
