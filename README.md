@@ -56,20 +56,22 @@ import (
 func main() {
 	// configure your endpoint here
 	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
-	resp, err := cli.GetRecentTransactions(context.Background(), models.GetRecentTransactionRequest{
-		Count: 5,
+	resp, err := cli.SuiCall(context.Background(), "sui_getTransactionAuthSigners", "Ar9FigfQcR52tAGDPwt2DtKyp4oNDgRCc85yzeCuFU1L")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	fmt.Println("resp result:", resp)
+
+	resp2, err := cli.GetTransactionAuthSigners(context.Background(), models.GetTransactionAuthSignersRequest{
+		Digest: "Ar9FigfQcR52tAGDPwt2DtKyp4oNDgRCc85yzeCuFU1L",
 	})
 	if err != nil {
 		fmt.Println(err.Error())
+		return
 	}
-	fmt.Println(resp)
-
-	//If you want to request for original json response, you can use SuiCall().
-	rsp, err := cli.SuiCall(context.Background(), "sui_getRecentTransactions", 5)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println(rsp)
+	fmt.Printf("%+v\n", resp2)
 
 	keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
 	if err != nil {
