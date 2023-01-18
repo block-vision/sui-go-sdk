@@ -82,3 +82,11 @@ type GetTransactionsToAddressRequest struct {
 type GetTransactionsToAddressResponse struct {
 	Result []GetTransactionMetaData
 }
+
+type GetTransactionAuthSignersRequest struct {
+	Digest string
+}
+
+type GetTransactionAuthSignersResponse struct {
+	Signers []string `json:"signers"`
+}

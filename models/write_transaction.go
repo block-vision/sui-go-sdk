@@ -210,3 +210,13 @@ type MintNFTRequest struct {
 	GasObject      string
 	GasBudget      uint64
 }
+
+type ExecuteTransactionSerializedSigRequest struct {
+	TxBytes     string
+	Signature   string
+	RequestType interface{}
+}
+
+type ExecuteTransactionSerializedSigResponse struct {
+	EffectsCert interface{} `json:"effectsCert"`
+}
