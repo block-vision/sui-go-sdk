@@ -1,6 +1,6 @@
 package sui_json_rpc_types
 
-import "github.com/block-vision/sui-go-sdk/models/sui_types"
+import "github.com/shoshinsquare/sui-go-sdk/models/sui_types"
 
 type SuiCertifiedTransaction struct {
 	TransactionDigest string                  `json:"transactionDigest,omitempty"`

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/shoshinsquare/sui-go-sdk/models"
 )
 
 func TestOnAPIs(t *testing.T) {

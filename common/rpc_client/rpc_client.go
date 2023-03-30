@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/block-vision/sui-go-sdk/common/sui_error"
-	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/gorilla/websocket"
+	"github.com/shoshinsquare/sui-go-sdk/common/sui_error"
+	"github.com/shoshinsquare/sui-go-sdk/models"
 )
 
 type RPCClient struct {

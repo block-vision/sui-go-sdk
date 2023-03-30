@@ -4,12 +4,12 @@ import (
 	"crypto/sha256"
 	"strings"
 
-	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"github.com/ledgerwatch/secp256k1"
+	"github.com/shoshinsquare/sui-go-sdk/common/sui_error"
 
-	"github.com/block-vision/sui-go-sdk/common/keypair"
-	"github.com/block-vision/sui-go-sdk/config"
-	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/shoshinsquare/sui-go-sdk/common/keypair"
+	"github.com/shoshinsquare/sui-go-sdk/config"
+	"github.com/shoshinsquare/sui-go-sdk/models"
 	"golang.org/x/crypto/ed25519"
 )
 

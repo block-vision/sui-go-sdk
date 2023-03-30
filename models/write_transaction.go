@@ -1,8 +1,8 @@
 package models
 
 import (
-	"github.com/block-vision/sui-go-sdk/models/sui_json_rpc_types"
-	"github.com/block-vision/sui-go-sdk/models/sui_types"
+	"github.com/shoshinsquare/sui-go-sdk/models/sui_json_rpc_types"
+	"github.com/shoshinsquare/sui-go-sdk/models/sui_types"
 )
 
 type MoveCallRequest struct {

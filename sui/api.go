@@ -1,7 +1,7 @@
 package sui
 
 import (
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
+	"github.com/shoshinsquare/sui-go-sdk/common/rpc_client"
 )
 
 type ISuiAPI interface {

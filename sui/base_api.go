@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
-	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/shoshinsquare/sui-go-sdk/common/rpc_client"
+	"github.com/shoshinsquare/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
 

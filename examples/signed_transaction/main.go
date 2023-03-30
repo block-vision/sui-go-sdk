@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/sui"
+	"github.com/shoshinsquare/sui-go-sdk/models"
+	"github.com/shoshinsquare/sui-go-sdk/sui"
 )
 
-//send signed transactions
+// send signed transactions
 func main() {
 	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 

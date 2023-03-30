@@ -1,6 +1,6 @@
 package models
 
-import "github.com/block-vision/sui-go-sdk/models/sui_json_rpc_types"
+import "github.com/shoshinsquare/sui-go-sdk/models/sui_json_rpc_types"
 
 type DevInsepctTransactionRequest struct {
 	TxBytes string
