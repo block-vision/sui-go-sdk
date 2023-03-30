@@ -2,14 +2,13 @@ package models
 
 type GetCoinsRequeset struct {
 	Owner    string
-	CoinType *string
-	Cursor   *string
+	CoinType string
+	Cursor   string
 	Limit    uint64
 }
 
 type GetCoinsResponse struct {
-	Data       []CoinPage `json:"data"`
-	NextCursor string     `json:"nextCursor"`
+	Data []CoinPage `json:"data"`
 }
 
 type CoinPage struct {

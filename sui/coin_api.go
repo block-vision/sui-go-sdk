@@ -25,7 +25,7 @@ type SuiCoinImpl struct {
 
 func (s *SuiCoinImpl) GetCoins(ctx context.Context, req models.GetCoinsRequeset, opts ...interface{}) (models.GetCoinsResponse, error) {
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getCoins",
+		Method: "suix_getCoins",
 		Params: []interface{}{
 			req.Owner,
 			req.CoinType,

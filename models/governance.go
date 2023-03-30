@@ -55,3 +55,16 @@ type GetSuiSystemStateResponse struct {
 	ValidatorReportRecords interface{} `json:"validator_report_records"`
 	StakeSubsidy           interface{} `json:"stake_subsidy"`
 }
+
+type GetCheckpointRequest struct {
+	Id string `json:"id"`
+}
+
+type GetCheckpointResponse struct {
+	SequenceNumber           string   `json:"sequenceNumber"`
+	Digest                   string   `json:"digest"`
+	NetworkTotalTransactions uint64   `json:"networkTotalTransactions"`
+	TimestampMs              uint64   `json:"timestampMs"`
+	PreviousDigest           string   `json:"previousDigest"`
+	Transactions             []string `json:"transactions"`
+}

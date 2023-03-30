@@ -17,6 +17,8 @@ type IGovernanceAPI interface {
 	GetValidators(ctx context.Context, req models.GetValidatorsRequest, opts ...interface{}) (models.GetValidatorsResponse, error)
 	GetCommitteeInfo(ctx context.Context, req models.GetCommitteeInfoRequest, opts ...interface{}) (models.GetCommitteeInfoResponse, error)
 	GetSuiSystemState(ctx context.Context, req models.GetSuiSystemStateRequest, opt ...interface{}) (models.GetSuiSystemStateResponse, error)
+	GetCheckpoint(ctx context.Context, req models.GetCheckpointRequest, opts ...interface{}) (models.GetCheckpointResponse, error)
+	GetLatestCheckpointSequenceNumber(ctx context.Context, req models.GetLatestCheckpointSequenceNumberRequest, opts ...interface{}) (uint64, error)
 }
 
 type SuiGovernanceImpl struct {
@@ -101,6 +103,48 @@ func (s *SuiGovernanceImpl) GetSuiSystemState(ctx context.Context, req models.Ge
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.GetSuiSystemStateResponse{}, err
+	}
+	return rsp, nil
+}
+
+// Get checkpoint by id
+func (s *SuiGovernanceImpl) GetCheckpoint(ctx context.Context, req models.GetCheckpointRequest, opts ...interface{}) (models.GetCheckpointResponse, error) {
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_getCheckpoint",
+		Params: []interface{}{
+			req.Id,
+		},
+	})
+	if err != nil {
+		return models.GetCheckpointResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetCheckpointResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	var rsp models.GetCheckpointResponse
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetCheckpointResponse{}, err
+	}
+	return rsp, nil
+}
+
+// Get checkpoint by id
+func (s *SuiGovernanceImpl) GetLatestCheckpointSequenceNumber(ctx context.Context, req models.GetLatestCheckpointSequenceNumberRequest, opts ...interface{}) (uint64, error) {
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_getLatestCheckpointSequenceNumber",
+		Params: []interface{}{},
+	})
+	if err != nil {
+		return 0, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return 0, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	var rsp uint64
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return 0, err
 	}
 	return rsp, nil
 }

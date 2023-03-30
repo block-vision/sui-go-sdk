@@ -3,10 +3,6 @@ package models
 type GetLatestCheckpointSequenceNumberRequest struct {
 }
 
-type GetLatestCheckpointSequenceNumberResponse struct {
-	CheckpointSequenceNumber uint64 `json:"checkpointSequenceNumber,omitempty"`
-}
-
 type GetCheckpointSummaryRequest struct {
 	SequenceNumber uint64 `json:"sequenceNumber,omitempty"`
 }
