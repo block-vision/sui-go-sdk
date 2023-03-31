@@ -120,7 +120,7 @@ func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req mod
 func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error) {
 	var rsp models.GetCoinMetadataResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getCoinMetadata",
+		Method: "suix_getCoinMetadata",
 		Params: []interface{}{
 			req.CoinType,
 		},
