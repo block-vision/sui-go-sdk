@@ -93,3 +93,12 @@ type GetDynamicFieldObjectResponse struct {
 	} `json:"details"`
 	Status string `json:"status"`
 }
+
+type GetOwnedObjectsRequest struct {
+	Address string `json:"address"`
+}
+
+type GetOwnedObjectsResponse struct {
+	Data        []sui_json_rpc_types.SuiParsedMoveObject `json:"data"`
+	HasNextPage bool                                     `json:"hasNextPage"`
+}

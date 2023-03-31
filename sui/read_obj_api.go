@@ -12,11 +12,10 @@ import (
 
 type IReadObjectFromSuiAPI interface {
 	GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error)
-	GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error)
-	GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error)
 	GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error)
 	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
 	GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error)
+	GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -65,29 +64,6 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context,
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
 	if err != nil {
 		return models.GetObjectsOwnedByAddressResponse{}, err
-	}
-	return rsp, nil
-}
-
-// GetObjectsOwnedByObject implements method `sui_getObjectsOwnedByObject`.
-// Returns an array of object information
-func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error) {
-	var rsp models.GetObjectsOwnedByObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObjectsOwnedByObject",
-		Params: []interface{}{
-			req.ObjectID,
-		},
-	})
-	if err != nil {
-		return models.GetObjectsOwnedByObjectResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetObjectsOwnedByObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
-	if err != nil {
-		return models.GetObjectsOwnedByObjectResponse{}, err
 	}
 	return rsp, nil
 }
@@ -158,6 +134,27 @@ func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req mode
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.GetCoinMetadataResponse{}, err
+	}
+	return rsp, nil
+}
+
+func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error) {
+	var rsp models.GetOwnedObjectsResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "suix_getOwnedObjects",
+		Params: []interface{}{
+			req.Address,
+		},
+	})
+	if err != nil {
+		return models.GetOwnedObjectsResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetOwnedObjectsResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetOwnedObjectsResponse{}, err
 	}
 	return rsp, nil
 }

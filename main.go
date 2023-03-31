@@ -9,17 +9,14 @@ import (
 )
 
 func main() {
-	cli := sui.NewSuiClient("https://fullnode.testnet.sui.io:443")
+	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
 
-	res, err := cli.GetCoins(context.Background(), models.GetCoinsRequeset{
-		Owner: "0x68af121be266605d657285f08c51378c6d46ff14bac05029bf54b0976d4bf016",
-		// CoinType: "0x2::sui::SUI",
-		// Cursor:   "",
-		Limit: 100,
+	res, err := cli.GetOwnedObjects(context.Background(), models.GetOwnedObjectsRequest{
+		Address: "0x78dc765e2cb0d0b6d4f7b172213b5a554880ef237fc280d81e410e3af737c62f",
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(res)
+	fmt.Printf("%+v", res)
 }

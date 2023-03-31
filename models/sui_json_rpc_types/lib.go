@@ -124,11 +124,11 @@ type MoveEvent struct {
 }
 
 type SuiParsedMoveObject struct {
-	DataType          string                 `json:"dataType"`
-	Type              string                 `json:"type"`
-	HasPublicTransfer bool                   `json:"has_public_transfer"`
-	Fields            map[string]interface{} `json:"fields"`
-	BcsBytes          []byte                 `json:"bcs_bytes,omitempty"`
+	Data struct {
+		Digest   string `json:"digest"`
+		ObjectID string `json:"objectId"`
+		Version  uint64 `json:"version"`
+	} `json:"data"`
 }
 
 type SuiObjectInfo struct {
