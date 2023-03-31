@@ -18,5 +18,13 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("%+v", res)
+	for _, r := range res.Data {
+		object, err := cli.GetObject(context.Background(), models.GetObjectRequest{
+			ObjectID: r.Data.ObjectID,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Printf("%+v\n", object)
+	}
 }

@@ -125,9 +125,17 @@ type MoveEvent struct {
 
 type SuiParsedMoveObject struct {
 	Data struct {
-		Digest   string `json:"digest"`
-		ObjectID string `json:"objectId"`
-		Version  uint64 `json:"version"`
+		Digest              string `json:"digest"`
+		ObjectID            string `json:"objectId"`
+		Version             uint64 `json:"version"`
+		Type                string `json:"type"`
+		Owner               string `json:"owner"`
+		PreviousTransaction string `json:"previousTransaction"`
+		StorageRebate       uint64 `json:"storageRebate"`
+		Content             struct {
+			DataType          string `json:"dataType"`
+			HasPublicTransfer bool   `json:"hasPublicTransfer"`
+		} `json:"content"`
 	} `json:"data"`
 }
 

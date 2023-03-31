@@ -156,5 +156,7 @@ func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req mode
 	if err != nil {
 		return models.GetOwnedObjectsResponse{}, err
 	}
+
+	
 	return rsp, nil
 }

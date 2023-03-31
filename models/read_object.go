@@ -10,14 +10,19 @@ type GetObjectRequest struct {
 }
 
 type GetObjectResponse struct {
-	Details struct {
-		Data sui_json_rpc_types.SuiParsedMoveObject `json:"data"`
-		sui_json_rpc_types.OwnedObjectRef
-		PreviousTransaction string                 `json:"previousTransaction"`
-		StorageRebate       uint64                 `json:"storageRebate"`
-		Reference           sui_types.SuiObjectRef `json:"reference"`
-	} `json:"details"`
-	Status string `json:"status"`
+	Data struct {
+		Digest              string `json:"digest"`
+		ObjectID            string `json:"objectId"`
+		Version             uint64 `json:"version"`
+		Type                string `json:"type"`
+		Owner               string `json:"owner"`
+		PreviousTransaction string `json:"previousTransaction"`
+		StorageRebate       uint64 `json:"storageRebate"`
+		Content             struct {
+			DataType          string `json:"dataType"`
+			HasPublicTransfer bool   `json:"hasPublicTransfer"`
+		} `json:"content"`
+	} `json:"data"`
 }
 
 type GetObjectsOwnedByAddressRequest struct {
