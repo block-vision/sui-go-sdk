@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/shoshinsquare/sui-go-sdk/models"
 	"github.com/shoshinsquare/sui-go-sdk/sui"
 )
 
@@ -16,13 +18,18 @@ func main() {
 	}
 
 	for _, r := range res {
-		// metadata, err := cli.GetDynamicField(context.Background(), models.GetCoinMetadataRequest{
-		// 	CoinType: r.Data.Type,
-		// })
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
+		fmt.Println("================================")
+		fmt.Printf("%+v\n", r.Data)
+		realType := strings.Split(r.Data.Type, "<")[0]
+		metadata, err := cli.GetNormalizedMoveStruct(context.Background(), models.GetNormalizedMoveStructRequest{
+			Package:    strings.Split(realType, "::")[0],
+			ModuleName: strings.Split(realType, "::")[1],
+			StructName: strings.Split(realType, "::")[2],
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
 
-		fmt.Printf("%+v\n", r)
+		fmt.Printf("%+v\n", metadata)
 	}
 }
