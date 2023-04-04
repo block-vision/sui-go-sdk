@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/shoshinsquare/sui-go-sdk/common/rpc_client"
 	"github.com/shoshinsquare/sui-go-sdk/models"
+	"github.com/shoshinsquare/sui-go-sdk/models/sui_json_rpc_types"
 	"github.com/tidwall/gjson"
 )
 
@@ -16,6 +18,8 @@ type IReadObjectFromSuiAPI interface {
 	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
 	GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error)
 	GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error)
+	GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (interface{}, error)
+	GetAllNFT(ctx context.Context, address string) ([]models.GetObjectResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -30,6 +34,14 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 		Method: "sui_getObject",
 		Params: []interface{}{
 			req.ObjectID,
+			map[string]bool{
+				"showType":                true,
+				"showOwner":               true,
+				"showPreviousTransaction": true,
+				"showDisplay":             true,
+				"showBcs":                 true,
+				"showStorageRebate":       true,
+			},
 		},
 	})
 	if err != nil {
@@ -157,6 +169,63 @@ func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req mode
 		return models.GetOwnedObjectsResponse{}, err
 	}
 
-	
 	return rsp, nil
+}
+
+func (s *suiReadObjectFromSuiImpl) GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (interface{}, error) {
+	var rsp interface{}
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "suix_getDynamicFields",
+		Params: []interface{}{
+			req.ParentObjectID,
+		},
+	})
+	if err != nil {
+		return models.GetDynamicFieldResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetDynamicFieldResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetDynamicFieldResponse{}, err
+	}
+
+	return rsp, nil
+}
+
+func (s *suiReadObjectFromSuiImpl) GetAllNFT(ctx context.Context, address string) ([]models.GetObjectResponse, error) {
+	res, err := s.GetOwnedObjects(context.Background(), models.GetOwnedObjectsRequest{
+		Address: address,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	metaData := []models.GetObjectResponse{}
+	queue := make(chan models.GetObjectResponse)
+
+	for _, r := range res.Data {
+		go func(param sui_json_rpc_types.SuiParsedMoveObject) {
+			metaData, err := s.GetObject(context.Background(), models.GetObjectRequest{
+				ObjectID: param.Data.ObjectID,
+			})
+			if err != nil {
+				return
+			}
+			queue <- metaData
+		}(r)
+	}
+
+	for range res.Data {
+		select {
+		case data := <-queue:
+			if !strings.Contains(data.Data.Type, "0x2::coin::Coin") {
+				metaData = append(metaData, data)
+			}
+
+		}
+	}
+
+	return metaData, nil
 }

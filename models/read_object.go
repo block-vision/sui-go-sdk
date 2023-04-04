@@ -11,15 +11,18 @@ type GetObjectRequest struct {
 
 type GetObjectResponse struct {
 	Data struct {
-		Digest              string `json:"digest"`
-		ObjectID            string `json:"objectId"`
-		Version             uint64 `json:"version"`
-		Type                string `json:"type"`
-		Owner               string `json:"owner"`
+		Digest   string `json:"digest"`
+		ObjectID string `json:"objectId"`
+		Version  uint64 `json:"version"`
+		Type     string `json:"type"`
+		Owner    struct {
+			AddressOwner string `json:"AddressOwner"`
+		} `json:"owner"`
 		PreviousTransaction string `json:"previousTransaction"`
 		StorageRebate       uint64 `json:"storageRebate"`
 		Content             struct {
 			DataType          string `json:"dataType"`
+			Type              string `json:"type"`
 			HasPublicTransfer bool   `json:"hasPublicTransfer"`
 		} `json:"content"`
 	} `json:"data"`
@@ -71,7 +74,7 @@ type TryGetPastObjectResponse struct {
 }
 
 type GetCoinMetadataRequest struct {
-	CoinType string
+	CoinType string `json:"coin_type"`
 }
 
 type GetCoinMetadataResponse struct {
@@ -106,4 +109,11 @@ type GetOwnedObjectsRequest struct {
 type GetOwnedObjectsResponse struct {
 	Data        []sui_json_rpc_types.SuiParsedMoveObject `json:"data"`
 	HasNextPage bool                                     `json:"hasNextPage"`
+}
+
+type GetDynamicFieldRequest struct {
+	ParentObjectID string `json:"parent_object_id"`
+}
+
+type GetDynamicFieldResponse struct {
 }

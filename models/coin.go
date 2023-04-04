@@ -1,10 +1,10 @@
 package models
 
 type GetCoinsRequeset struct {
-	Owner    string
-	CoinType string
-	Cursor   string
-	Limit    uint64
+	Owner    string `json:"owner"`
+	CoinType string `json:"coin_type"`
+	Cursor   string `json:"cursor"`
+	Limit    uint64 `json:"limit"`
 }
 
 type GetCoinsResponse struct {
@@ -12,12 +12,11 @@ type GetCoinsResponse struct {
 }
 
 type CoinPage struct {
-	CoinType         string      `json:"coinType"`
-	CoinObjectId     string      `json:"coinObjectId"`
-	Version          uint64      `json:"version"`
-	Digest           string      `json:"digest"`
-	Balance          uint64      `json:"balance"`
-	LockedUntilEpoch interface{} `json:"lockedUntilEpoch"`
+	CoinType     string `json:"coinType"`
+	CoinObjectId string `json:"coinObjectId"`
+	Version      uint64 `json:"version"`
+	Digest       string `json:"digest"`
+	Balance      uint64 `json:"balance"`
 }
 
 type GetAllCoinsRequest struct {
@@ -55,8 +54,8 @@ type GetTotalSupplyRequest struct {
 type GetTotalSupplyResponse struct{}
 
 type Balance struct {
-	CoinType        string
-	CoinObjectCount uint64
-	TotalBalance    uint64
-	LockedBalance   interface{}
+	CoinType        string      `json:"coinType"`
+	CoinObjectCount uint64      `json:"coinObjectCount"`
+	TotalBalance    uint64      `json:"totalBalance"`
+	LockedBalance   interface{} `json:"lockedBalance"`
 }

@@ -49,7 +49,7 @@ func (s *SuiCoinImpl) GetCoins(ctx context.Context, req models.GetCoinsRequeset,
 
 func (s *SuiCoinImpl) GetAllCoins(ctx context.Context, req models.GetAllCoinsRequest, opts ...interface{}) (models.GetAllCoinsResponse, error) {
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getAllCoins",
+		Method: "suix_getAllCoins",
 		Params: []interface{}{
 			req.Owner,
 			req.Cursor,
@@ -95,7 +95,7 @@ func (s *SuiCoinImpl) GetAllBalances(ctx context.Context, req models.GetAllBalan
 
 func (s *SuiCoinImpl) GetBalance(ctx context.Context, req models.GetBalanceRequest, opts ...interface{}) (models.GetBalanceResponse, error) {
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getBalance",
+		Method: "suix_getBalance",
 		Params: []interface{}{
 			req.Owner,
 			req.CoinType,
@@ -108,8 +108,7 @@ func (s *SuiCoinImpl) GetBalance(ctx context.Context, req models.GetBalanceReque
 		return models.GetBalanceResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	var rsp models.GetBalanceResponse
-	var arr []models.Balance
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &arr)
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.GetBalanceResponse{}, err
 	}
