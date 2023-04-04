@@ -39,6 +39,7 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 				"showOwner":               true,
 				"showPreviousTransaction": true,
 				"showDisplay":             true,
+				"showContent":             true,
 				"showBcs":                 true,
 				"showStorageRebate":       true,
 			},

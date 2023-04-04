@@ -14,8 +14,15 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(len(res))
-	// for _, r := range res {
-	// 	fmt.Println(r)
-	// }
+
+	for _, r := range res {
+		// metadata, err := cli.GetDynamicField(context.Background(), models.GetCoinMetadataRequest{
+		// 	CoinType: r.Data.Type,
+		// })
+		// if err != nil {
+		// 	fmt.Println(err)
+		// }
+
+		fmt.Printf("%+v\n", r)
+	}
 }
