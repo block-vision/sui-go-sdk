@@ -20,10 +20,40 @@ type IReadObjectFromSuiAPI interface {
 	GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error)
 	GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (models.GetDynamicFieldResponse, error)
 	GetAllNFT(ctx context.Context, address string) ([]models.GetObjectResponse, error)
+	GetTransactionBlock(ctx context.Context, req models.GetTransactionBlockRequest, opt ...interface{}) (models.GetTransactionBlockResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
 	cli *rpc_client.RPCClient
+}
+
+func (s *suiReadObjectFromSuiImpl) GetTransactionBlock(ctx context.Context, req models.GetTransactionBlockRequest, opt ...interface{}) (models.GetTransactionBlockResponse, error) {
+	var rsp models.GetTransactionBlockResponse
+	respBytes, err := s.cli.Request(ctx, models.Operation{
+		Method: "sui_getTransactionBlock",
+		Params: []interface{}{
+			req.Digest,
+			map[string]bool{
+				"showInput":          false,
+				"showRawInput":       false,
+				"showEffects":        false,
+				"showEvents":         true,
+				"showObjectChanges":  false,
+				"showBalanceChanges": false,
+			},
+		},
+	})
+	if err != nil {
+		return models.GetTransactionBlockResponse{}, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return models.GetTransactionBlockResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return models.GetTransactionBlockResponse{}, err
+	}
+	return rsp, nil
 }
 
 // GetObject implements method `sui_getObject`.

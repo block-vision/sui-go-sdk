@@ -51,6 +51,28 @@ type GetObjectResponse struct {
 	} `json:"data"`
 }
 
+type GetTransactionBlockRequest struct {
+	Digest string `json:"digest"`
+}
+
+type Events struct {
+	BCS string `json:"bcs"`
+	ID  struct {
+		TxDigest string `json:"txDigest"`
+	} `json:"id"`
+	PackageId         string      `json:"packageId"`
+	ParsedJson        interface{} `json:"parsedJson"`
+	Sender            string      `json:"sender"`
+	TransactionModule string      `json:"transactionModule"`
+	Type              string      `json:"type"`
+}
+
+type GetTransactionBlockResponse struct {
+	Digest    string   `json:"digest"`
+	Checkpint uint64   `json:"checkpoint"`
+	Events    []Events `json:"events"`
+}
+
 type GetObjectsOwnedByAddressRequest struct {
 	Address string `json:"address"`
 }

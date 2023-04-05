@@ -30,12 +30,15 @@ func main() {
 	// 	fmt.Printf("%+v\n", metadata)
 	// }
 
-	res, err := cli.GetObject(context.Background(), models.GetObjectRequest{
-		ObjectID: "0x41085f8d26829e8ee212decb2a5b8d0c9bd4a97f3f96a9e1514bc60e6060a830",
+	res, err := cli.GetTransactionBlock(context.Background(), models.GetTransactionBlockRequest{
+		Digest: "GnLDKzSrX2U1aXs4DGbs2dcnJxkCPK4xa9N51exY4ZKA",
 	})
 
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Printf("%+v\n", res)
+
+	for _, r := range res.Events {
+		fmt.Println(r)
+	}
 }
