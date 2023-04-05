@@ -11,6 +11,13 @@ type GetObjectRequest struct {
 
 type GetObjectResponse struct {
 	Data struct {
+		BSC struct {
+			BcsBytes          string `json:"bcsBytes"`
+			DataType          string `json:"dataType"`
+			HasPublicTransfer bool   `json:"hasPublicTransfer"`
+			Type              string `json:"type"`
+			Version           uint64 `json:"version"`
+		} `json:"bsc"`
 		Digest   string `json:"digest"`
 		ObjectID string `json:"objectId"`
 		Version  uint64 `json:"version"`
@@ -24,7 +31,23 @@ type GetObjectResponse struct {
 			DataType          string `json:"dataType"`
 			Type              string `json:"type"`
 			HasPublicTransfer bool   `json:"hasPublicTransfer"`
+			Fields            struct {
+				Id struct {
+					Id string `json:"id"`
+				} `json:"id"`
+				Name     string `json:"name"`
+				ImageURL string `json:"image_url"`
+				ImgURL   string `json:"img_url"`
+				URL      string `json:"url"`
+			} `json:"fields"`
 		} `json:"content"`
+		Display struct {
+			Collection  string `json:"collection"`
+			Creator     string `json:"creator"`
+			Description string `json:"description"`
+			ImageURL    string `json:"image_url"`
+			ProjectURL  string `json:"project_url"`
+		} `json:"display"`
 	} `json:"data"`
 }
 
@@ -115,5 +138,17 @@ type GetDynamicFieldRequest struct {
 	ParentObjectID string `json:"parent_object_id"`
 }
 
+type DynamicFieldData struct {
+	Name       string `json:"name"`
+	BCSName    string `json:"bcsName"`
+	Type       string `json:"type"`
+	ObjectType string `json:"objectType"`
+	ObjectId   string `json:"objectId"`
+	Version    uint64 `json:"version"`
+	Digest     string `json:"digest"`
+}
 type GetDynamicFieldResponse struct {
+	HasNextPage bool               `json:"hasNextPage"`
+	NextCursor  string             `json:"nextCursor"`
+	Data        []DynamicFieldData `json:"data"`
 }

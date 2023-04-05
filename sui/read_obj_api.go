@@ -18,7 +18,7 @@ type IReadObjectFromSuiAPI interface {
 	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
 	GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error)
 	GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error)
-	GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (interface{}, error)
+	GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (models.GetDynamicFieldResponse, error)
 	GetAllNFT(ctx context.Context, address string) ([]models.GetObjectResponse, error)
 }
 
@@ -173,8 +173,8 @@ func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req mode
 	return rsp, nil
 }
 
-func (s *suiReadObjectFromSuiImpl) GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (interface{}, error) {
-	var rsp interface{}
+func (s *suiReadObjectFromSuiImpl) GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (models.GetDynamicFieldResponse, error) {
+	var rsp models.GetDynamicFieldResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
 		Method: "suix_getDynamicFields",
 		Params: []interface{}{
