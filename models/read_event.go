@@ -18,8 +18,8 @@ type MoveModule struct {
 	Module  string `json:"module"`
 }
 type EventQuery struct {
-	MoveModule    MoveModule `json:"MoveModule,omitempty"`
-	MoveEventType string     `json:"MoveEventType,omitempty"`
+	// MoveModule    MoveModule `json:"MoveModule,omitempty"`
+	MoveEventType string `json:"MoveEventType,omitempty"`
 }
 
 type CursorPage struct {
