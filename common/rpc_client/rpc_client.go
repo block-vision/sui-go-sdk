@@ -1,23 +1,22 @@
 package rpc_client
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/ponlv/go-kit/jrequest"
 	"github.com/shoshinsquare/sui-go-sdk/common/sui_error"
 	"github.com/shoshinsquare/sui-go-sdk/models"
 )
 
 type RPCClient struct {
 	ws         *websocket.Conn
-	httpClient *http.Client
+	httpClient *jrequest.Client
+	jRequest   *jrequest.JRequest
 	baseUrl    string
 	timeout    time.Duration
 }
@@ -34,12 +33,17 @@ func NewRPCClient(baseUrl string) *RPCClient {
 			return nil
 		}
 	}
-	return &RPCClient{
+
+	client := &RPCClient{
 		ws:         ws,
-		httpClient: &http.Client{},
+		httpClient: jrequest.DefaultClient(),
 		baseUrl:    baseUrl,
 		timeout:    defaultTimeout,
 	}
+
+	client.jRequest = client.httpClient.NewJRequest()
+
+	return client
 }
 
 func (r *RPCClient) WithTimeout(timeout time.Duration) {
@@ -75,56 +79,55 @@ func (r *RPCClient) websocketRequest(ctx context.Context, op models.Operation) (
 }
 
 func (r *RPCClient) httpRequest(ctx context.Context, op models.Operation) ([]byte, error) {
-	jsonRPCReq := models.JsonRPCRequest{
-		JsonRPC: "2.0",
-		ID:      1,
-		Method:  op.Method,
-		Params:  op.Params,
-	}
-	reqBytes, err := json.Marshal(jsonRPCReq)
+	reqBytes, err := json.Marshal(op)
 	if err != nil {
 		return []byte{}, err
 	}
-	request, err := http.NewRequest("POST", r.baseUrl, bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return []byte{}, err
-	}
-	request = request.WithContext(ctx)
-	request.Header.Add("Content-Type", "application/json")
-	rsp, err := r.httpClient.Do(request)
-	if err != nil {
-		return []byte{}, err
-	}
-	defer rsp.Body.Close()
 
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	r.jRequest.ContentTypeJSON()
+	rsp, err := r.jRequest.POST(r.baseUrl, reqBytes)
 	if err != nil {
 		return []byte{}, err
 	}
-	return bodyBytes, nil
+
+	// request, err := http.NewRequest("POST", r.baseUrl, bytes.NewBuffer(reqBytes))
+
+	// request = request.WithContext(ctx)
+	// request.Header.Add("Content-Type", "application/json")
+	// rsp, err := r.httpClient.Do(request)
+	// if err != nil {
+	// 	return []byte{}, err
+	// }
+	// defer rsp.Body.Close()
+
+	// bodyBytes, err := ioutil.ReadAll()
+	// if err != nil {
+	// 	return []byte{}, err
+	// }
+	return rsp.BodyByte, nil
 }
 
-func (r *RPCClient) PostMultiple(ctx context.Context, method string, params [][]interface{}) ([]byte, error) {
-	defaultRequest := []map[string]interface{}{}
-	for i := range params {
-		defaultRequest = append(defaultRequest, map[string]interface{}{
-			"jsonrpc": "2.0",
-			"id":      1,
-			"method":  method,
-			"params":  params[i],
-		})
-	}
-	reqBody, err := json.Marshal(defaultRequest)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := r.httpClient.Post(r.baseUrl, "application/json", bytes.NewReader(reqBody))
-	if err != nil {
-		return nil, err
-	}
-	if resp == nil {
-		return nil, nil
-	}
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
-}
+// func (r *RPCClient) PostMultiple(ctx context.Context, method string, params [][]interface{}) ([]byte, error) {
+// 	defaultRequest := []map[string]interface{}{}
+// 	for i := range params {
+// 		defaultRequest = append(defaultRequest, map[string]interface{}{
+// 			"jsonrpc": "2.0",
+// 			"id":      1,
+// 			"method":  method,
+// 			"params":  params[i],
+// 		})
+// 	}
+// 	reqBody, err := json.Marshal(defaultRequest)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	resp, err := r.httpClient.Post(r.baseUrl, "application/json", bytes.NewReader(reqBody))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if resp == nil {
+// 		return nil, nil
+// 	}
+// 	defer resp.Body.Close()
+// 	return ioutil.ReadAll(resp.Body)
+// }

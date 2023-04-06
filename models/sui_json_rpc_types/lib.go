@@ -118,9 +118,9 @@ type MoveEvent struct {
 	PackageID         string      `json:"packageID,omitempty"`
 	TransactionModule string      `json:"transactionModule,omitempty"`
 	Sender            string      `json:"sender,omitempty"`
-	Type_             string      `json:"type_,omitempty"`
+	Type              string      `json:"type,omitempty"`
 	Fields            interface{} `json:"field,omitempty"`
-	BSC               []uint8     `json:"bcs,omitempty"`
+	BSC               string      `json:"bcs,omitempty"`
 }
 
 type SuiParsedMoveObject struct {
@@ -144,9 +144,17 @@ type SuiObjectInfo struct {
 }
 
 type SuiEventEnvelop struct {
-	Timestamp uint64   `json:"timestamp"`
-	TxDigest  string   `json:"txDigest,omitempty"`
-	SuiEvent  SuiEvent `json:"event"`
+	ID struct {
+		TxDigest string `json:"txDigest"`
+		EventSeq uint64 `json:"eventSeq"`
+	} `json:"id"`
+	BCS               string      `json:"bcs"`
+	Timestamp         uint64      `json:"timestampMs"`
+	PackageID         string      `json:"packageId"`
+	TransactionModule string      `json:"transactionModule"`
+	Sender            string      `json:"sender"`
+	Type              string      `json:"type"`
+	ParsedJson        interface{} `json:"parsedJson"`
 }
 
 type SuiMoveModuleId struct {
