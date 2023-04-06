@@ -23,7 +23,10 @@ type EventQuery struct {
 }
 
 type CursorPage struct {
+	TxDigest string `json:"txDigest"`
+	EventSeq uint64 `json:"eventSeq"`
 }
+
 type QueryEventsRequest struct {
 	EventQuery EventQuery
 	Cursor     *CursorPage
