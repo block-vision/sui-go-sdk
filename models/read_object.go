@@ -42,11 +42,13 @@ type GetObjectResponse struct {
 			} `json:"fields"`
 		} `json:"content"`
 		Display struct {
-			Collection  string `json:"collection"`
-			Creator     string `json:"creator"`
-			Description string `json:"description"`
-			ImageURL    string `json:"image_url"`
-			ProjectURL  string `json:"project_url"`
+			Data struct {
+				Collection  string `json:"collection"`
+				Creator     string `json:"creator"`
+				Description string `json:"description"`
+				ImageURL    string `json:"image_url"`
+				ProjectURL  string `json:"project_url"`
+			} `json:"data"`
 		} `json:"display"`
 	} `json:"data"`
 }
