@@ -26,7 +26,9 @@ type suiReadMoveFromSuiImpl struct {
 func (s *suiReadMoveFromSuiImpl) GetMoveFunctionArgTypes(ctx context.Context, req models.GetMoveFunctionArgTypesRequest, opts ...interface{}) (models.GetMoveFunctionArgTypesResponse, error) {
 	var rsp models.GetMoveFunctionArgTypesResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getMoveFunctionArgTypes",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getMoveFunctionArgTypes",
 		Params: []interface{}{
 			req.Package,
 			req.Module,
@@ -50,7 +52,9 @@ func (s *suiReadMoveFromSuiImpl) GetMoveFunctionArgTypes(ctx context.Context, re
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest, opts ...interface{}) (models.GetNormalizedMoveModulesByPackageResponse, error) {
 	var rsp models.GetNormalizedMoveModulesByPackageResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getNormalizedMoveModulesByPackage",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getNormalizedMoveModulesByPackage",
 		Params: []interface{}{
 			req.Package,
 		},
@@ -72,7 +76,9 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModulesByPackage(ctx context.C
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModule(ctx context.Context, req models.GetNormalizedMoveModuleRequest, opts ...interface{}) (models.GetNormalizedMoveModuleResponse, error) {
 	var rsp models.GetNormalizedMoveModuleResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getNormalizedMoveModule",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getNormalizedMoveModule",
 		Params: []interface{}{
 			req.Package,
 			req.ModuleName,
@@ -95,7 +101,9 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveModule(ctx context.Context, re
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveStruct(ctx context.Context, req models.GetNormalizedMoveStructRequest, opts ...interface{}) (models.GetNormalizedMoveStructResponse, error) {
 	var rsp models.GetNormalizedMoveStructResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getNormalizedMoveStruct",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getNormalizedMoveStruct",
 		Params: []interface{}{
 			req.Package,
 			req.ModuleName,
@@ -119,7 +127,9 @@ func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveStruct(ctx context.Context, re
 func (s *suiReadMoveFromSuiImpl) GetNormalizedMoveFunction(ctx context.Context, req models.GetNormalizedMoveFunctionRequest, opts ...interface{}) (models.GetNormalizedMoveFunctionResponse, error) {
 	var rsp models.GetNormalizedMoveFunctionResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getNormalizedMoveFunction",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getNormalizedMoveFunction",
 		Params: []interface{}{
 			req.Package,
 			req.ModuleName,

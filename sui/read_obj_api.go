@@ -59,9 +59,11 @@ func (s *suiReadObjectFromSuiImpl) GetTransactionBlock(ctx context.Context, req 
 // GetObject implements method `sui_getObject`.
 // Returns object details
 func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error) {
-	var rsp models.GetObjectResponse
+
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObject",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getObject",
 		Params: []interface{}{
 			req.ObjectID,
 			map[string]bool{
@@ -81,6 +83,7 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return models.GetObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
+	var rsp models.GetObjectResponse
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return models.GetObjectResponse{}, err
@@ -93,7 +96,9 @@ func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.Get
 func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error) {
 	var rsp models.GetObjectsOwnedByAddressResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObjectsOwnedByAddress",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getObjectsOwnedByAddress",
 		Params: []interface{}{
 			req.Address,
 		},
@@ -116,7 +121,9 @@ func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context,
 func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error) {
 	var rsp models.GetRawObjectResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getRawObject",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_getRawObject",
 		Params: []interface{}{
 			req.ObjectID,
 		},
@@ -142,7 +149,9 @@ func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.
 func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opts ...interface{}) (models.TryGetPastObjectResponse, error) {
 	var rsp models.TryGetPastObjectResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_tryGetPastObject",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "sui_tryGetPastObject",
 		Params: []interface{}{
 			req.ObjectID,
 		},
@@ -163,7 +172,9 @@ func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req mod
 func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error) {
 	var rsp models.GetCoinMetadataResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "suix_getCoinMetadata",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "suix_getCoinMetadata",
 		Params: []interface{}{
 			req.CoinType,
 		},
@@ -184,7 +195,9 @@ func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req mode
 func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req models.GetOwnedObjectsRequest, opt ...interface{}) (models.GetOwnedObjectsResponse, error) {
 	var rsp models.GetOwnedObjectsResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "suix_getOwnedObjects",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "suix_getOwnedObjects",
 		Params: []interface{}{
 			req.Address,
 		},
@@ -206,7 +219,9 @@ func (s *suiReadObjectFromSuiImpl) GetOwnedObjects(ctx context.Context, req mode
 func (s *suiReadObjectFromSuiImpl) GetDynamicField(ctx context.Context, req models.GetDynamicFieldRequest, opt ...interface{}) (models.GetDynamicFieldResponse, error) {
 	var rsp models.GetDynamicFieldResponse
 	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "suix_getDynamicFields",
+		JsonRPC: "2.0",
+		ID:      1,
+		Method:  "suix_getDynamicFields",
 		Params: []interface{}{
 			req.ParentObjectID,
 		},
