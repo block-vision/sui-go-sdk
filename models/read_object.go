@@ -48,6 +48,7 @@ type GetObjectResponse struct {
 				Description string `json:"description"`
 				ImageURL    string `json:"image_url"`
 				ProjectURL  string `json:"project_url"`
+				Name        string `json:"name"`
 			} `json:"data"`
 		} `json:"display"`
 	} `json:"data"`
