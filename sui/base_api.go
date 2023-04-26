@@ -1,11 +1,12 @@
+// Copyright (c) BlockVision, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package sui
 
 import (
 	"context"
 	"errors"
-
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
-	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/tidwall/gjson"
 )
 
@@ -14,12 +15,12 @@ type IBaseAPI interface {
 }
 
 type suiBaseImpl struct {
-	cli *rpc_client.RPCClient
+	conn *httpconn.HttpConn
 }
 
 // SuiCall send customized request to Sui Node endpoint.
 func (s *suiBaseImpl) SuiCall(ctx context.Context, method string, params ...interface{}) (interface{}, error) {
-	resp, err := s.cli.Request(ctx, models.Operation{
+	resp, err := s.conn.Request(ctx, httpconn.Operation{
 		Method: method,
 		Params: params,
 	})

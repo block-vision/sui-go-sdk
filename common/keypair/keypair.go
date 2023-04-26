@@ -8,10 +8,12 @@ import (
 	"github.com/block-vision/sui-go-sdk/models"
 )
 
+type KeyPair byte
+
 const (
-	Ed25519Flag   byte = 0
-	Secp256k1Flag byte = 1
-	ErrorFlag     byte = math.MaxUint8
+	Ed25519Flag   KeyPair = 0
+	Secp256k1Flag KeyPair = 1
+	ErrorFlag     byte    = math.MaxUint8
 )
 
 const (
@@ -34,27 +36,27 @@ func FetchKeyPair(value string) (models.SuiKeyPair, error) {
 		return models.SuiKeyPair{}, err
 	}
 	switch result[0] {
-	case Ed25519Flag:
+	case byte(Ed25519Flag):
 		pb := result[1 : ed25519PublicKeyLength+1]
 		sk := result[1+ed25519PublicKeyLength:]
 		pbInBase64 := encodeBase64(pb)
 		return models.SuiKeyPair{
-			Flag:            Ed25519Flag,
+			Flag:            byte(Ed25519Flag),
 			PrivateKey:      sk,
 			PublicKeyBase64: pbInBase64,
 			PublicKey:       pb,
-			Address:         fromPublicKeyBytesToAddress(pb, Ed25519Flag),
+			Address:         fromPublicKeyBytesToAddress(pb, byte(Ed25519Flag)),
 		}, nil
-	case Secp256k1Flag:
+	case byte(Secp256k1Flag):
 		pb := result[1 : secp256k1PublicKeyLength+1]
 		sk := result[1+secp256k1PublicKeyLength:]
 		pbInBase64 := encodeBase64(pb)
 		return models.SuiKeyPair{
-			Flag:            Secp256k1Flag,
+			Flag:            byte(Secp256k1Flag),
 			PrivateKey:      sk,
 			PublicKey:       pb,
 			PublicKeyBase64: pbInBase64,
-			Address:         fromPublicKeyBytesToAddress(pb, Secp256k1Flag),
+			Address:         fromPublicKeyBytesToAddress(pb, byte(Secp256k1Flag)),
 		}, nil
 	default:
 		return models.SuiKeyPair{}, sui_error.ErrInvalidEncryptFlag

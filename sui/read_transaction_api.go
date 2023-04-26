@@ -1,297 +1,121 @@
+// Copyright (c) BlockVision, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package sui
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
 
 type IReadTransactionFromSuiAPI interface {
-	GetRecentTransactions(ctx context.Context, req models.GetRecentTransactionRequest, opts ...interface{}) (models.GetRecentTransactionResponse, error)
-	GetTotalTransactionNumber(ctx context.Context, req models.GetTotalTransactionNumberRequest, opts ...interface{}) (models.GetTotalTransactionNumberResponse, error)
-	GetTransaction(ctx context.Context, req models.GetTransactionRequest, opts ...interface{}) (models.GetTransactionResponse, error)
-	GetTransactionsByInputObject(ctx context.Context, req models.GetTransactionsByInputObjectRequest, opts ...interface{}) (models.GetTransactionsByInputObjectResponse, error)
-	GetTransactionsByMoveFunction(ctx context.Context, req models.GetTransactionsByMoveFunctionRequest, opts ...interface{}) (models.GetTransactionsByMoveFunctionResponse, error)
-	GetTransactionsByMutatedObject(ctx context.Context, req models.GetTransactionsByMutatedObjectRequest, opts ...interface{}) (models.GetTransactionsByMutatedObjectResponse, error)
-	GetTransactionsFromAddress(ctx context.Context, req models.GetTransactionsFromAddressRequest, opts ...interface{}) (models.GetTransactionsFromAddressResponse, error)
-	GetTransactionsInRange(ctx context.Context, req models.GetTransactionsInRangeRequest, opts ...interface{}) (models.GetTransactionsInRangeResponse, error)
-	GetTransactionsToAddress(ctx context.Context, req models.GetTransactionsToAddressRequest, opts ...interface{}) (models.GetTransactionsToAddressResponse, error)
-	GetTransactionAuthSigners(ctx context.Context, req models.GetTransactionAuthSignersRequest, opts ...interface{}) (models.GetTransactionAuthSignersResponse, error)
+	SuiGetTotalTransactionBlocks(ctx context.Context) (uint64, error)
+	SuiGetTransactionBlock(ctx context.Context, req models.SuiGetTransactionBlockRequest) (models.SuiTransactionBlockResponse, error)
+	SuiMultiGetTransactionBlocks(ctx context.Context, req models.SuiMultiGetTransactionBlocksRequest) (models.SuiMultiGetTransactionBlocksResponse, error)
+	SuiXQueryTransactionBlocks(ctx context.Context, req models.SuiXQueryTransactionBlocksRequest) (models.SuiXQueryTransactionBlocksResponse, error)
 }
 
 type suiReadTransactionFromSuiImpl struct {
-	cli *rpc_client.RPCClient
+	conn *httpconn.HttpConn
 }
 
-// GetRecentTransactions implements method `sui_getRecentTransactions`.
-// Returns an array of transactions' metadata
-func (s *suiReadTransactionFromSuiImpl) GetRecentTransactions(ctx context.Context, req models.GetRecentTransactionRequest, opts ...interface{}) (models.GetRecentTransactionResponse, error) {
-	var rsp models.GetRecentTransactionResponse
-	reqList := make([]interface{}, 0)
-	reqList = append(reqList, req.Count)
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getRecentTransactions",
-		Params: reqList,
-	})
-	if err != nil {
-		return models.GetRecentTransactionResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetRecentTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-// GetTotalTransactionNumber implements method `sui_getTotalTransactionNumber`
-// Returns a number of total transactions
-func (s *suiReadTransactionFromSuiImpl) GetTotalTransactionNumber(ctx context.Context, req models.GetTotalTransactionNumberRequest, opts ...interface{}) (models.GetTotalTransactionNumberResponse, error) {
-	var rsp models.GetTotalTransactionNumberResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTotalTransactionNumber",
+// SuiGetTotalTransactionBlocks implements the method `sui_getTotalTransactionBlocks`, gets the total number of transactions known to the node.
+func (s *suiReadTransactionFromSuiImpl) SuiGetTotalTransactionBlocks(ctx context.Context) (uint64, error) {
+	var rsp uint64
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getTotalTransactionBlocks",
 		Params: []interface{}{},
 	})
 	if err != nil {
-		return models.GetTotalTransactionNumberResponse{}, err
+		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTotalTransactionNumberResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	rsp.TotalNumberOfTransaction = gjson.ParseBytes(respBytes).Get("result").Uint()
+	rsp = gjson.ParseBytes(respBytes).Get("result").Uint()
 	return rsp, nil
 }
 
-// GetTransaction implements method `sui_getTransaction`
-// Returns detail info of the transaction
-func (s *suiReadTransactionFromSuiImpl) GetTransaction(ctx context.Context, req models.GetTransactionRequest, opts ...interface{}) (models.GetTransactionResponse, error) {
-	var rsp models.GetTransactionResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransaction",
+// SuiGetTransactionBlock implements the method `sui_getTransactionBlock`, gets the transaction response object for a specified transaction digest.
+func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Context, req models.SuiGetTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
+	var rsp models.SuiTransactionBlockResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getTransactionBlock",
 		Params: []interface{}{
 			req.Digest,
+			req.Options,
 		},
 	})
 	if err != nil {
-		return models.GetTransactionResponse{}, err
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
-		return models.GetTransactionResponse{}, err
+		return rsp, err
 	}
 	return rsp, nil
 }
 
-// GetTransactionsByInputObject implements method `sui_getTransactionsByInputObject`.
-// Returns an array of transactions' metadata
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsByInputObject(ctx context.Context, req models.GetTransactionsByInputObjectRequest, opts ...interface{}) (models.GetTransactionsByInputObjectResponse, error) {
-	var rsp models.GetTransactionsByInputObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsByInputObject",
+// SuiMultiGetTransactionBlocks implements the method `sui_multiGetTransactionBlocks`, gets an ordered list of transaction responses.
+func (s *suiReadTransactionFromSuiImpl) SuiMultiGetTransactionBlocks(ctx context.Context, req models.SuiMultiGetTransactionBlocksRequest) (models.SuiMultiGetTransactionBlocksResponse, error) {
+	var rsp models.SuiMultiGetTransactionBlocksResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_multiGetTransactionBlocks",
 		Params: []interface{}{
-			req.ObjectID,
+			req.Digests,
+			req.Options,
 		},
 	})
 	if err != nil {
-		return models.GetTransactionsByInputObjectResponse{}, err
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsByInputObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	if err != nil {
+		return rsp, err
 	}
 	return rsp, nil
 }
 
-// GetTransactionsByMoveFunction implements method `sui_getTransactionsByInputObject`.
-// Returns an array of transactions' metadata.
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMoveFunction(ctx context.Context, req models.GetTransactionsByMoveFunctionRequest, opts ...interface{}) (models.GetTransactionsByMoveFunctionResponse, error) {
-	var rsp models.GetTransactionsByMoveFunctionResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsByInputObject",
+// SuiXQueryTransactionBlocks implements the method `suix_queryTransactionBlocks`, gets list of transactions for a specified query criteria.
+func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.Context, req models.SuiXQueryTransactionBlocksRequest) (models.SuiXQueryTransactionBlocksResponse, error) {
+	var rsp models.SuiXQueryTransactionBlocksResponse
+	if err := validate.ValidateStruct(req); err != nil {
+		return rsp, err
+	}
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "suix_queryTransactionBlocks",
 		Params: []interface{}{
-			req.Package,
-			req.Module,
-			req.Function,
+			req.SuiTransactionBlockResponseQuery,
+			req.Cursor,
+			req.Limit,
+			req.DescendingOrder,
 		},
 	})
 	if err != nil {
-		return models.GetTransactionsByMoveFunctionResponse{}, err
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsByMoveFunctionResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-// GetTransactionsByMutatedObject implements method `sui_getTransactionsByMutatedObject`.
-// Returns an array of transactions' metadata.
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsByMutatedObject(ctx context.Context, req models.GetTransactionsByMutatedObjectRequest, opts ...interface{}) (models.GetTransactionsByMutatedObjectResponse, error) {
-	var rsp models.GetTransactionsByMutatedObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsByMutatedObject",
-		Params: []interface{}{
-			req.ObjectID,
-		},
-	})
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
-		return models.GetTransactionsByMutatedObjectResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsByMutatedObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-// GetTransactionsFromAddress implements method `sui_getTransactionsFromAddress`.
-// Returns an array of transactions' metadata.
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsFromAddress(ctx context.Context, req models.GetTransactionsFromAddressRequest, opts ...interface{}) (models.GetTransactionsFromAddressResponse, error) {
-	var rsp models.GetTransactionsFromAddressResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsFromAddress",
-		Params: []interface{}{
-			req.Addr,
-		},
-	})
-	if err != nil {
-		return models.GetTransactionsFromAddressResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsFromAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-// GetTransactionsInRange implements method `sui_getTransactionsInRange`.
-// Returns an array of transactions' metadata.
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsInRange(ctx context.Context, req models.GetTransactionsInRangeRequest, opts ...interface{}) (models.GetTransactionsInRangeResponse, error) {
-	var rsp models.GetTransactionsInRangeResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsInRange",
-		Params: []interface{}{
-			req.Start,
-			req.End,
-		},
-	})
-	if err != nil {
-		return models.GetTransactionsInRangeResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsInRangeResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-// GetTransactionsToAddress implements method `sui_getTransactionsToAddress`.
-// Returns an array of transactions' metadata.
-func (s *suiReadTransactionFromSuiImpl) GetTransactionsToAddress(ctx context.Context, req models.GetTransactionsToAddressRequest, opts ...interface{}) (models.GetTransactionsToAddressResponse, error) {
-	var rsp models.GetTransactionsToAddressResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionsToAddress",
-		Params: []interface{}{
-			req.Addr,
-		},
-	})
-
-	if err != nil {
-		return models.GetTransactionsToAddressResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionsToAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	results := gjson.ParseBytes(respBytes).Get("result").Array()
-	for i := range results {
-		if len(results[i].Array()) < 2 {
-			continue
-		}
-		rsp.Result = append(rsp.Result, models.GetTransactionMetaData{
-			GatewayTxSeqNumber: results[i].Array()[0].Uint(),
-			TransactionDigest:  results[i].Array()[1].String(),
-		})
-	}
-	return rsp, nil
-}
-
-func (s *suiReadTransactionFromSuiImpl) GetTransactionAuthSigners(ctx context.Context, req models.GetTransactionAuthSignersRequest, opts ...interface{}) (models.GetTransactionAuthSignersResponse, error) {
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getTransactionAuthSigners",
-		Params: []interface{}{
-			req.Digest,
-		},
-	})
-	if err != nil {
-		return models.GetTransactionAuthSignersResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetTransactionAuthSignersResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	var rsp models.GetTransactionAuthSignersResponse
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return models.GetTransactionAuthSignersResponse{}, err
+		return rsp, err
 	}
 	return rsp, nil
 }
