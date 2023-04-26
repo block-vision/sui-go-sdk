@@ -1,163 +1,134 @@
+// Copyright (c) BlockVision, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package sui
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
-
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
 
 type IReadObjectFromSuiAPI interface {
-	GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error)
-	GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error)
-	GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error)
-	GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error)
-	TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opt ...interface{}) (models.TryGetPastObjectResponse, error)
-	GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error)
+	SuiXGetOwnedObjects(ctx context.Context, req models.SuiXGetOwnedObjectsRequest) (models.PaginatedObjectsResponse, error)
+	SuiMultiGetObjects(ctx context.Context, req models.SuiMultiGetObjectsRequest) ([]*models.SuiObjectResponse, error)
+	SuiXGetDynamicField(ctx context.Context, req models.SuiXGetDynamicFieldRequest) (models.PaginatedDynamicFieldInfoResponse, error)
+	SuiXGetDynamicFieldObject(ctx context.Context, req models.SuiXGetDynamicFieldObjectRequest) (models.SuiObjectResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
-	cli *rpc_client.RPCClient
+	conn *httpconn.HttpConn
 }
 
-// GetObject implements method `sui_getObject`.
-// Returns object details
-func (s *suiReadObjectFromSuiImpl) GetObject(ctx context.Context, req models.GetObjectRequest, opts ...interface{}) (models.GetObjectResponse, error) {
-	var rsp models.GetObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObject",
-		Params: []interface{}{
-			req.ObjectID,
-		},
-	})
-	if err != nil {
-		return models.GetObjectResponse{}, err
+// SuiXGetOwnedObjects implements the method `suix_getOwnedObjects`, gets the list of objects owned by an address.
+func (s *suiReadObjectFromSuiImpl) SuiXGetOwnedObjects(ctx context.Context, req models.SuiXGetOwnedObjectsRequest) (models.PaginatedObjectsResponse, error) {
+	var rsp models.PaginatedObjectsResponse
+	if err := validate.ValidateStruct(req); err != nil {
+		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return models.GetObjectResponse{}, err
-	}
-	return rsp, nil
-}
-
-// GetObjectsOwnedByAddress implements method `sui_getObjectsOwnedByAddress`.
-// Returns an array of object information
-func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByAddress(ctx context.Context, req models.GetObjectsOwnedByAddressRequest, opts ...interface{}) (models.GetObjectsOwnedByAddressResponse, error) {
-	var rsp models.GetObjectsOwnedByAddressResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObjectsOwnedByAddress",
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "suix_getOwnedObjects",
 		Params: []interface{}{
 			req.Address,
+			req.Query,
+			req.Cursor,
+			req.Limit,
 		},
 	})
 	if err != nil {
-		return models.GetObjectsOwnedByAddressResponse{}, err
+		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetObjectsOwnedByAddressResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
-	if err != nil {
-		return models.GetObjectsOwnedByAddressResponse{}, err
-	}
-	return rsp, nil
-}
-
-// GetObjectsOwnedByObject implements method `sui_getObjectsOwnedByObject`.
-// Returns an array of object information
-func (s *suiReadObjectFromSuiImpl) GetObjectsOwnedByObject(ctx context.Context, req models.GetObjectsOwnedByObjectRequest, opts ...interface{}) (models.GetObjectsOwnedByObjectResponse, error) {
-	var rsp models.GetObjectsOwnedByObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getObjectsOwnedByObject",
-		Params: []interface{}{
-			req.ObjectID,
-		},
-	})
-	if err != nil {
-		return models.GetObjectsOwnedByObjectResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetObjectsOwnedByObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp.Result)
-	if err != nil {
-		return models.GetObjectsOwnedByObjectResponse{}, err
-	}
-	return rsp, nil
-}
-
-// GetRawObject implements method `sui_getRawObject`.
-// Returns object details
-func (s *suiReadObjectFromSuiImpl) GetRawObject(ctx context.Context, req models.GetRawObjectRequest, opts ...interface{}) (models.GetRawObjectResponse, error) {
-	var rsp models.GetRawObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getRawObject",
-		Params: []interface{}{
-			req.ObjectID,
-		},
-	})
-	if err != nil {
-		return models.GetRawObjectResponse{}, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetRawObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return models.GetRawObjectResponse{}, err
+		return rsp, err
 	}
 	return rsp, nil
 }
 
-// TryGetPastObject implements method `sui_tryGetPastObject`
-// Note there is no software-level guarantee/SLA that objects with past versions can be retrieved by this API,
-// even if the object and version exists/existed.
-// The result may vary across nodes depending on their pruning policies.
-// Return the object information for a specified version
-func (s *suiReadObjectFromSuiImpl) TryGetPastObject(ctx context.Context, req models.TryGetPastObjectRequest, opts ...interface{}) (models.TryGetPastObjectResponse, error) {
-	var rsp models.TryGetPastObjectResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_tryGetPastObject",
+// SuiMultiGetObjects implements the method `sui_multiGetObjects`, gets the object data for a list of objects.
+func (s *suiReadObjectFromSuiImpl) SuiMultiGetObjects(ctx context.Context, req models.SuiMultiGetObjectsRequest) ([]*models.SuiObjectResponse, error) {
+	var rsp []*models.SuiObjectResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_multiGetObjects",
 		Params: []interface{}{
-			req.ObjectID,
+			req.ObjectIds,
+			req.Options,
 		},
 	})
 	if err != nil {
-		return models.TryGetPastObjectResponse{}, err
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.TryGetPastObjectResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return models.TryGetPastObjectResponse{}, err
+		return rsp, err
 	}
 	return rsp, nil
 }
 
-func (s *suiReadObjectFromSuiImpl) GetCoinMetadata(ctx context.Context, req models.GetCoinMetadataRequest, opt ...interface{}) (models.GetCoinMetadataResponse, error) {
-	var rsp models.GetCoinMetadataResponse
-	respBytes, err := s.cli.Request(ctx, models.Operation{
-		Method: "sui_getCoinMetadata",
+// SuiXGetDynamicField implements the method `suix_getDynamicFields`, gets the list of dynamic field objects owned by an object.
+func (s *suiReadObjectFromSuiImpl) SuiXGetDynamicField(ctx context.Context, req models.SuiXGetDynamicFieldRequest) (models.PaginatedDynamicFieldInfoResponse, error) {
+	var rsp models.PaginatedDynamicFieldInfoResponse
+	if err := validate.ValidateStruct(req); err != nil {
+		return rsp, err
+	}
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "suix_getDynamicFields",
 		Params: []interface{}{
-			req.CoinType,
+			req.ObjectId,
+			req.Cursor,
+			req.Limit,
 		},
 	})
 	if err != nil {
-		return models.GetCoinMetadataResponse{}, err
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return models.GetCoinMetadataResponse{}, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return models.GetCoinMetadataResponse{}, err
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiXGetDynamicFieldObject implements the method `suix_getDynamicFieldObject`, gets the dynamic field object information for a specified object.
+func (s *suiReadObjectFromSuiImpl) SuiXGetDynamicFieldObject(ctx context.Context, req models.SuiXGetDynamicFieldObjectRequest) (models.SuiObjectResponse, error) {
+	var rsp models.SuiObjectResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "suix_getDynamicFieldObject",
+		Params: []interface{}{
+			req.ObjectId,
+			req.DynamicFieldName,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if !gjson.ValidBytes(respBytes) {
+		return rsp, errors.New("not a valid json response")
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
 	}
 	return rsp, nil
 }

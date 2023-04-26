@@ -8,35 +8,35 @@
     <a href="https://discord.gg/Re6prK86Tr"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true"></a>
 </p>
 
+## Overview
+The Sui-Go-SDK provided by BlockVision aims to offer access to all resources in the BlockVision API and also offers some additional features that make the integration easier:
+Sui-Go-SDK is designated for Lay 1 BlockChain [Sui](https://github.com/MystenLabs/sui) in Go programming language.
 
-## Notices
-+ You don't need to load your `sui.keystore` file if you just want to send some unsigned transactions.
-+ File `sui.keystore` in config folder is test-only. Replace and load your own sui.keystore if your need to sign transactions. 
-+ PRs are open to everyone and let's build useful tools for Sui community!
-
-
-## Features
-+ Load your keystore file and sign your messages with specific address.
-+ Provide methods `MoveCallAndExecuteTransaction`/`BatchAndExecuteTransaction`.
+### Features
++ Support the mainstream methods in the Object, Coin, Event, Read Transaction Blocks, System Data, and Write Transaction Blocks modules.
 + Customized request method `SuiCall`.
 + Unsigned methods can be executed without loading your keystore file.
+
+
 
 * [Quick Start](#Quick-Start)
 * [Examples](#Examples)
 
+## Quick Start
 
-## Install 
+### Install 
 ```shell
 go get github.com/block-vision/sui-go-sdk
 ```
 
+### Go Version
 | Golang Version |
 |----------------|
-| \>= 1.17.3     | 
+| \>= 1.20       | 
 
 ## Examples
 
-### Get start
+### Get started
 ```go
 package main
 
@@ -49,110 +49,38 @@ import (
 )
 
 func main() {
-	// configure your endpoint here
-	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
-	resp, err := cli.SuiCall(context.Background(), "sui_getTransactionAuthSigners", "Ar9FigfQcR52tAGDPwt2DtKyp4oNDgRCc85yzeCuFU1L")
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	// configure your endpoint here or use blockVision's free Sui RPC endpoint
+	cli := sui.NewSuiClient("https://sui-testnet-endpoint.blockvision.org")
 
-	fmt.Println("resp result:", resp)
+	ctx := context.Background()
 
-	resp2, err := cli.GetTransactionAuthSigners(context.Background(), models.GetTransactionAuthSignersRequest{
-		Digest: "Ar9FigfQcR52tAGDPwt2DtKyp4oNDgRCc85yzeCuFU1L",
+	rsp, err := cli.SuiXGetAllBalance(ctx, models.SuiXGetAllBalanceRequest{
+		Owner: "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
 	})
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	fmt.Printf("%+v\n", resp2)
 
-	keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	fmt.Println(keystoreCli.Keys())
-	fmt.Println(keystoreCli.GetKey("your-address"))
-}
-```
+	fmt.Println(rsp)
 
-### Send unsigned transactions
+	//If you want to request for original json response data, you can use SuiCall().
+	callRsp, err := cli.SuiCall(ctx, "suix_getAllBalances", "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5")
 
-```go
-func main() {
-	cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
-
-	keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	fmt.Println(keystoreCli.Keys())
-	fmt.Println(keystoreCli.GetKey("your-address"))
-
-	resp, err := cli.MoveCall(context.Background(), models.MoveCallRequest{
-		Signer:          "0x4d6f1a54e805038f44ecd3112927af147e9b9ecb",
-		PackageObjectId: "0x0000000000000000000000000000000000000002",
-		Module:          "devnet_nft",
-		Function:        "mint",
-		TypeArguments:   []interface{}{},
-		Arguments:       []interface{}{"blockvision", "blockvision", "testurl"},
-		Gas:             "0x14802aeff2f444c888303f8fbba6d4e8451c38f8",
-		GasBudget:       1000,
-	})
-	
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	fmt.Println(resp)
-}
-```
-
-
-### Send signed transactions
-
-```go
-func main() {
-    cli := sui.NewSuiClient("https://fullnode.devnet.sui.io:443")
-
-    keystoreCli, err := sui.SetAccountKeyStore("../sui.keystore.fortest")
-    if err != nil {
-        fmt.Println(err.Error())
-        return
-	}
-
-    fmt.Println(keystoreCli.Keys())
-    fmt.Println(keystoreCli.GetKey("your-address"))
-
-    resp, err := cli.MoveCallAndExecuteTransaction(context.Background(), models.MoveCallAndExecuteTransactionRequest{
-        MoveCallRequest: models.MoveCallRequest{
-            Signer:          "0x4d6f1a54e805038f44ecd3112927af147e9b9ecb",
-            PackageObjectId: "0x0000000000000000000000000000000000000002",
-            Module:          "devnet_nft",
-            Function:        "mint",
-            TypeArguments:   []interface{}{},
-            Arguments:       []interface{}{"blockvision", "blockvision", "testurl"},
-            Gas:             "0x14802aeff2f444c888303f8fbba6d4e8451c38f8",
-            GasBudget:       1000,
-        },
-    })
-    if err != nil {
-        fmt.Println(err.Error())
-        return
-    }
-    fmt.Println(resp)
+	fmt.Println(callRsp)
 }
 ```
 
 ## Contribution  
-Contributions are welcomed and greatly appreciated.   
-Please follow the PR/issue template.  
-Thank you to all the people who participate in building better infrastructure! 
++ We welcome your suggestions, comments (including criticisms), comments and contributions.   
++ Please follow the PR/issue template provided to ensure that your contributions are clear and easy to understand.  
++ Thank you to all the people who participate in building better infrastructure! 
 
 ## Resources
 + [SDK Examples](https://github.com/block-vision/sui-go-sdk/tree/main/examples)

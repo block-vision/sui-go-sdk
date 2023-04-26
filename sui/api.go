@@ -1,56 +1,58 @@
+// Copyright (c) BlockVision, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package sui
 
 import (
-	"github.com/block-vision/sui-go-sdk/common/rpc_client"
+	"github.com/block-vision/sui-go-sdk/common/httpconn"
 )
 
+// ISuiAPI defines the SuiAPI related interface, and then implement it by the client.
 type ISuiAPI interface {
 	IBaseAPI
+	IReadCoinFromSuiAPI
 	IWriteTransactionAPI
 	IReadEventFromSuiAPI
-	IReadMoveFromSuiAPI
 	IReadObjectFromSuiAPI
 	IReadTransactionFromSuiAPI
-	IFeatureSuiAPI
-	ICoinAPI
-	IGovernanceAPI
+	IReadSystemFromSuiAPI
 }
 
+// Client implements SuiAPI related interfaces.
 type Client struct {
 	IBaseAPI
+	IReadCoinFromSuiAPI
 	IWriteTransactionAPI
 	IReadEventFromSuiAPI
-	IReadMoveFromSuiAPI
 	IReadObjectFromSuiAPI
 	IReadTransactionFromSuiAPI
-	IFeatureSuiAPI
-	ICoinAPI
-	IGovernanceAPI
+	IReadSystemFromSuiAPI
 }
 
-func NewSuiClient(dest string) ISuiAPI {
-	cli := rpc_client.NewRPCClient(dest)
+// NewSuiClient instantiates the Sui client to call the methods of each module.
+func NewSuiClient(rpcUrl string) ISuiAPI {
+	conn := httpconn.NewHttpConn(rpcUrl)
 	return &Client{
+		IBaseAPI: &suiBaseImpl{
+			conn: conn,
+		},
+		IReadCoinFromSuiAPI: &suiReadCoinFromSuiImpl{
+			conn: conn,
+		},
 		IWriteTransactionAPI: &suiWriteTransactionImpl{
-			cli: cli,
+			conn: conn,
 		},
 		IReadEventFromSuiAPI: &suiReadEventFromSuiImpl{
-			cli: cli,
-		},
-		IReadMoveFromSuiAPI: &suiReadMoveFromSuiImpl{
-			cli: cli,
+			conn: conn,
 		},
 		IReadObjectFromSuiAPI: &suiReadObjectFromSuiImpl{
-			cli: cli,
+			conn: conn,
 		},
 		IReadTransactionFromSuiAPI: &suiReadTransactionFromSuiImpl{
-			cli: cli,
+			conn: conn,
 		},
-		ICoinAPI: &SuiCoinImpl{
-			cli: cli,
+		IReadSystemFromSuiAPI: &suiReadSystemFromSuiImpl{
+			conn: conn,
 		},
-		IGovernanceAPI: &SuiGovernanceImpl{cli: cli},
-		IBaseAPI:       &suiBaseImpl{cli: cli},
-		IFeatureSuiAPI: &suiFeatureImpl{cli: cli},
 	}
 }

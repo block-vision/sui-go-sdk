@@ -7,7 +7,7 @@ import (
 )
 
 func fromPublicKeyBytesToAddress(publicKey []byte, scheme byte) string {
-	if scheme != Ed25519Flag && scheme != Secp256k1Flag {
+	if scheme != byte(Ed25519Flag) && scheme != byte(Secp256k1Flag) {
 		return ""
 	}
 	tmp := make([]byte, len(publicKey)+1)
@@ -16,7 +16,7 @@ func fromPublicKeyBytesToAddress(publicKey []byte, scheme byte) string {
 		tmp[i+1] = publicKey[i]
 	}
 	hexHash := sha3.Sum256(tmp)
-	return "0x" + hexEncode(hexHash[:])[:AccountAddress20Length*2]
+	return "0x" + hexEncode(hexHash[:])[:AccountAddress32Length*2]
 }
 
 func hexEncode(b []byte) string {
