@@ -36,8 +36,8 @@ func (s *suiWriteTransactionImpl) SuiExecuteTransactionBlock(ctx context.Context
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {

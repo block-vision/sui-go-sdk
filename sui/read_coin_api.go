@@ -38,9 +38,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetBalance(ctx context.Context, req models.
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -62,9 +59,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetAllBalance(ctx context.Context, req mode
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
@@ -94,9 +88,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetCoins(ctx context.Context, req models.Su
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -124,9 +115,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetAllCoins(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -149,9 +137,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetCoinMetadata(ctx context.Context, req mo
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -173,9 +158,6 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetTotalSupply(ctx context.Context, req mod
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())

@@ -41,8 +41,8 @@ func (s *suiReadObjectFromSuiImpl) SuiXGetOwnedObjects(ctx context.Context, req 
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
@@ -63,9 +63,6 @@ func (s *suiReadObjectFromSuiImpl) SuiMultiGetObjects(ctx context.Context, req m
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
@@ -94,9 +91,6 @@ func (s *suiReadObjectFromSuiImpl) SuiXGetDynamicField(ctx context.Context, req 
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -119,9 +113,6 @@ func (s *suiReadObjectFromSuiImpl) SuiXGetDynamicFieldObject(ctx context.Context
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())

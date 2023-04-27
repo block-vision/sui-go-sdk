@@ -31,7 +31,6 @@ func TestOnReadSystemFromSui(t *testing.T) {
 
 	t.Run("test on sui_getCheckpoints", func(t *testing.T) {
 		rsp, err := cli.SuiGetCheckpoints(ctx, models.SuiGetCheckpointsRequest{
-			Cursor:          "13200",
 			Limit:           5,
 			DescendingOrder: true,
 		})
@@ -68,6 +67,66 @@ func TestOnReadSystemFromSui(t *testing.T) {
 		utils.PrettyPrint(rsp)
 	})
 
+	t.Run("test on suix_getCommitteeInfo", func(t *testing.T) {
+		rsp, err := cli.SuiXGetCommitteeInfo(ctx, models.SuiXGetCommitteeInfoRequest{
+			Epoch: "754",
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on suix_getReferenceGasPrice", func(t *testing.T) {
+		rsp, err := cli.SuiXGetReferenceGasPrice(ctx)
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on suix_getStakes", func(t *testing.T) {
+		rsp, err := cli.SuiXGetStakes(ctx, models.SuiXGetStakesRequest{
+			Owner: "0xe335d84c489084474aac4322fb9ac5173369d27487c404558e99c7c5ec608075",
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on suix_getStakesByIds", func(t *testing.T) {
+		rsp, err := cli.SuiXGetStakesByIds(ctx, models.SuiXGetStakesByIdsRequest{
+			StakedSuiIds: []string{"0x9898fae07add84f032eb109ffc548d4afae7c78cb9b0836aed674e7aec55df19"},
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on suix_getLatestSuiSystemState", func(t *testing.T) {
+		rsp, err := cli.SuiXGetLatestSuiSystemState(ctx)
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
 }
 
 func TestOnReadCoinFromSui(t *testing.T) {
@@ -172,10 +231,10 @@ func TestOnReadTransactionFromSui(t *testing.T) {
 		rsp, err := cli.SuiGetTransactionBlock(ctx, models.SuiGetTransactionBlockRequest{
 			Digest: "CeVpDXKKU3Gs89efej9pKiYYQyTzifE2BDxWwquUaUht",
 			Options: models.SuiTransactionBlockOptions{
-				ShowInput:          true,
-				ShowRawInput:       true,
-				ShowEffects:        true,
-				ShowEvents:         true,
+				ShowInput:    true,
+				ShowRawInput: true,
+				ShowEffects:  true,
+				ShowEvents:   true,
 			},
 		})
 
@@ -191,9 +250,9 @@ func TestOnReadTransactionFromSui(t *testing.T) {
 		rsp, err := cli.SuiMultiGetTransactionBlocks(ctx, models.SuiMultiGetTransactionBlocksRequest{
 			Digests: []string{"CeVpDXKKU3Gs89efej9pKiYYQyTzifE2BDxWwquUaUht", "C2zZu2dpX2sLQy2234yt6ecRiNTVgQTXeQpgw9GhxGgo"},
 			Options: models.SuiTransactionBlockOptions{
-				ShowInput:          true,
-				ShowRawInput:       true,
-				ShowEffects:        true,
+				ShowInput:    true,
+				ShowRawInput: true,
+				ShowEffects:  true,
 			},
 		})
 
@@ -214,9 +273,9 @@ func TestOnReadTransactionFromSui(t *testing.T) {
 					"FromAddress": "0x7d20dcdb2bca4f508ea9613994683eb4e76e9c4ed371169677c1be02aaf0b58e",
 				},
 				Options: models.SuiTransactionBlockOptions{
-					ShowInput:          true,
-					ShowRawInput:       true,
-					ShowEffects:        true,
+					ShowInput:    true,
+					ShowRawInput: true,
+					ShowEffects:  true,
 				},
 			},
 			Limit:           5,
@@ -304,20 +363,20 @@ func TestOnReadObjectFromSui(t *testing.T) {
 
 func TestOnReadEventFromSui(t *testing.T) {
 
-	// t.Run("test on sui_getEvents", func(t *testing.T) {
-	// 	rsp, err := cli.SuiGetEvents(ctx, models.SuiGetEventsRequest{
-	// 		Digest: "HATq5p7MNynkBL5bLsdVqL3K38PxWHbqs7vndGiz5qrA",
-	// 	})
-	//
-	// 	if err != nil {
-	// 		t.Error(err.Error())
-	// 		t.FailNow()
-	// 	}
-	//
-	// 	for _, event := range rsp {
-	// 		utils.PrettyPrint(*event)
-	// 	}
-	// })
+	t.Run("test on sui_getEvents", func(t *testing.T) {
+		rsp, err := cli.SuiGetEvents(ctx, models.SuiGetEventsRequest{
+			Digest: "HATq5p7MNynkBL5bLsdVqL3K38PxWHbqs7vndGiz5qrA",
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		for _, event := range rsp {
+			utils.PrettyPrint(*event)
+		}
+	})
 
 	t.Run("test on suix_queryEvents", func(t *testing.T) {
 		rsp, err := cli.SuiXQueryEvents(ctx, models.SuiXQueryEventsRequest{
@@ -344,12 +403,10 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 			TxBytes:   "AAACAQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQEAAAAAAAAAAQEAjgDW4hJZlqvw654RGR3SdndKkdjoC0pzXQLxja/NUahLowQAAAAAACBEQGwClI9RQX68dzbN7PN29/Pw/Sc1hbtZwNAny7wZ+wEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMKc3VpX3N5c3RlbRZyZXF1ZXN0X3dpdGhkcmF3X3N0YWtlAAIBAAABAQC3+Y0yfxn2dDR+HkBkFAglMULW5+UJOnyW7ajN/X2btQEqzrI5x8BMQ6LjmCSgAykfjisdYCcyTfW79nyzDB/PvtZBpwAAAAAAIAm+IREDziwoZLm7lc4ZKegZ2J5viEgoss9zgrFkHLh6t/mNMn8Z9nQ0fh5AZBQIJTFC1uflCTp8lu2ozf19m7XoAwAAAAAAAFDhjyoAAAAAAA==",
 			Signature: []string{"ALISOTYXKlmBvQ1Uc4UrlWieczU9cGwkyT0Mg65Y2r6VvriElBGB63JDjqg1714Z8B0m84g3S4yrJIIws+leugKOjKY5Wf3dV/la/GVL26whJPWy7WsrWUH2wtmlmcgN6w=="},
 			Options: models.SuiTransactionBlockOptions{
-				ShowInput:          true,
-				ShowRawInput:       true,
-				ShowEffects:        true,
-				ShowEvents:         true,
-				ShowObjectChanges:  true,
-				ShowBalanceChanges: true,
+				ShowInput:    true,
+				ShowRawInput: true,
+				ShowEffects:  true,
+				ShowEvents:   true,
 			},
 			RequestType: "WaitForLocalExecution",
 		})

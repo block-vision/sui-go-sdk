@@ -17,6 +17,10 @@ func main() {
 	SuiGetCheckpoints()
 	SuiGetLatestCheckpointSequenceNumber()
 	SuiXGetReferenceGasPrice()
+	SuiXGetCommitteeInfo()
+	SuiXGetStakes()
+	SuiXGetStakesByIds()
+	SuiXGetLatestSuiSystemState()
 }
 
 func SuiGetCheckpoint() {
@@ -34,7 +38,6 @@ func SuiGetCheckpoint() {
 
 func SuiGetCheckpoints() {
 	rsp, err := cli.SuiGetCheckpoints(ctx, models.SuiGetCheckpointsRequest{
-		Cursor:          "13200",
 		Limit:           5,
 		DescendingOrder: true,
 	})
@@ -60,6 +63,81 @@ func SuiGetLatestCheckpointSequenceNumber() {
 
 func SuiXGetReferenceGasPrice() {
 	rsp, err := cli.SuiXGetReferenceGasPrice(ctx)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetCommitteeInfo() {
+	rsp, err := cli.SuiXGetCommitteeInfo(ctx, models.SuiXGetCommitteeInfoRequest{
+		Epoch: "754",
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetStakes() {
+	rsp, err := cli.SuiXGetStakes(ctx, models.SuiXGetStakesRequest{
+		Owner: "0xe335d84c489084474aac4322fb9ac5173369d27487c404558e99c7c5ec608075",
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetStakesByIds() {
+	rsp, err := cli.SuiXGetStakesByIds(ctx, models.SuiXGetStakesByIdsRequest{
+		StakedSuiIds: []string{"0x9898fae07add84f032eb109ffc548d4afae7c78cb9b0836aed674e7aec55df19"},
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetEpochs() {
+	rsp, err := cli.SuiXGetEpochs(ctx, models.SuiXGetEpochsRequest{
+		Limit:           5,
+		DescendingOrder: true,
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetCurrentEpoch() {
+	rsp, err := cli.SuiXGetCurrentEpoch(ctx)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetLatestSuiSystemState() {
+	rsp, err := cli.SuiXGetLatestSuiSystemState(ctx)
 
 	if err != nil {
 		fmt.Println(err.Error())

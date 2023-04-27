@@ -50,9 +50,6 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Conte
 	if err != nil {
 		return rsp, err
 	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
-	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
@@ -75,9 +72,6 @@ func (s *suiReadTransactionFromSuiImpl) SuiMultiGetTransactionBlocks(ctx context
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
@@ -106,9 +100,6 @@ func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.C
 	})
 	if err != nil {
 		return rsp, err
-	}
-	if !gjson.ValidBytes(respBytes) {
-		return rsp, errors.New("not a valid json response")
 	}
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
