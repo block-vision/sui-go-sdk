@@ -17,6 +17,8 @@ type IReadTransactionFromSuiAPI interface {
 	SuiGetTransactionBlock(ctx context.Context, req models.SuiGetTransactionBlockRequest) (models.SuiTransactionBlockResponse, error)
 	SuiMultiGetTransactionBlocks(ctx context.Context, req models.SuiMultiGetTransactionBlocksRequest) (models.SuiMultiGetTransactionBlocksResponse, error)
 	SuiXQueryTransactionBlocks(ctx context.Context, req models.SuiXQueryTransactionBlocksRequest) (models.SuiXQueryTransactionBlocksResponse, error)
+	SuiDryRunTransactionBlock(ctx context.Context, req models.SuiDryRunTransactionBlockRequest) (models.SuiTransactionBlockResponse, error)
+	SuiDevInspectTransactionBlock(ctx context.Context, req models.SuiDevInspectTransactionBlockRequest) (models.SuiTransactionBlockResponse, error)
 }
 
 type suiReadTransactionFromSuiImpl struct {
@@ -96,6 +98,55 @@ func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.C
 			req.Cursor,
 			req.Limit,
 			req.DescendingOrder,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiDryRunTransactionBlock implements the method `sui_dryRunTransactionBlock`, gets transaction execution effects including the gas cost summary, while the effects are not committed to the chain.
+func (s *suiReadTransactionFromSuiImpl) SuiDryRunTransactionBlock(ctx context.Context, req models.SuiDryRunTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
+	var rsp models.SuiTransactionBlockResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_dryRunTransactionBlock",
+		Params: []interface{}{
+			req.TxBytes,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiDevInspectTransactionBlock implements the method `sui_devInspectTransactionBlock`, runs the transaction in dev-inspect mode.
+// Which allows for nearly any transaction (or Move call) with any arguments.
+// Detailed results are provided, including both the transaction effects and any return values.
+func (s *suiReadTransactionFromSuiImpl) SuiDevInspectTransactionBlock(ctx context.Context, req models.SuiDevInspectTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
+	var rsp models.SuiTransactionBlockResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_devInspectTransactionBlock",
+		Params: []interface{}{
+			req.Sender,
+			req.TxBytes,
+			req.GasPrice,
+			req.Epoch,
 		},
 	})
 	if err != nil {

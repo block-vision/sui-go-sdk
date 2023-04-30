@@ -16,6 +16,7 @@ type ISuiAPI interface {
 	IReadObjectFromSuiAPI
 	IReadTransactionFromSuiAPI
 	IReadSystemFromSuiAPI
+	IReadMoveFromSuiAPI
 }
 
 // Client implements SuiAPI related interfaces.
@@ -27,6 +28,7 @@ type Client struct {
 	IReadObjectFromSuiAPI
 	IReadTransactionFromSuiAPI
 	IReadSystemFromSuiAPI
+	IReadMoveFromSuiAPI
 }
 
 // NewSuiClient instantiates the Sui client to call the methods of each module.
@@ -52,6 +54,9 @@ func NewSuiClient(rpcUrl string) ISuiAPI {
 			conn: conn,
 		},
 		IReadSystemFromSuiAPI: &suiReadSystemFromSuiImpl{
+			conn: conn,
+		},
+		IReadMoveFromSuiAPI: &suiReadMoveFromSuiImpl{
 			conn: conn,
 		},
 	}

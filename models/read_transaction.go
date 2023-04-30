@@ -74,9 +74,10 @@ type SuiObjectRef struct {
 
 type SuiGasData struct {
 	Payment []SuiObjectRef `json:"payment"`
-	Owner   string         `json:"owner"`
-	Price   string         `json:"price"`
-	Budget  string         `json:"budget"`
+	// the owner's Sui address
+	Owner  string `json:"owner"`
+	Price  string `json:"price"`
+	Budget string `json:"budget"`
 }
 
 type SuiObjectChangePublished struct {
@@ -217,13 +218,31 @@ type TransactionFilter map[string]interface{}
 
 type SuiXQueryTransactionBlocksRequest struct {
 	SuiTransactionBlockResponseQuery SuiTransactionBlockResponseQuery
-	Cursor                           interface{} `json:"cursor"`
-	Limit                            uint64      `json:"limit" validate:"lte=50"`
-	DescendingOrder                  bool        `json:"descendingOrder"`
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
+	// query result ordering, default to false (ascending order), oldest record first
+	DescendingOrder bool `json:"descendingOrder"`
 }
 
 type SuiXQueryTransactionBlocksResponse struct {
 	Data        []SuiTransactionBlockResponse `json:"data"`
 	NextCursor  string                        `json:"nextCursor"`
 	HasNextPage bool                          `json:"hasNextPage"`
+}
+
+type SuiDryRunTransactionBlockRequest struct {
+	TxBytes string `json:"txBytes"`
+}
+
+type SuiDevInspectTransactionBlockRequest struct {
+	// the transaction signer's Sui address
+	Sender string `json:"sender"`
+	// BCS encoded TransactionKind(as opposed to TransactionData, which include gasBudget and gasPrice)
+	TxBytes string `json:"txBytes"`
+	// Gas is not charged, but gas usage is still calculated. Default to use reference gas price
+	GasPrice string `json:"gasPrice"`
+	// The epoch to perform the call. Will be set from the system state object if not provided
+	Epoch string `json:"epoch"`
 }

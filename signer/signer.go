@@ -4,7 +4,8 @@ import (
 	"crypto/ed25519"
 	"encoding/hex"
 	"github.com/block-vision/sui-go-sdk/common/keypair"
-	"golang.org/x/crypto/sha3"
+	"github.com/tyler-smith/go-bip39"
+	"golang.org/x/crypto/blake2b"
 )
 
 const (
@@ -15,40 +16,36 @@ const (
 	DerivationPathSecp256k1 = `m/54'/784'/0'/0/0`
 )
 
-type Account struct {
-	priKey  ed25519.PrivateKey
-	pubKey  ed25519.PublicKey
+type Signer struct {
+	PriKey  ed25519.PrivateKey
+	PubKey  ed25519.PublicKey
 	Address string
 }
 
-func NewSigner(seed []byte) *Account {
+func NewSigner(seed []byte) *Signer {
 	priKey := ed25519.NewKeyFromSeed(seed[:])
 	pubKey := priKey.Public().(ed25519.PublicKey)
 
 	tmp := []byte{byte(keypair.Ed25519Flag)}
 	tmp = append(tmp, pubKey...)
-	addrBytes := sha3.Sum256(tmp)
+	addrBytes := blake2b.Sum256(tmp)
 	addr := "0x" + hex.EncodeToString(addrBytes[:])[:AddressLength]
 
-	return &Account{
-		priKey:  priKey,
-		pubKey:  pubKey,
+	return &Signer{
+		PriKey:  priKey,
+		PubKey:  pubKey,
 		Address: addr,
 	}
 }
 
-func NewSignerWithPriKey(priKey ed25519.PrivateKey) *Account {
-	pubKey := priKey.Public().(ed25519.PublicKey)
-
-	tmp := []byte{byte(keypair.Ed25519Flag)}
-	tmp = append(tmp, pubKey...)
-	addrBytes := sha3.Sum256(tmp)
-	addr := "0x" + hex.EncodeToString(addrBytes[:])[:AddressLength]
-
-	return &Account{
-		priKey:  priKey,
-		pubKey:  pubKey,
-		Address: addr,
+func NewSignertWithMnemonic(mnemonic string) (*Signer, error) {
+	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, "")
+	if err != nil {
+		return nil, err
 	}
+	key, err := DeriveForPath("m/44'/784'/0'/0'/0'", seed)
+	if err != nil {
+		return nil, err
+	}
+	return NewSigner(key.Key), nil
 }
-

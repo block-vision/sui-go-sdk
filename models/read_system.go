@@ -25,9 +25,12 @@ type CheckpointResponse struct {
 }
 
 type SuiGetCheckpointsRequest struct {
-	Cursor          interface{} `json:"cursor"`
-	Limit           uint64      `json:"limit" validate:"lte=50"`
-	DescendingOrder bool        `json:"descendingOrder"`
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
+	// query result ordering, default to false (ascending order), oldest record first
+	DescendingOrder bool `json:"descendingOrder"`
 }
 
 type PaginatedCheckpointsResponse struct {
@@ -69,9 +72,12 @@ type DelegatedStakesResponse struct {
 }
 
 type SuiXGetEpochsRequest struct {
-	Cursor          interface{} `json:"cursor"`
-	Limit           uint64      `json:"limit" validate:"lte=50"`
-	DescendingOrder bool        `json:"descendingOrder"`
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
+	// query result ordering, default to false (ascending order), oldest record first
+	DescendingOrder bool `json:"descendingOrder"`
 }
 
 type SuiValidatorSummary struct {
@@ -184,5 +190,5 @@ type SuiSystemStateSummary struct {
 	ValidatorCandidatesId                 string                `json:"validatorCandidatesId"`
 	ValidatorCandidatesSize               string                `json:"validatorCandidatesSize"`
 	AtRiskValidators                      []string              `json:"atRiskValidators"`
-	ValidatorReportRecords                [][]interface{}         `json:"validatorReportRecords"`
+	ValidatorReportRecords                [][]interface{}       `json:"validatorReportRecords"`
 }

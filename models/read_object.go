@@ -12,16 +12,50 @@ type SuiObjectDataOptions struct {
 
 type SuiObjectDataFilter map[string]interface{}
 
+type ObjectFilterByPackage struct {
+	Package string `json:"Package"`
+}
+
+type ObjectFilterByStructType struct {
+	StructType string `json:"StructType"`
+}
+
+type ObjectFilterByAddressOwner struct {
+	AddressOwner string `json:"AddressOwner"`
+}
+
+type ObjectFilterByObjectOwner struct {
+	ObjectOwner string `json:"ObjectOwner"`
+}
+
+type ObjectFilterByObjectId struct {
+	ObjectId string `json:"ObjectId"`
+}
+
+type ObjectFilterByObjectIds struct {
+	ObjectIds []string `json:"ObjectIds"`
+}
+
+type ObjectFilterByVersion struct {
+	Version string `json:"Version"`
+}
+
 type SuiObjectResponseQuery struct {
-	Filter  SuiObjectDataFilter  `json:"filter"`
+	// If None, no filter will be applied
+	Filter interface{} `json:"filter"`
+	// config which fields to include in the response, by default only digest is included
 	Options SuiObjectDataOptions `json:"options"`
 }
 
 type SuiXGetOwnedObjectsRequest struct {
+	// the owner's Sui address
 	Address string `json:"address" validate:"checkAddress"`
-	Query   SuiObjectResponseQuery
-	Cursor  interface{} `json:"cursor"`
-	Limit   uint64      `json:"limit" validate:"lte=50"`
+	// the objects query criteria
+	Query SuiObjectResponseQuery
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
 }
 
 type PaginatedObjectsResponse struct {
@@ -43,6 +77,7 @@ type SuiObjectResponseError struct {
 }
 
 type ObjectOwner struct {
+	// the owner's Sui address
 	AddressOwner string      `json:"AddressOwner"`
 	ObjectOwner  string      `json:"ObjectOwner"`
 	Shared       ObjectShare `json:"Shared"`
@@ -88,9 +123,11 @@ type SuiMultiGetObjectsRequest struct {
 }
 
 type SuiXGetDynamicFieldRequest struct {
-	ObjectId string      `json:"objectId"`
-	Cursor   interface{} `json:"cursor"`
-	Limit    uint64      `json:"limit" validate:"lte=50"`
+	ObjectId string `json:"objectId"`
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
 }
 
 type DynamicFieldInfo struct {
@@ -112,4 +149,28 @@ type PaginatedDynamicFieldInfoResponse struct {
 type SuiXGetDynamicFieldObjectRequest struct {
 	ObjectId         string `json:"objectId"`
 	DynamicFieldName string `json:"dynamicFieldName"`
+}
+
+type SuiTryGetPastObjectRequest struct {
+	ObjectId string               `json:"objectId"`
+	Version  uint64               `json:"version"`
+	Options  SuiObjectDataOptions `json:"options"`
+}
+
+type PastObjectResponse struct {
+	Status  string        `json:"status"`
+	Details SuiObjectData `json:"details"`
+}
+
+type SuiGetLoadedChildObjectsRequest struct {
+	Digest string `json:"digest"`
+}
+
+type ChildObjectsResponse struct {
+	LoadedChildObjects []*SuiLoadedChildObject `json:"loadedChildObjects"`
+}
+
+type SuiLoadedChildObject struct {
+	ObjectID       string `json:"objectId"`
+	SequenceNumber string `json:"sequenceNumber"`
 }

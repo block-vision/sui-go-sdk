@@ -77,10 +77,13 @@ type EventFilterBySuiAddress struct {
 }
 
 type SuiXQueryEventsRequest struct {
-	SuiEventFilter  interface{} `json:"suiEventFilter"`
-	Cursor          interface{} `json:"cursor"`
-	Limit           uint64      `json:"limit" validate:"lte=50"`
-	DescendingOrder bool        `json:"descendingOrder"`
+	SuiEventFilter interface{} `json:"suiEventFilter"`
+	// optional paging cursor
+	Cursor interface{} `json:"cursor"`
+	// maximum number of items per page
+	Limit uint64 `json:"limit" validate:"lte=50"`
+	// query result ordering, default to false (ascending order), oldest record first
+	DescendingOrder bool `json:"descendingOrder"`
 }
 
 type PaginatedEventsResponse struct {

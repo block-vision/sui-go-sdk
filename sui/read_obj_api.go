@@ -17,6 +17,8 @@ type IReadObjectFromSuiAPI interface {
 	SuiMultiGetObjects(ctx context.Context, req models.SuiMultiGetObjectsRequest) ([]*models.SuiObjectResponse, error)
 	SuiXGetDynamicField(ctx context.Context, req models.SuiXGetDynamicFieldRequest) (models.PaginatedDynamicFieldInfoResponse, error)
 	SuiXGetDynamicFieldObject(ctx context.Context, req models.SuiXGetDynamicFieldObjectRequest) (models.SuiObjectResponse, error)
+	SuiTryGetPastObject(ctx context.Context, req models.SuiTryGetPastObjectRequest) (models.PastObjectResponse, error)
+	SuiGetLoadedChildObjects(ctx context.Context, req models.SuiGetLoadedChildObjectsRequest) (models.ChildObjectsResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -109,6 +111,53 @@ func (s *suiReadObjectFromSuiImpl) SuiXGetDynamicFieldObject(ctx context.Context
 		Params: []interface{}{
 			req.ObjectId,
 			req.DynamicFieldName,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiTryGetPastObject implements the method `sui_tryGetPastObject`, gets the object information for a specified version.
+// There is no guarantee that objects with past versions can be retrieved by this API. The result may vary across nodes depending on their pruning policies.
+func (s *suiReadObjectFromSuiImpl) SuiTryGetPastObject(ctx context.Context, req models.SuiTryGetPastObjectRequest) (models.PastObjectResponse, error) {
+	var rsp models.PastObjectResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_tryGetPastObject",
+		Params: []interface{}{
+			req.ObjectId,
+			req.Version,
+			req.Options,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiGetLoadedChildObjects implements the method `sui_getLoadedChildObjects`, return the object information for a specified digest.
+func (s *suiReadObjectFromSuiImpl) SuiGetLoadedChildObjects(ctx context.Context, req models.SuiGetLoadedChildObjectsRequest) (models.ChildObjectsResponse, error) {
+	var rsp models.ChildObjectsResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getLoadedChildObjects",
+		Params: []interface{}{
+			req.Digest,
 		},
 	})
 	if err != nil {
