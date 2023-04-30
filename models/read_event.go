@@ -48,35 +48,43 @@ type TimeRange struct {
 
 type SuiEventFilter map[string]interface{}
 
+// the event query by `Package`
 type EventFilterByPackage struct {
 	Package string `json:"Package"`
 }
 
+// the event query by `MoveModule`
 type EventFilterByMoveModule struct {
 	MoveModule MoveModule `json:"MoveModule"`
 }
 
+// the event query by `MoveEventType`
 type EventFilterByMoveEventType struct {
 	MoveEventType string `json:"MoveEventType"`
 }
 
+// the event query by `MoveEventField`
 type EventFilterByMoveEventField struct {
 	MoveEventField MoveEventField `json:"MoveEventField"`
 }
 
+// the event query by `Transaction`
 type EventFilterByTransaction struct {
 	Transaction string `json:"Transaction"`
 }
 
+// the event query by `TimeRange`
 type EventFilterByTimeRange struct {
 	TimeRange TimeRange `json:"TimeRange"`
 }
 
+// the event query by `Sender`
 type EventFilterBySuiAddress struct {
 	Sender string `json:"Sender"`
 }
 
 type SuiXQueryEventsRequest struct {
+	// the event query criteria.
 	SuiEventFilter interface{} `json:"suiEventFilter"`
 	// optional paging cursor
 	Cursor interface{} `json:"cursor"`

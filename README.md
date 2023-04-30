@@ -16,7 +16,7 @@ Sui-Go-SDK is designed for Layer 1 BlockChain [Sui](https://github.com/MystenLab
 + Support the mainstream methods in the Object, Coin, Event, Read Transaction Blocks, System Data, and Write Transaction Blocks modules.
 + Customized request method `SuiCall`.
 + Unsigned methods can be executed without loading your keystore file.
-
++ Provide the method `SignAndExecuteTransactionBlock` to send signed transaction.
 
 ## Quick Start
 
