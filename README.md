@@ -14,7 +14,7 @@ The Sui-Go-SDK provided by BlockVision aims to offer access to all resources in 
 additional features that make the integration easier.
 Sui-Go-SDK is designed for Layer 1 BlockChain [Sui](https://github.com/MystenLabs/sui) in Go programming language.
 
-Fell free to contact us on [Discord](https://discord.gg/Re6prK86Tr) if you have any questions.
+Feel free to contact us on [Discord](https://discord.gg/Re6prK86Tr) if you have any questions.
 
 ### Features
 
