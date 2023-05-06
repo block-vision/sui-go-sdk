@@ -13,11 +13,35 @@ var ctx = context.Background()
 var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
 func main() {
+	SuiGetObject()
 	SuiXGetOwnedObjects()
 	SuiMultiGetObjects()
 	SuiXGetDynamicField()
 	SuiTryGetPastObject()
 	SuiGetLoadedChildObjects()
+}
+
+func SuiGetObject() {
+	rsp, err := cli.SuiGetObject(ctx, models.SuiGetObjectRequest{
+		ObjectId: "0xeeb964d1e640219c8ddb791cc8548f3242a3392b143ff47484a3753291cad898",
+		Options: models.SuiObjectDataOptions{
+			ShowContent:             true,
+			ShowDisplay:             true,
+			ShowType:                true,
+			ShowBcs:                 true,
+			ShowOwner:               true,
+			ShowPreviousTransaction: true,
+			ShowStorageRebate:       true,
+		},
+	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+
 }
 
 func SuiXGetOwnedObjects() {

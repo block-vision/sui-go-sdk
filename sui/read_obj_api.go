@@ -13,6 +13,7 @@ import (
 )
 
 type IReadObjectFromSuiAPI interface {
+	SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectData, error)
 	SuiXGetOwnedObjects(ctx context.Context, req models.SuiXGetOwnedObjectsRequest) (models.PaginatedObjectsResponse, error)
 	SuiMultiGetObjects(ctx context.Context, req models.SuiMultiGetObjectsRequest) ([]*models.SuiObjectResponse, error)
 	SuiXGetDynamicField(ctx context.Context, req models.SuiXGetDynamicFieldRequest) (models.PaginatedDynamicFieldInfoResponse, error)
@@ -23,6 +24,30 @@ type IReadObjectFromSuiAPI interface {
 
 type suiReadObjectFromSuiImpl struct {
 	conn *httpconn.HttpConn
+}
+
+// SuiGetObject implements the method `sui_getObject`, gets the object information for a specified object.
+func (s *suiReadObjectFromSuiImpl) SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectData, error) {
+	var rsp models.SuiObjectData
+
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getObject",
+		Params: []interface{}{
+			req.ObjectId,
+			req.Options,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result.data").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
 }
 
 // SuiXGetOwnedObjects implements the method `suix_getOwnedObjects`, gets the list of objects owned by an address.

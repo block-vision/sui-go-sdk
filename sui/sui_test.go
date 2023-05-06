@@ -133,7 +133,7 @@ func TestOnReadCoinFromSui(t *testing.T) {
 
 	t.Run("test on suix_getBalance", func(t *testing.T) {
 		rsp, err := cli.SuiXGetBalance(ctx, models.SuiXGetBalanceRequest{
-			Owner:    "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Owner:    "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			CoinType: "0x2::sui::SUI",
 		})
 
@@ -147,7 +147,7 @@ func TestOnReadCoinFromSui(t *testing.T) {
 
 	t.Run("test on suix_getAllBalances", func(t *testing.T) {
 		rsp, err := cli.SuiXGetAllBalance(ctx, models.SuiXGetAllBalanceRequest{
-			Owner: "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Owner: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		})
 
 		if err != nil {
@@ -160,7 +160,7 @@ func TestOnReadCoinFromSui(t *testing.T) {
 
 	t.Run("test on suix_getCoins", func(t *testing.T) {
 		rsp, err := cli.SuiXGetCoins(ctx, models.SuiXGetCoinsRequest{
-			Owner:    "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Owner:    "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			CoinType: "0x2::sui::SUI",
 			Limit:    5,
 		})
@@ -175,7 +175,7 @@ func TestOnReadCoinFromSui(t *testing.T) {
 
 	t.Run("test on suix_getAllCoins", func(t *testing.T) {
 		rsp, err := cli.SuiXGetAllCoins(ctx, models.SuiXGetAllCoinsRequest{
-			Owner: "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Owner: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			Limit: 5,
 		})
 
@@ -293,6 +293,27 @@ func TestOnReadTransactionFromSui(t *testing.T) {
 }
 
 func TestOnReadObjectFromSui(t *testing.T) {
+	t.Run("test on sui_getObject", func(t *testing.T) {
+		rsp, err := cli.SuiGetObject(ctx, models.SuiGetObjectRequest{
+			ObjectId: "0xeeb964d1e640219c8ddb791cc8548f3242a3392b143ff47484a3753291cad898",
+			Options: models.SuiObjectDataOptions{
+				ShowContent:             true,
+				ShowDisplay:             true,
+				ShowType:                true,
+				ShowBcs:                 true,
+				ShowOwner:               true,
+				ShowPreviousTransaction: true,
+				ShowStorageRebate:       true,
+			},
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
 
 	t.Run("test on suix_getOwnedObjects", func(t *testing.T) {
 		suiObjectResponseQuery := models.SuiObjectResponseQuery{
@@ -444,7 +465,7 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_moveCall", func(t *testing.T) {
 		rsp, err := cli.MoveCall(ctx, models.MoveCallRequest{
-			Signer:          "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Signer:          "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			PackageObjectId: "0x7d584c9a27ca4a546e8203b005b0e9ae746c9bec6c8c3c0bc84611bcf4ceab5f",
 			Module:          "auction",
 			Function:        "start_an_auction",
@@ -454,9 +475,9 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 				"0x3fd0fdedb84cf1f59386b6251ba6dd2cb495094da26e0a5a38239acd9d437f96",
 				"0xb3de4235cb04167b473de806d00ba351e5860500253cf8e62d711e578e1d92ae",
 				"web3",
-				"0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+				"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			},
-			Gas:       "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget: "1000",
 		})
 
@@ -471,10 +492,10 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_mergeCoins", func(t *testing.T) {
 		rsp, err := cli.MergeCoins(ctx, models.MergeCoinsRequest{
-			Signer:      "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			PrimaryCoin: "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			PrimaryCoin: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			CoinToMerge: "0x92f03fdec6e0278dcb6fa3f4467eeee3e0bee1ac41825351ef53431677d2e2f7",
-			Gas:         "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:         "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:   "1000",
 		})
 
@@ -488,12 +509,12 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_publish", func(t *testing.T) {
 		rsp, err := cli.Publish(ctx, models.PublishRequest{
-			Sender: "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Sender: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			CompiledModules: []string{
 				"oRzrCwUAAAALAQAOAg4kAzJZBIsBFgWhAZoBB7sC5wEIogQoBsoECgrUBBoM7gSjAQ2RBgQAAAEBAQIBAwEEAQUBBgAHCAAACAgAAAkIAAIKDAEAAQQLAgAGDAIAAxIEAAEUBAEAAQANAAEAAA4CAQAADwMBAAAQBAEAAhUHCAEAAhYJCgEAARcLDAEAARgNCAEAAxkEDgAGGg8QAAUFEQEBCAEVEwgBAAIbFBUBAAMcDgEAAR0BDAEABR4ZAQEIBAYFBgYGBwYKAwsGDAYKFgoXDgYPGAMHCAEHCwMBCAQHCAUAAwYIAgcIAQcIBQEIAAEHCAUCBwsHAQgECwcBCAQBCAQBBgsDAQkAAQMBBwsDAQkAAQcLBwEJAAIHCwcBCQADAQsHAQkAAgcLBwEJAAsHAQkAAQgGAQYIBQEFAgkABQIDCwMBCAQBBgsHAQkAAwcLBwEJAAMHCAUBCwMBCQABCwMBCAQBCAIBCAEBCQAGZG9udXRzB2JhbGFuY2UEY29pbgZvYmplY3QDc3VpCHRyYW5zZmVyCnR4X2NvbnRleHQFRG9udXQJRG9udXRTaG9wDFNob3BPd25lckNhcARDb2luA1NVSQlUeENvbnRleHQJYnV5X2RvbnV0D2NvbGxlY3RfcHJvZml0cwllYXRfZG9udXQEaW5pdAJpZANVSUQFcHJpY2UHQmFsYW5jZQV2YWx1ZQtiYWxhbmNlX211dAVzcGxpdARqb2luA25ldwZzZW5kZXIEdGFrZQZkZWxldGUEemVybwxzaGFyZV9vYmplY3QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAwgAAAAAAAAAAAACAREIBgECAxEIBhMDAQsHAQgEAgIBEQgGAAEEAAUmCgEuOAAKABAAFCYDEAsAAQsBAQsCAQcAJwsBOAEMAwsDCgAQABQ4AgwECwAPAQsEOAMBCgIRCBIACwIuEQk4BAIBAQQAEhAKARABOAUMAwsBDwELAwoCOAYMBAsECwIuEQk4BwICAQQADgYLABMADAELARENAgMAAAABDgoAEQgSAgoALhEJOAgLABEIBugDAAAAAAAAOAkSATgKAgEBAQIA",
 			},
-			Dependencies: []string{"0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe"},
-			Gas:          "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Dependencies: []string{"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"},
+			Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:    "1000",
 		})
 
@@ -507,10 +528,10 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_splitCoin", func(t *testing.T) {
 		rsp, err := cli.SplitCoin(ctx, models.SplitCoinRequest{
-			Signer:       "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			CoinObjectId: "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Signer:       "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			CoinObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			SplitAmounts: []string{"1000", "1000"},
-			Gas:          "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:    "1000",
 		})
 
@@ -524,10 +545,10 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_splitCoinEqual", func(t *testing.T) {
 		rsp, err := cli.SplitCoinEqual(ctx, models.SplitCoinEqualRequest{
-			Signer:       "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			CoinObjectId: "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Signer:       "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			CoinObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			SplitCount:   "2",
-			Gas:          "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:    "1000",
 		})
 
@@ -541,9 +562,9 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_transferObject", func(t *testing.T) {
 		rsp, err := cli.TransferObject(ctx, models.TransferObjectRequest{
-			Signer:    "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			ObjectId:  "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
-			Gas:       "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Signer:    "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			ObjectId:  "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+			Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget: "1000",
 			Recipient: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		})
@@ -558,8 +579,8 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_transferSui", func(t *testing.T) {
 		rsp, err := cli.TransferSui(ctx, models.TransferSuiRequest{
-			Signer:      "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			SuiObjectId: "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			SuiObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:   "1000",
 			Recipient:   "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			Amount:      "1",
@@ -575,11 +596,11 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_pay", func(t *testing.T) {
 		rsp, err := cli.Pay(ctx, models.PayRequest{
-			Signer:      "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			SuiObjectId: []string{"0x92f03fdec6e0278dcb6fa3f4467eeee3e0bee1ac41825351ef53431677d2e2f7"},
 			Recipient:   []string{"0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff"},
 			Amount:      []string{"1"},
-			Gas:         "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:         "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:   "1000",
 		})
 
@@ -593,8 +614,8 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_paySui", func(t *testing.T) {
 		rsp, err := cli.PaySui(ctx, models.PaySuiRequest{
-			Signer:      "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			SuiObjectId: []string{"0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe"},
+			Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			SuiObjectId: []string{"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"},
 			Recipient:   []string{"0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff"},
 			Amount:      []string{"1"},
 			GasBudget:   "1000",
@@ -610,8 +631,8 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_payAllSui", func(t *testing.T) {
 		rsp, err := cli.PayAllSui(ctx, models.PayAllSuiRequest{
-			Signer:      "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			SuiObjectId: []string{"0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe"},
+			Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+			SuiObjectId: []string{"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"},
 			Recipient:   "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			GasBudget:   "1000",
 		})
@@ -626,7 +647,7 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 	t.Run("test on unsafe_batchTransaction", func(t *testing.T) {
 		rsp, err := cli.BatchTransaction(ctx, models.BatchTransactionRequest{
-			Signer: "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
+			Signer: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 			RPCTransactionRequestParams: []models.RPCTransactionRequestParams{
 				{
 					MoveCallRequestParams: &models.MoveCallRequest{
@@ -639,18 +660,18 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 							"0x3fd0fdedb84cf1f59386b6251ba6dd2cb495094da26e0a5a38239acd9d437f96",
 							"0xb3de4235cb04167b473de806d00ba351e5860500253cf8e62d711e578e1d92ae",
 							"web3",
-							"0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+							"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 						},
 					},
 				},
 				{
 					TransferObjectRequestParams: &models.TransferObjectRequest{
-						ObjectId:  "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+						ObjectId:  "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 						Recipient: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 					},
 				},
 			},
-			Gas:                            "0x2aceb239c7c04c43a2e39824a003291f8e2b1d6027324df5bbf67cb30c1fcfbe",
+			Gas:                            "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 			GasBudget:                      "1000",
 			SuiTransactionBlockBuilderMode: "DevInspect",
 		})
@@ -664,47 +685,47 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 	})
 
 	/*
-	t.Run("test on SignAndExecuteTransactionBlock", func(t *testing.T) {
-		signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
-		if err != nil {
-			fmt.Println(err.Error())
-			t.FailNow()
-		}
-		priKey := signerAccount.PriKey
-		fmt.Printf("signerAccount.Address: %s\n", signerAccount.Address)
+		t.Run("test on SignAndExecuteTransactionBlock", func(t *testing.T) {
+			signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+			if err != nil {
+				fmt.Println(err.Error())
+				t.FailNow()
+			}
+			priKey := signerAccount.PriKey
+			fmt.Printf("signerAccount.Address: %s\n", signerAccount.Address)
 
-		rsp, err := cli.TransferSui(ctx, models.TransferSuiRequest{
-			Signer:      signerAccount.Address,
-			SuiObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
-			GasBudget:   "100000000",
-			Recipient:   "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-			Amount:      "1",
+			rsp, err := cli.TransferSui(ctx, models.TransferSuiRequest{
+				Signer:      signerAccount.Address,
+				SuiObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+				GasBudget:   "100000000",
+				Recipient:   "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
+				Amount:      "1",
+			})
+
+			if err != nil {
+				fmt.Println(err.Error())
+				t.FailNow()
+			}
+
+			// see the successful transaction url: https://suivision.xyz/txblock/C7iYsH4tU5RdY1KBeNax4mCBn3XLZ5UswsuDpKrVkcH6
+			rsp2, err := cli.SignAndExecuteTransactionBlock(ctx, models.SignAndExecuteTransactionBlockRequest{
+				TxnMetaData: rsp,
+				PriKey:      priKey,
+				Options: models.SuiTransactionBlockOptions{
+					ShowInput:    true,
+					ShowRawInput: true,
+					ShowEffects:  true,
+				},
+				RequestType: "WaitForLocalExecution",
+			})
+
+			if err != nil {
+				fmt.Println(err.Error())
+				t.FailNow()
+			}
+
+			utils.PrettyPrint(rsp2)
 		})
-
-		if err != nil {
-			fmt.Println(err.Error())
-			t.FailNow()
-		}
-
-		// see the successful transaction url: https://suivision.xyz/txblock/C7iYsH4tU5RdY1KBeNax4mCBn3XLZ5UswsuDpKrVkcH6
-		rsp2, err := cli.SignAndExecuteTransactionBlock(ctx, models.SignAndExecuteTransactionBlockRequest{
-			TxnMetaData: rsp,
-			PriKey:      priKey,
-			Options: models.SuiTransactionBlockOptions{
-				ShowInput:    true,
-				ShowRawInput: true,
-				ShowEffects:  true,
-			},
-			RequestType: "WaitForLocalExecution",
-		})
-
-		if err != nil {
-			fmt.Println(err.Error())
-			t.FailNow()
-		}
-
-		utils.PrettyPrint(rsp2)
-	})
 	*/
 
 }

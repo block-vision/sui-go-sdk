@@ -47,6 +47,13 @@ type SuiObjectResponseQuery struct {
 	Options SuiObjectDataOptions `json:"options"`
 }
 
+type SuiGetObjectRequest struct {
+	// the ID of the queried object
+	ObjectId string `json:"ObjectId"`
+	// config which fields to include in the response, by default only digest is included
+	Options SuiObjectDataOptions `json:"options"`
+}
+
 type SuiXGetOwnedObjectsRequest struct {
 	// the owner's Sui address
 	Address string `json:"address" validate:"checkAddress"`
