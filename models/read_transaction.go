@@ -216,6 +216,44 @@ type SuiTransactionBlockResponseQuery struct {
 
 type TransactionFilter map[string]interface{}
 
+// TransactionFilterByFromAddress is a filter for from address
+type TransactionFilterByFromAddress struct {
+	FromAddress string `json:"FromAddress"`
+}
+
+// TransactionFilterByToAddress is a filter for to address
+type TransactionFilterByToAddress struct {
+	ToAddress string `json:"ToAddress"`
+}
+
+// TransactionFilterByInputObject is a filter for input objects
+type TransactionFilterByInputObject struct {
+	// InputObject is the id of the object
+	InputObject string `json:"InputObject"`
+}
+
+// TransactionFilterByChangedObjectFilter is a filter for changed objects
+type TransactionFilterByChangedObjectFilter struct {
+	// ChangedObject is a filter for changed objects
+	ChangedObject string `json:"ChangedObject"`
+}
+
+// TransactionFilterByMoveFunction is a filter for move functions
+type TransactionFilterByMoveFunction struct {
+	MoveFunction MoveFunction `json:"MoveFunction"`
+}
+
+type MoveFunction struct {
+	Package  string  `json:"package"`
+	Module   *string `json:"module"`
+	Function *string `json:"function"`
+}
+
+type SuiXSubscribeTransactionsRequest struct {
+	// the transaction query criteria.
+	TransactionFilter interface{} `json:"filter"`
+}
+
 type SuiXQueryTransactionBlocksRequest struct {
 	SuiTransactionBlockResponseQuery SuiTransactionBlockResponseQuery
 	// optional paging cursor
@@ -245,4 +283,9 @@ type SuiDevInspectTransactionBlockRequest struct {
 	GasPrice string `json:"gasPrice"`
 	// The epoch to perform the call. Will be set from the system state object if not provided
 	Epoch string `json:"epoch"`
+}
+
+type SuiXSubscribeEventsRequest struct {
+	// the event query criteria.
+	SuiEventFilter interface{} `json:"suiEventFilter"`
 }

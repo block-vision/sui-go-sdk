@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/go-playground/validator/v10 v10.12.0
+	github.com/gorilla/websocket v1.5.0
 	github.com/tidwall/gjson v1.14.4
 	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/crypto v0.8.0

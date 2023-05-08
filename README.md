@@ -23,6 +23,7 @@ Powred by [BlockVision](https://blockvision.org/) & [SuiVision](https://suivisio
 + Customized request method `SuiCall`.
 + Unsigned methods can be executed without loading your keystore file.
 + Provide the method `SignAndExecuteTransactionBlock` to send signed transaction.
++ Support subscriptions to events or transactions via websockets.
 
 ## Quick Start
 
