@@ -293,7 +293,7 @@ func main() {
   var ctx = context.Background()
   var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
-  signerAccount, err := signer.NewSignertWithMnemonic("puppy gate beyond civil bargain matter flock armed spy piece cook depart")
+  signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
 
   if err != nil {
     fmt.Println(err.Error())
@@ -680,6 +680,104 @@ func main() {
   }
 
   utils.PrettyPrint(rsp2)
+
+}
+
+```
+
+### Subscribe API
+
+#### Subscribe event API
+
+Subscribe to a stream of Sui event.
+
+```go
+
+package main
+
+import (
+  "context"
+  "github.com/block-vision/sui-go-sdk/constant"
+  "github.com/block-vision/sui-go-sdk/models"
+  "github.com/block-vision/sui-go-sdk/sui"
+  "github.com/block-vision/sui-go-sdk/utils"
+)
+
+func main() {
+  var ctx = context.Background()
+  // create a websocket client, connect to the mainnet websocket endpoint
+  var cli = sui.NewSuiWebsocketClient(constant.WssBvMainnetEndpoint)
+
+  // receiveMsgCh is a channel to receive Sui event
+  receiveMsgCh := make(chan models.SuiEventResponse, 10)
+  
+  // SubscribeEvent implements the method `suix_subscribeEvent`, subscribe to a stream of Sui event.
+  err := cli.SubscribeEvent(ctx, models.SuiXSubscribeEventsRequest{
+    SuiEventFilter: map[string]interface{}{
+      "All": []string{},
+    },
+  }, receiveMsgCh)
+  if err != nil {
+    panic(err)
+  }
+
+  for {
+    select {
+	// receive Sui event
+    case msg := <-receiveMsgCh:
+      utils.PrettyPrint(msg)
+    case <-ctx.Done():
+      return
+    }
+  }
+
+}
+
+```
+
+#### Subscribe transaction API
+
+Subscribe to a stream of Sui transaction effects.
+
+```go
+
+package main
+
+import (
+  "context"
+  "github.com/block-vision/sui-go-sdk/constant"
+  "github.com/block-vision/sui-go-sdk/models"
+  "github.com/block-vision/sui-go-sdk/sui"
+  "github.com/block-vision/sui-go-sdk/utils"
+)
+
+func main() {
+  var ctx = context.Background()
+  // create a websocket client, connect to the mainnet websocket endpoint
+  var cli = sui.NewSuiWebsocketClient(constant.WssBvMainnetEndpoint)
+
+  // receiveMsgCh is a channel to receive Sui transaction effects
+  receiveMsgCh := make(chan models.SuiEffects, 10)
+
+  // SubscribeTransaction implements the method `suix_subscribeTransaction`, subscribe to a stream of Sui transaction effects.
+  err := cli.SubscribeTransaction(ctx, models.SuiXSubscribeTransactionsRequest{
+    TransactionFilter: models.TransactionFilterByFromAddress{
+      FromAddress: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    },
+  }, receiveMsgCh)
+  if err != nil {
+    panic(err)
+  }
+
+  for {
+    select {
+    // receive Sui transaction effects
+    case msg := <-receiveMsgCh:
+      utils.PrettyPrint(msg)
+    case <-ctx.Done():
+      return
+    }
+  }
 
 }
 
