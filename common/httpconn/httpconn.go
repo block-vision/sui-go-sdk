@@ -8,19 +8,37 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const defaultTimeout = time.Second * 5
 
 type HttpConn struct {
 	c       *http.Client
+	rl      *rate.Limiter
 	rpcUrl  string
 	timeout time.Duration
+}
+
+func newDefaultRateLimiter() *rate.Limiter {
+	rateLimiter := rate.NewLimiter(rate.Every(1*time.Second), 10) // 10 request every 1 seconds
+	return rateLimiter
 }
 
 func NewHttpConn(rpcUrl string) *HttpConn {
 	return &HttpConn{
 		c:       &http.Client{},
+		rl:      newDefaultRateLimiter(),
+		rpcUrl:  rpcUrl,
+		timeout: defaultTimeout,
+	}
+}
+
+func NewCustomHttpConn(rpcUrl string, cli *http.Client) *HttpConn {
+	return &HttpConn{
+		c:       cli,
+		rl:      newDefaultRateLimiter(),
 		rpcUrl:  rpcUrl,
 		timeout: defaultTimeout,
 	}
@@ -36,6 +54,11 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 	reqBytes, err := json.Marshal(jsonRPCReq)
 	if err != nil {
 		return []byte{}, err
+	}
+
+	err = h.rl.Wait(ctx) // This is a blocking call. Honors the rate limit.
+	if err != nil {
+		return nil, err
 	}
 
 	request, err := http.NewRequest("POST", h.rpcUrl, bytes.NewBuffer(reqBytes))

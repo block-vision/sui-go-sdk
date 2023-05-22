@@ -5,6 +5,7 @@ package sui
 
 import (
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"net/http"
 )
 
 // ISuiAPI defines the SuiAPI related interface, and then implement it by the client.
@@ -34,6 +35,16 @@ type Client struct {
 // NewSuiClient instantiates the Sui client to call the methods of each module.
 func NewSuiClient(rpcUrl string) ISuiAPI {
 	conn := httpconn.NewHttpConn(rpcUrl)
+	return newClient(conn)
+}
+
+// NewSuiClientWithCustomClient custom HTTP client, instantiates the Sui client to call the methods of each module.
+func NewSuiClientWithCustomClient(rpcUrl string, c *http.Client) ISuiAPI {
+	conn := httpconn.NewCustomHttpConn(rpcUrl, c)
+	return newClient(conn)
+}
+
+func newClient(conn *httpconn.HttpConn) *Client {
 	return &Client{
 		IBaseAPI: &suiBaseImpl{
 			conn: conn,
