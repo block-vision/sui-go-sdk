@@ -9,23 +9,15 @@ type EventId struct {
 	EventSeq string `json:"eventSeq"`
 }
 
-type ParsedJson struct {
-	Amount           string `json:"amount"`
-	Epoch            string `json:"epoch"`
-	PoolId           string `json:"pool_id"`
-	StakerAddress    string `json:"staker_address"`
-	ValidatorAddress string `json:"validator_address"`
-}
-
 type SuiEventResponse struct {
-	Id                EventId    `json:"id"`
-	PackageId         string     `json:"packageId"`
-	TransactionModule string     `json:"transactionModule"`
-	Sender            string     `json:"sender"`
-	Type              string     `json:"type"`
-	ParsedJson        ParsedJson `json:"parsedJson"`
-	Bcs               string     `json:"bcs"`
-	TimestampMs       string     `json:"timestampMs"`
+	Id                EventId                `json:"id"`
+	PackageId         string                 `json:"packageId"`
+	TransactionModule string                 `json:"transactionModule"`
+	Sender            string                 `json:"sender"`
+	Type              string                 `json:"type"`
+	ParsedJson        map[string]interface{} `json:"parsedJson"`
+	Bcs               string                 `json:"bcs"`
+	TimestampMs       string                 `json:"timestampMs"`
 }
 
 type GetEventsResponse []*SuiEventResponse

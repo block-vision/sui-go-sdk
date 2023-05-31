@@ -409,7 +409,7 @@ func TestOnReadEventFromSui(t *testing.T) {
 
 	t.Run("test on sui_getEvents", func(t *testing.T) {
 		rsp, err := cli.SuiGetEvents(ctx, models.SuiGetEventsRequest{
-			Digest: "66DkTV1f4Vq83iszXk6uCzWjvyCwcTPeYfapvW6vMDrg",
+			Digest: "4ErUvWjWdXY5zdVkRCqgQFJZQDTgJmHo55RFJW2FWcs2",
 		})
 
 		if err != nil {
