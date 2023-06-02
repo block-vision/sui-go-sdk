@@ -72,15 +72,16 @@ type PaginatedObjectsResponse struct {
 }
 
 type SuiObjectResponse struct {
-	Data SuiObjectData `json:"data"`
+	Data  SuiObjectData          `json:"data"`
+	Error SuiObjectResponseError `json:"error"`
 }
 
 type SuiObjectResponseError struct {
-	Code     string
-	Error    string
-	ObjectId string
-	Version  string
-	Digest   string
+	Code     string `json:"code"`
+	Error    string `json:"error"`
+	ObjectId string `json:"object_id"`
+	Version  string `json:"version"`
+	Digest   string `json:"digest"`
 }
 
 type ObjectOwner struct {
@@ -154,8 +155,8 @@ type PaginatedDynamicFieldInfoResponse struct {
 }
 
 type SuiXGetDynamicFieldObjectRequest struct {
-	ObjectId         string `json:"objectId"`
-	DynamicFieldName string `json:"dynamicFieldName"`
+	ObjectId         string           `json:"objectId"`
+	DynamicFieldName DynamicFieldName `json:"dynamicFieldName"`
 }
 
 type SuiTryGetPastObjectRequest struct {

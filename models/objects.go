@@ -41,3 +41,8 @@ type SuiRawData struct {
 	SuiRawMoveObject
 	SuiRawMovePackage
 }
+
+type DynamicFieldName struct {
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
+}

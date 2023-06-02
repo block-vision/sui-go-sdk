@@ -18,6 +18,7 @@ type ISuiAPI interface {
 	IReadTransactionFromSuiAPI
 	IReadSystemFromSuiAPI
 	IReadMoveFromSuiAPI
+	IReadNameServiceFromSuiAPI
 }
 
 // Client implements SuiAPI related interfaces.
@@ -30,6 +31,7 @@ type Client struct {
 	IReadTransactionFromSuiAPI
 	IReadSystemFromSuiAPI
 	IReadMoveFromSuiAPI
+	IReadNameServiceFromSuiAPI
 }
 
 // NewSuiClient instantiates the Sui client to call the methods of each module.
@@ -68,6 +70,9 @@ func newClient(conn *httpconn.HttpConn) *Client {
 			conn: conn,
 		},
 		IReadMoveFromSuiAPI: &suiReadMoveFromSuiImpl{
+			conn: conn,
+		},
+		IReadNameServiceFromSuiAPI: &suiReadNameServiceFromSuiImpl{
 			conn: conn,
 		},
 	}
