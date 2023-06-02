@@ -80,7 +80,7 @@ type SuiObjectResponseError struct {
 	Code     string `json:"code"`
 	Error    string `json:"error"`
 	ObjectId string `json:"object_id"`
-	Version  string `json:"version"`
+	Version  int    `json:"version"`
 	Digest   string `json:"digest"`
 }
 
