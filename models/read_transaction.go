@@ -191,6 +191,8 @@ type ObjectChange struct {
 	Owner           ObjectOwner `json:"owner"`
 	ObjectType      string      `json:"objectType"`
 	ObjectId        string      `json:"objectId"`
+	PackageId       string      `json:"packageId"`
+	Modules         []string    `json:"modules"`
 	Version         string      `json:"version"`
 	PreviousVersion string      `json:"previousVersion,omitempty"`
 	Digest          string      `json:"digest"`
