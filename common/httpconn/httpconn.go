@@ -22,7 +22,7 @@ type HttpConn struct {
 }
 
 func newDefaultRateLimiter() *rate.Limiter {
-	rateLimiter := rate.NewLimiter(rate.Every(1*time.Second), 10) // 10 request every 1 seconds
+	rateLimiter := rate.NewLimiter(rate.Every(1*time.Second), 10000) // 10000 request every 1 seconds
 	return rateLimiter
 }
 
