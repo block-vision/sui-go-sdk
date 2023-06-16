@@ -23,6 +23,8 @@ type IReadSystemFromSuiAPI interface {
 	SuiXGetEpochs(ctx context.Context, req models.SuiXGetEpochsRequest) (models.PaginatedEpochInfoResponse, error)
 	SuiXGetCurrentEpoch(ctx context.Context) (models.EpochInfo, error)
 	SuiXGetLatestSuiSystemState(ctx context.Context) (models.SuiSystemStateSummary, error)
+	SuiGetChainIdentifier(ctx context.Context) (string, error)
+	SuiXGetValidatorsApy(ctx context.Context) (models.ValidatorsApy, error)
 }
 
 type suiReadSystemFromSuiImpl struct {
@@ -233,6 +235,44 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetLatestSuiSystemState(ctx context.Conte
 	var rsp models.SuiSystemStateSummary
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
 		Method: "suix_getLatestSuiSystemState",
+		Params: []interface{}{},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiGetChainIdentifier implements the method `sui_getChainIdentifier`, return the chain's identifier.
+func (s *suiReadSystemFromSuiImpl) SuiGetChainIdentifier(ctx context.Context) (string, error) {
+	var rsp string
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getChainIdentifier",
+		Params: []interface{}{},
+	})
+	if err != nil {
+		return rsp, err
+	}
+
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	rsp = gjson.ParseBytes(respBytes).Get("result").String()
+	return rsp, nil
+}
+
+// SuiXGetValidatorsApy implements the method `suix_getValidatorsApy`, return the validator APY.
+func (s *suiReadSystemFromSuiImpl) SuiXGetValidatorsApy(ctx context.Context) (models.ValidatorsApy, error) {
+	var rsp models.ValidatorsApy
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "suix_getValidatorsApy",
 		Params: []interface{}{},
 	})
 	if err != nil {

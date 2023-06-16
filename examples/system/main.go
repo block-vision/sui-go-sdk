@@ -10,7 +10,7 @@ import (
 )
 
 var ctx = context.Background()
-var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
+var cli = sui.NewSuiClient(constant.BvMainnetEndpoint)
 
 func main() {
 	SuiGetCheckpoint()
@@ -21,6 +21,8 @@ func main() {
 	SuiXGetStakes()
 	SuiXGetStakesByIds()
 	SuiXGetLatestSuiSystemState()
+	SuiGetChainIdentifier()
+	SuiXGetValidatorsApy()
 }
 
 func SuiGetCheckpoint() {
@@ -138,6 +140,28 @@ func SuiXGetCurrentEpoch() {
 
 func SuiXGetLatestSuiSystemState() {
 	rsp, err := cli.SuiXGetLatestSuiSystemState(ctx)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiGetChainIdentifier() {
+	rsp, err := cli.SuiGetChainIdentifier(ctx)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiXGetValidatorsApy() {
+	rsp, err := cli.SuiXGetValidatorsApy(ctx)
 
 	if err != nil {
 		fmt.Println(err.Error())

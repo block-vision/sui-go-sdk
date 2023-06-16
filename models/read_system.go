@@ -192,3 +192,13 @@ type SuiSystemStateSummary struct {
 	AtRiskValidators                      []string              `json:"atRiskValidators"`
 	ValidatorReportRecords                [][]interface{}       `json:"validatorReportRecords"`
 }
+
+type ValidatorsApy struct {
+	Apys  []Apy  `json:"apys"`
+	Epoch string `json:"epoch"`
+}
+
+type Apy struct {
+	Address string  `json:"address"`
+	Apy     float64 `json:"apy"`
+}
