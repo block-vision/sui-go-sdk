@@ -76,7 +76,7 @@ func SuiXGetOwnedObjects() {
 
 func SuiMultiGetObjects() {
 	rsp, err := cli.SuiMultiGetObjects(ctx, models.SuiMultiGetObjectsRequest{
-		ObjectIds: []string{"0xb1c9e223b3a49cbb9365abe88a6da5464d9d88aa5176913536f4dacdba390570"},
+		ObjectIds: []string{"0x02b547f6aaece97b39142093205d5802101599833c65334ec3beb0aeed82c884"},
 		Options: models.SuiObjectDataOptions{
 			ShowContent:             true,
 			ShowDisplay:             true,
