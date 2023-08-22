@@ -20,6 +20,7 @@ type IReadObjectFromSuiAPI interface {
 	SuiXGetDynamicFieldObject(ctx context.Context, req models.SuiXGetDynamicFieldObjectRequest) (models.SuiObjectResponse, error)
 	SuiTryGetPastObject(ctx context.Context, req models.SuiTryGetPastObjectRequest) (models.PastObjectResponse, error)
 	SuiGetLoadedChildObjects(ctx context.Context, req models.SuiGetLoadedChildObjectsRequest) (models.ChildObjectsResponse, error)
+	SuiTryMultiGetPastObjects(ctx context.Context, req models.SuiTryMultiGetPastObjectsRequest) ([]*models.PastObjectResponse, error)
 }
 
 type suiReadObjectFromSuiImpl struct {
@@ -183,6 +184,32 @@ func (s *suiReadObjectFromSuiImpl) SuiGetLoadedChildObjects(ctx context.Context,
 		Method: "sui_getLoadedChildObjects",
 		Params: []interface{}{
 			req.Digest,
+		},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiTryMultiGetPastObjects implements the method `sui_tryMultiGetPastObjects`,
+// note there is no software-level guarantee/SLA that objects with past versions can be retrieved by this API,
+// even if the object and version exists/existed. The result may vary across nodes depending on their pruning policies.
+// Return the object information for a specified version.
+func (s *suiReadObjectFromSuiImpl) SuiTryMultiGetPastObjects(ctx context.Context, req models.SuiTryMultiGetPastObjectsRequest) ([]*models.PastObjectResponse, error) {
+	var rsp []*models.PastObjectResponse
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_tryMultiGetPastObjects",
+		Params: []interface{}{
+			req.MultiGetPastObjects,
+			req.Options,
 		},
 	})
 	if err != nil {

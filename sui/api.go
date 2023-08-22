@@ -46,6 +46,7 @@ func NewSuiClientWithCustomClient(rpcUrl string, c *http.Client) ISuiAPI {
 	return newClient(conn)
 }
 
+// newClient return the Sui client to call the methods of each module.
 func newClient(conn *httpconn.HttpConn) *Client {
 	return &Client{
 		IBaseAPI: &suiBaseImpl{

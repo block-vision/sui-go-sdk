@@ -10,7 +10,7 @@ import (
 )
 
 var ctx = context.Background()
-var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
+var cli = sui.NewSuiClient(constant.BvMainnetEndpoint)
 
 func main() {
 	SuiGetEvents()
@@ -19,7 +19,7 @@ func main() {
 
 func SuiGetEvents() {
 	rsp, err := cli.SuiGetEvents(ctx, models.SuiGetEventsRequest{
-		Digest: "HATq5p7MNynkBL5bLsdVqL3K38PxWHbqs7vndGiz5qrA",
+		Digest: "AxwPoyvpPRcfyuURg6vuc2wDgrMh8BJkT1rAtc1dfU5p",
 	})
 
 	if err != nil {

@@ -127,6 +127,39 @@ func TestOnReadSystemFromSui(t *testing.T) {
 
 		utils.PrettyPrint(rsp)
 	})
+
+	t.Run("test on sui_getChainIdentifier", func(t *testing.T) {
+		rsp, err := cli.SuiGetChainIdentifier(ctx)
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on suix_getValidatorsApy", func(t *testing.T) {
+		rsp, err := cli.SuiXGetValidatorsApy(ctx)
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
+
+	t.Run("test on sui_getProtocolConfig", func(t *testing.T) {
+		rsp, err := cli.SuiGetProtocolConfig(ctx, models.SuiGetProtocolConfigRequest{})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+	})
 }
 
 func TestOnReadCoinFromSui(t *testing.T) {
@@ -384,6 +417,38 @@ func TestOnReadObjectFromSui(t *testing.T) {
 		rsp, err := cli.SuiTryGetPastObject(ctx, models.SuiTryGetPastObjectRequest{
 			ObjectId: "0x02cfd8057d8a499bcd936ba65efd65889e66874b3819cb251fe9b9799048f1ed",
 			Version:  9636,
+			Options: models.SuiObjectDataOptions{
+				ShowContent:             true,
+				ShowDisplay:             true,
+				ShowType:                true,
+				ShowBcs:                 true,
+				ShowOwner:               true,
+				ShowPreviousTransaction: true,
+				ShowStorageRebate:       true,
+			},
+		})
+
+		if err != nil {
+			t.Error(err.Error())
+			t.FailNow()
+		}
+
+		utils.PrettyPrint(rsp)
+
+	})
+
+	t.Run("test on sui_tryMultiGetPastObjects", func(t *testing.T) {
+		rsp, err := cli.SuiTryMultiGetPastObjects(ctx, models.SuiTryMultiGetPastObjectsRequest{
+			MultiGetPastObjects: []*models.PastObject{
+				{
+					ObjectId: "0xfe3e114168d65ca9c86e43ce0f8dc4f8e0fa5a03634a4c6bf292679f6d73ec72",
+					Version:  "22945798",
+				},
+				{
+					ObjectId: "0xbf67e84fef313e6f1756411b095ba07868804852c939691b300a7e1e45d0251f",
+					Version:  "23119685",
+				},
+			},
 			Options: models.SuiObjectDataOptions{
 				ShowContent:             true,
 				ShowDisplay:             true,

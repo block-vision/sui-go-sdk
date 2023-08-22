@@ -23,6 +23,7 @@ func main() {
 	SuiXGetLatestSuiSystemState()
 	SuiGetChainIdentifier()
 	SuiXGetValidatorsApy()
+	SuiGetProtocolConfig()
 }
 
 func SuiGetCheckpoint() {
@@ -162,6 +163,17 @@ func SuiGetChainIdentifier() {
 
 func SuiXGetValidatorsApy() {
 	rsp, err := cli.SuiXGetValidatorsApy(ctx)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	utils.PrettyPrint(rsp)
+}
+
+func SuiGetProtocolConfig() {
+	rsp, err := cli.SuiGetProtocolConfig(ctx, models.SuiGetProtocolConfigRequest{})
 
 	if err != nil {
 		fmt.Println(err.Error())

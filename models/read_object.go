@@ -160,14 +160,16 @@ type SuiXGetDynamicFieldObjectRequest struct {
 }
 
 type SuiTryGetPastObjectRequest struct {
-	ObjectId string               `json:"objectId"`
-	Version  uint64               `json:"version"`
-	Options  SuiObjectDataOptions `json:"options"`
+	// the ID of the queried object
+	ObjectId string `json:"objectId"`
+	// the version of the queried object
+	Version uint64               `json:"version"`
+	Options SuiObjectDataOptions `json:"options"`
 }
 
 type PastObjectResponse struct {
-	Status  string        `json:"status"`
-	Details SuiObjectData `json:"details"`
+	Status  string      `json:"status"`
+	Details interface{} `json:"details"`
 }
 
 type SuiGetLoadedChildObjectsRequest struct {
@@ -181,4 +183,18 @@ type ChildObjectsResponse struct {
 type SuiLoadedChildObject struct {
 	ObjectID       string `json:"objectId"`
 	SequenceNumber string `json:"sequenceNumber"`
+}
+
+type PastObject struct {
+	// the ID of the queried object
+	ObjectId string `json:"objectId"`
+	// the version of the queried object
+	Version string `json:"version"`
+}
+
+type SuiTryMultiGetPastObjectsRequest struct {
+	// a vector of object and versions to be queried
+	MultiGetPastObjects []*PastObject
+	// options for specifying the content to be returned
+	Options SuiObjectDataOptions
 }

@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/block-vision/sui-go-sdk/utils"
 	"github.com/tidwall/gjson"
 )
 
@@ -25,6 +26,7 @@ type IReadSystemFromSuiAPI interface {
 	SuiXGetLatestSuiSystemState(ctx context.Context) (models.SuiSystemStateSummary, error)
 	SuiGetChainIdentifier(ctx context.Context) (string, error)
 	SuiXGetValidatorsApy(ctx context.Context) (models.ValidatorsApy, error)
+	SuiGetProtocolConfig(ctx context.Context, req models.SuiGetProtocolConfigRequest) (models.ProtocolConfigResponse, error)
 }
 
 type suiReadSystemFromSuiImpl struct {
@@ -274,6 +276,31 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetValidatorsApy(ctx context.Context) (mo
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
 		Method: "suix_getValidatorsApy",
 		Params: []interface{}{},
+	})
+	if err != nil {
+		return rsp, err
+	}
+	if gjson.ParseBytes(respBytes).Get("error").Exists() {
+		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	}
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	if err != nil {
+		return rsp, err
+	}
+	return rsp, nil
+}
+
+// SuiGetProtocolConfig implements the method `sui_getProtocolConfig`, return the protocol config table for the given version number.
+// If the version number is not specified, If none is specified, the node uses the version of the latest epoch it has processed.
+func (s *suiReadSystemFromSuiImpl) SuiGetProtocolConfig(ctx context.Context, req models.SuiGetProtocolConfigRequest) (models.ProtocolConfigResponse, error) {
+	var rsp models.ProtocolConfigResponse
+	params := make([]interface{}, 0)
+	if utils.IsFieldNonEmpty(req, "Version") {
+		params = append(params, req.Version)
+	}
+	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
+		Method: "sui_getProtocolConfig",
+		Params: params,
 	})
 	if err != nil {
 		return rsp, err

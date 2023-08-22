@@ -51,7 +51,7 @@ func SuiXGetAllBalance() {
 func SuiXGetCoins() {
 	rsp, err := cli.SuiXGetCoins(ctx, models.SuiXGetCoinsRequest{
 		Owner:    "0xb7f98d327f19f674347e1e40641408253142d6e7e5093a7c96eda8cdfd7d9bb5",
-		CoinType: "0x2::sui::SUI",
+		CoinType: "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
 		Limit:    5,
 	})
 
@@ -79,7 +79,7 @@ func SuiXGetAllCoins() {
 
 func SuiXGetCoinMetadata() {
 	rsp, err := cli.SuiXGetCoinMetadata(ctx, models.SuiXGetCoinMetadataRequest{
-		CoinType: "0xf7a0b8cc24808220226301e102dae27464ea46e0d74bb968828318b9e3a921fa::busd::BUSD",
+		CoinType: "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
 	})
 
 	if err != nil {
@@ -92,7 +92,7 @@ func SuiXGetCoinMetadata() {
 
 func SuiXGetTotalSupply() {
 	rsp, err := cli.SuiXGetTotalSupply(ctx, models.SuiXGetTotalSupplyRequest{
-		CoinType: "0x3d5ef021274cdc194009ea17e8018ac00ff63843d34dd0fdb57e2696a2020293::polat::POLAT",
+		CoinType: "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
 	})
 
 	if err != nil {

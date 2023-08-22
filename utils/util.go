@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"reflect"
 )
 
 func PrettyPrint(v interface{}) {
@@ -21,4 +22,16 @@ func PrettyPrint(v interface{}) {
 	}
 
 	fmt.Println(out.String())
+}
+
+func IsFieldNonEmpty(v interface{}, fieldName string) bool {
+	rv := reflect.ValueOf(v)
+
+	field := rv.FieldByName(fieldName)
+
+	if !field.IsValid() {
+		return false
+	}
+
+	return !field.IsZero()
 }

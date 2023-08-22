@@ -28,8 +28,7 @@ func newDefaultRateLimiter() *rate.Limiter {
 
 func NewHttpConn(rpcUrl string) *HttpConn {
 	return &HttpConn{
-		c: &http.Client{},
-		// rl:      newDefaultRateLimiter(),
+		c:       &http.Client{},
 		rpcUrl:  rpcUrl,
 		timeout: defaultTimeout,
 	}
@@ -37,8 +36,7 @@ func NewHttpConn(rpcUrl string) *HttpConn {
 
 func NewCustomHttpConn(rpcUrl string, cli *http.Client) *HttpConn {
 	return &HttpConn{
-		c: cli,
-		// rl:      newDefaultRateLimiter(),
+		c:       cli,
 		rpcUrl:  rpcUrl,
 		timeout: defaultTimeout,
 	}
@@ -55,11 +53,6 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-
-	// err = h.rl.Wait(ctx) // This is a blocking call. Honors the rate limit.
-	// if err != nil {
-	// 	return nil, err
-	// }
 
 	request, err := http.NewRequest("POST", h.rpcUrl, bytes.NewBuffer(reqBytes))
 	if err != nil {
