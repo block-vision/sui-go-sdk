@@ -65,6 +65,46 @@ func main() {
 }
 
 ```
+### Getting coins from the faucet
+You can request sui from the faucet when running against devnet, testnet, or localnet
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/block-vision/sui-go-sdk/constant"
+	"github.com/block-vision/sui-go-sdk/sui"
+)
+
+func main() {
+	RequestDevNetSuiFromFaucet()
+}
+
+func RequestDevNetSuiFromFaucet() {
+	faucetHost, err := sui.GetFaucetHost(constant.SuiDevnet)
+	if err != nil {
+		fmt.Println("GetFaucetHost err:", err)
+		return
+	}
+
+	fmt.Println("faucetHost:", faucetHost)
+
+	recipient := "0xaf9f4d20c205f26051a7e1758601c4c47a9f99df3f9823f70926c17c80882d36"
+
+	header := map[string]string{}
+	err = sui.RequestSuiFromFaucet(faucetHost, recipient, header)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	// the successful transaction block url: https://suiexplorer.com/txblock/91moaxbXsQnJYScLP2LpbMXV43ZfngS2xnRgj1CT7jLQ?network=devnet
+	fmt.Println("Request DevNet Sui From Faucet success")
+}
+
+```
+
 
 ### Writing Transaction Blocks to Sui
 
@@ -782,6 +822,9 @@ func main() {
 }
 
 ```
+
+## API Documentation
+The Go Client SDK API documentation is currently available at [godoc.org](https://pkg.go.dev/github.com/block-vision/sui-go-sdk).
 
 ## Contribution
 

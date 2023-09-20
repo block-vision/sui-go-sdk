@@ -10,4 +10,15 @@ const (
 	WssBvMainnetEndpoint  = "wss://sui-mainnet-endpoint.blockvision.org/websocket"
 	WssSuiTestnetEndpoint = "wss://fullnode.testnet.sui.io"
 	WssSuiMainnetEndpoint = "wss://fullnode.mainnet.sui.io"
+
+	FaucetTestnetEndpoint  = "https://faucet.testnet.sui.io/gas"
+	FaucetDevnetEndpoint   = "https://faucet.devnet.sui.io"
+	FaucetLocalnetEndpoint = "http://127.0.0.1:9123"
+)
+
+const (
+	SuiMainnet  = "mainnet"
+	SuiTestnet  = "testnet"
+	SuiDevnet   = "devnet"
+	SuiLocalnet = "localnet"
 )
