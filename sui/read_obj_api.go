@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -41,9 +42,15 @@ func (s *suiReadObjectFromSuiImpl) SuiGetObject(ctx context.Context, req models.
 	if err != nil {
 		return rsp, err
 	}
+
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
+
+	if gjson.ParseBytes(respBytes).Get("result.error.code").Exists() {
+		return rsp, errors.New(fmt.Sprintf("the object is %s", gjson.ParseBytes(respBytes).Get("result.error.code").String()))
+	}
+
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result.data").String()), &rsp)
 	if err != nil {
 		return rsp, err
