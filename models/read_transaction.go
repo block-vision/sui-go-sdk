@@ -29,13 +29,13 @@ type SuiTransactionBlockKind struct {
 }
 
 type SuiTransaction struct {
-	MakeMoveVec     []interface{}          `json:"MakeMoveVec,omitempty"`
-	MergeCoins      []interface{}          `json:"MergeCoins,omitempty"`
-	SplitCoins      []interface{}          `json:"SplitCoins,omitempty"`
-	TransferObjects []interface{}          `json:"TransferObjects,omitempty"`
-	Publish         []interface{}          `json:"Publish,omitempty"`
-	Upgrade         []interface{}          `json:"Upgrade,omitempty"`
-	MoveCall        MoveCallSuiTransaction `json:"MoveCall,omitempty"`
+	MakeMoveVec     []interface{}           `json:"MakeMoveVec,omitempty"`
+	MergeCoins      []interface{}           `json:"MergeCoins,omitempty"`
+	SplitCoins      []interface{}           `json:"SplitCoins,omitempty"`
+	TransferObjects []interface{}           `json:"TransferObjects,omitempty"`
+	Publish         []interface{}           `json:"Publish,omitempty"`
+	Upgrade         []interface{}           `json:"Upgrade,omitempty"`
+	MoveCall        *MoveCallSuiTransaction `json:"MoveCall,omitempty"`
 }
 
 type ProgrammableTransaction struct {
