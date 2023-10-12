@@ -158,6 +158,7 @@ type SuiEffects struct {
 
 type ExecutionStatus struct {
 	Status string `json:"status"`
+	Error  string `json:"error,omitempty"`
 }
 
 type GasCostSummary struct {
