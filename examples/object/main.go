@@ -101,7 +101,7 @@ func SuiMultiGetObjects() {
 
 func SuiXGetDynamicField() {
 	rsp, err := cli.SuiXGetDynamicField(ctx, models.SuiXGetDynamicFieldRequest{
-		ObjectId: "0xeeb964d1e640219c8ddb791cc8548f3242a3392b143ff47484a3753291cad898",
+		ObjectId: "0x96cdd7b5b715477de928b5e8c58751ce9d26c9fe89f0d270c0d78350da9f3b4c",
 		Limit:    5,
 	})
 

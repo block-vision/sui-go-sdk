@@ -1,6 +1,10 @@
 package models
 
-import "github.com/block-vision/sui-go-sdk/models/sui_types"
+import (
+	"encoding/json"
+	"github.com/block-vision/sui-go-sdk/models/sui_types"
+	"github.com/tidwall/gjson"
+)
 
 type SuiObjectInfo struct {
 	sui_types.SuiObjectRef
@@ -43,6 +47,10 @@ type SuiRawData struct {
 }
 
 type DynamicFieldName struct {
-	Type  string      `json:"type"`
-	Value interface{} `json:"value"`
+	Type  string          `json:"type"`
+	Value json.RawMessage `json:"value"`
+}
+
+func (v DynamicFieldName) Field(field string) gjson.Result {
+	return gjson.GetBytes(v.Value, field)
 }

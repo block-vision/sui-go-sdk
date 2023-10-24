@@ -139,13 +139,13 @@ type SuiXGetDynamicFieldRequest struct {
 }
 
 type DynamicFieldInfo struct {
-	Name       string `json:"name"`
-	BcsName    string `json:"bcsName"`
-	Type       string `json:"type"`
-	ObjectType string `json:"objectType"`
-	ObjectId   string `json:"objectId"`
-	Version    int    `json:"version"`
-	Digest     string `json:"digest"`
+	Name       DynamicFieldName `json:"name"`
+	BcsName    string           `json:"bcsName"`
+	Type       string           `json:"type"`
+	ObjectType string           `json:"objectType"`
+	ObjectId   string           `json:"objectId"`
+	Version    int              `json:"version"`
+	Digest     string           `json:"digest"`
 }
 
 type PaginatedDynamicFieldInfoResponse struct {
