@@ -24,7 +24,7 @@ func main() {
 
 func SuiGetObject() {
 	rsp, err := cli.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: "0xfe3e114168d65ca9c86e43ce0f8dc4f8e0fa5a03634a4c6bf292679f6d73ec72",
+		ObjectId: "0xaf647fef62f139f9bbb3ece219d40a49024331531fbe7e5ac3f5718fc1f23c62",
 		Options: models.SuiObjectDataOptions{
 			ShowContent:             true,
 			ShowDisplay:             true,

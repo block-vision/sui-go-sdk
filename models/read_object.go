@@ -1,5 +1,10 @@
 package models
 
+import (
+	"encoding/json"
+	"github.com/tidwall/gjson"
+)
+
 type SuiObjectDataOptions struct {
 	ShowType                bool `json:"showType"`
 	ShowContent             bool `json:"showContent"`
@@ -103,8 +108,54 @@ type SuiRawMoveObject struct {
 }
 
 type DisplayFieldsResponse struct {
-	Data  interface{}            `json:"data,omitempty"`
+	Data  any                    `json:"data,omitempty"`
 	Error SuiObjectResponseError `json:"error,omitempty"`
+}
+
+type Display interface {
+	Name() string
+	Description() string
+	Link() string
+	ImageURL() string
+	ThumbnailURL() string
+	ProjectURL() string
+	Creator() string
+}
+
+func (display DisplayFieldsResponse) Description() string {
+	return display.value("description")
+}
+
+func (display DisplayFieldsResponse) Name() string {
+	return display.value("name")
+}
+
+func (display DisplayFieldsResponse) Link() string {
+	return display.value("link")
+}
+
+func (display DisplayFieldsResponse) ImageURL() string {
+	return display.value("image_url")
+}
+
+func (display DisplayFieldsResponse) ThumbnailURL() string {
+	return display.value("thumbnail_url")
+}
+
+func (display DisplayFieldsResponse) Creator() string {
+	return display.value("creator")
+}
+
+func (display DisplayFieldsResponse) ProjectURL() string {
+	return display.value("project_url")
+}
+
+func (display DisplayFieldsResponse) value(field string) string {
+	if display.Data == nil || display.Error.Error != "" {
+		return ""
+	}
+	bys, _ := json.Marshal(display.Data)
+	return gjson.GetBytes(bys, field).String()
 }
 
 type SuiParsedData struct {
