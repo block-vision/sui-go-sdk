@@ -14,9 +14,9 @@ type SuiObjectInfo struct {
 }
 
 type SuiMoveObject struct {
-	Type              string
-	Fields            map[string]interface{}
-	HasPublicTransfer bool
+	Type              string                 `json:"type"`
+	Fields            map[string]interface{} `json:"fields"`
+	HasPublicTransfer bool                   `json:"hasPublicTransfer"`
 }
 
 type SuiMovePackage struct {
@@ -24,8 +24,8 @@ type SuiMovePackage struct {
 }
 
 type SuiMoveModuleId struct {
-	Address string
-	Name    string
+	Address string `json:"address"`
+	Name    string `json:"name"`
 }
 
 type SuiMoveNormalizedModule struct {

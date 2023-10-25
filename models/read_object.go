@@ -77,8 +77,8 @@ type PaginatedObjectsResponse struct {
 }
 
 type SuiObjectResponse struct {
-	Data  SuiObjectData          `json:"data"`
-	Error SuiObjectResponseError `json:"error"`
+	Data  SuiObjectData           `json:"data"`
+	Error *SuiObjectResponseError `json:"error,omitempty"`
 }
 
 type SuiObjectResponseError struct {
@@ -108,8 +108,8 @@ type SuiRawMoveObject struct {
 }
 
 type DisplayFieldsResponse struct {
-	Data  any                    `json:"data,omitempty"`
-	Error SuiObjectResponseError `json:"error,omitempty"`
+	Data  any                     `json:"data"`
+	Error *SuiObjectResponseError `json:"error"`
 }
 
 type Display interface {
@@ -165,15 +165,15 @@ type SuiParsedData struct {
 }
 
 type SuiObjectData struct {
-	ObjectId            string                `json:"objectId"`
-	Version             string                `json:"version"`
-	Digest              string                `json:"digest"`
-	Type                string                `json:"type"`
-	Owner               interface{}           `json:"owner"`
-	PreviousTransaction string                `json:"previousTransaction"`
-	Display             DisplayFieldsResponse `json:"display"`
-	Content             SuiParsedData         `json:"content"`
-	Bcs                 SuiRawData            `json:"bcs"`
+	ObjectId            string                 `json:"objectId"`
+	Version             string                 `json:"version"`
+	Digest              string                 `json:"digest"`
+	Type                string                 `json:"type"`
+	Owner               interface{}            `json:"owner"`
+	PreviousTransaction string                 `json:"previousTransaction,omitempty"`
+	Display             *DisplayFieldsResponse `json:"display,omitempty"`
+	Content             *SuiParsedData         `json:"content,omitempty"`
+	Bcs                 *SuiRawData            `json:"bcs,omitempty"`
 }
 
 type SuiMultiGetObjectsRequest struct {
