@@ -151,7 +151,7 @@ func (display DisplayFieldsResponse) ProjectURL() string {
 }
 
 func (display DisplayFieldsResponse) value(field string) string {
-	if display.Data == nil || display.Error.Error != "" {
+	if display.Data == nil || display.Error != nil {
 		return ""
 	}
 	bys, _ := json.Marshal(display.Data)
@@ -165,15 +165,15 @@ type SuiParsedData struct {
 }
 
 type SuiObjectData struct {
-	ObjectId            string                 `json:"objectId"`
-	Version             string                 `json:"version"`
-	Digest              string                 `json:"digest"`
-	Type                string                 `json:"type"`
-	Owner               interface{}            `json:"owner"`
-	PreviousTransaction string                 `json:"previousTransaction,omitempty"`
-	Display             *DisplayFieldsResponse `json:"display,omitempty"`
-	Content             *SuiParsedData         `json:"content,omitempty"`
-	Bcs                 *SuiRawData            `json:"bcs,omitempty"`
+	ObjectId            string                `json:"objectId"`
+	Version             string                `json:"version"`
+	Digest              string                `json:"digest"`
+	Type                string                `json:"type"`
+	Owner               interface{}           `json:"owner"`
+	PreviousTransaction string                `json:"previousTransaction,omitempty"`
+	Display             DisplayFieldsResponse `json:"display"`
+	Content             *SuiParsedData        `json:"content,omitempty"`
+	Bcs                 *SuiRawData           `json:"bcs,omitempty"`
 }
 
 type SuiMultiGetObjectsRequest struct {
