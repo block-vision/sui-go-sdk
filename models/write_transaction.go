@@ -5,6 +5,13 @@ import (
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 )
 
+type ExecutionMode string
+
+const (
+	TransactionExecutionCommit     ExecutionMode = "Commit"
+	TransactionExecutionDevInspect ExecutionMode = "DevInspect"
+)
+
 type MoveCallRequest struct {
 	// the transaction signer's Sui address
 	Signer string `json:"signer"`
@@ -22,6 +29,8 @@ type MoveCallRequest struct {
 	Gas string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
+
+	ExecutionMode ExecutionMode `json:"executionMode"`
 }
 
 type MoveCallResponse struct {

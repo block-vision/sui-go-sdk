@@ -14,9 +14,13 @@ type SuiObjectInfo struct {
 }
 
 type SuiMoveObject struct {
-	Type              string                 `json:"type"`
-	Fields            map[string]interface{} `json:"fields"`
-	HasPublicTransfer bool                   `json:"hasPublicTransfer"`
+	Type              string          `json:"type"`
+	Fields            json.RawMessage `json:"fields"`
+	HasPublicTransfer bool            `json:"hasPublicTransfer"`
+}
+
+func (v SuiMoveObject) Field(field string) gjson.Result {
+	return gjson.GetBytes(v.Fields, field)
 }
 
 type SuiMovePackage struct {
