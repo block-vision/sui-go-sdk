@@ -7,14 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
 )
 
 type IReadObjectFromSuiAPI interface {
-	SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectData, error)
+	SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectResponse, error)
 	SuiXGetOwnedObjects(ctx context.Context, req models.SuiXGetOwnedObjectsRequest) (models.PaginatedObjectsResponse, error)
 	SuiMultiGetObjects(ctx context.Context, req models.SuiMultiGetObjectsRequest) ([]*models.SuiObjectResponse, error)
 	SuiXGetDynamicField(ctx context.Context, req models.SuiXGetDynamicFieldRequest) (models.PaginatedDynamicFieldInfoResponse, error)
@@ -29,8 +28,8 @@ type suiReadObjectFromSuiImpl struct {
 }
 
 // SuiGetObject implements the method `sui_getObject`, gets the object information for a specified object.
-func (s *suiReadObjectFromSuiImpl) SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectData, error) {
-	var rsp models.SuiObjectData
+func (s *suiReadObjectFromSuiImpl) SuiGetObject(ctx context.Context, req models.SuiGetObjectRequest) (models.SuiObjectResponse, error) {
+	var rsp models.SuiObjectResponse
 
 	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
 		Method: "sui_getObject",
@@ -43,15 +42,7 @@ func (s *suiReadObjectFromSuiImpl) SuiGetObject(ctx context.Context, req models.
 		return rsp, err
 	}
 
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-
-	if gjson.ParseBytes(respBytes).Get("result.error.code").Exists() {
-		return rsp, errors.New(fmt.Sprintf("the object is %s", gjson.ParseBytes(respBytes).Get("result.error.code").String()))
-	}
-
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result.data").String()), &rsp)
+	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
