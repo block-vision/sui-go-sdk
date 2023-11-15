@@ -151,7 +151,7 @@ func (display DisplayFieldsResponse) ProjectURL() string {
 }
 
 func (display DisplayFieldsResponse) value(field string) string {
-	if display.Data == nil || display.Error != nil {
+	if display.Data == nil {
 		return ""
 	}
 	bys, _ := json.Marshal(display.Data)
