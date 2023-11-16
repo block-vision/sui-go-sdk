@@ -77,7 +77,7 @@ type PaginatedObjectsResponse struct {
 }
 
 type SuiObjectResponse struct {
-	Data  SuiObjectData           `json:"data"`
+	Data  *SuiObjectData          `json:"data,omitempty"`
 	Error *SuiObjectResponseError `json:"error,omitempty"`
 }
 
