@@ -206,8 +206,8 @@ type PaginatedDynamicFieldInfoResponse struct {
 }
 
 type SuiXGetDynamicFieldObjectRequest struct {
-	ObjectId         string           `json:"objectId"`
-	DynamicFieldName DynamicFieldName `json:"dynamicFieldName"`
+	ObjectId         string                 `json:"objectId"`
+	DynamicFieldName DynamicFieldObjectName `json:"dynamicFieldName"`
 }
 
 type SuiTryGetPastObjectRequest struct {
@@ -248,4 +248,9 @@ type SuiTryMultiGetPastObjectsRequest struct {
 	MultiGetPastObjects []*PastObject
 	// options for specifying the content to be returned
 	Options SuiObjectDataOptions
+}
+
+type DynamicFieldObjectName struct {
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
 }
