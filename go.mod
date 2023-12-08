@@ -3,7 +3,6 @@ module github.com/block-vision/sui-go-sdk
 go 1.20
 
 require (
-	github.com/fardream/go-bcs v0.2.1
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/tidwall/gjson v1.14.4

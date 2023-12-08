@@ -1,9 +1,14 @@
 package signer
 
 import (
+	"crypto"
 	"crypto/ed25519"
+	"encoding/base64"
 	"encoding/hex"
+
 	"github.com/block-vision/sui-go-sdk/common/keypair"
+	"github.com/block-vision/sui-go-sdk/constant"
+	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/blake2b"
 )
@@ -48,4 +53,43 @@ func NewSignertWithMnemonic(mnemonic string) (*Signer, error) {
 		return nil, err
 	}
 	return NewSigner(key.Key), nil
+}
+
+type SignedMessageSerializedSig struct {
+	Message   string `json:"message"`
+	Signature string `json:"signature"`
+}
+
+func (s *Signer) SignMessage(data string, scope constant.IntentScope) (*SignedMessageSerializedSig, error) {
+	txBytes, _ := base64.StdEncoding.DecodeString(data)
+	message := models.NewMessageWithIntent(txBytes, scope)
+	digest := blake2b.Sum256(message)
+	var noHash crypto.Hash
+	sigBytes, err := s.PriKey.Sign(nil, digest[:], noHash)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := &SignedMessageSerializedSig{
+		Message:   data,
+		Signature: models.ToSerializedSignature(sigBytes, s.PriKey.Public().(ed25519.PublicKey)),
+	}
+	return ret, nil
+}
+
+func (s *Signer) SignTransaction(b64TxBytes string) (*models.SignedTransactionSerializedSig, error) {
+	result, err := s.SignMessage(b64TxBytes, constant.PersonalMessageIntentScope)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.SignedTransactionSerializedSig{
+		TxBytes:   result.Message,
+		Signature: result.Signature,
+	}, nil
+}
+
+func (s *Signer) SignPersonalMessage(message string) (*SignedMessageSerializedSig, error) {
+	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
+	return s.SignMessage(b64Message, constant.PersonalMessageIntentScope)
 }
