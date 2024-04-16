@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/block-vision/sui-go-sdk/models"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/block-vision/sui-go-sdk/models"
 
 	"golang.org/x/time/rate"
 )

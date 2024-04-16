@@ -6,6 +6,7 @@ package sui
 import (
 	"context"
 	"errors"
+
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/tidwall/gjson"
 )

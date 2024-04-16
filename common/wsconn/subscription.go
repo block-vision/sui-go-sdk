@@ -5,5 +5,3 @@ type SubscriptionResp struct {
 	Result  int64  `json:"result"`
 	Id      int64  `json:"id"`
 }
-
-

@@ -3,6 +3,7 @@ package keypair
 import (
 	"encoding/base64"
 	"encoding/hex"
+
 	"golang.org/x/crypto/sha3"
 )
 

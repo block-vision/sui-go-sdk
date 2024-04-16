@@ -2,8 +2,9 @@ package keypair
 
 import (
 	"encoding/base64"
-	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"math"
+
+	"github.com/block-vision/sui-go-sdk/common/sui_error"
 
 	"github.com/block-vision/sui-go-sdk/models"
 )

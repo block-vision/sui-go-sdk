@@ -6,10 +6,11 @@ package sui
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/utils"
-	"testing"
 )
 
 var ctx = context.Background()
