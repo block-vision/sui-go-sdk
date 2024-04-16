@@ -752,7 +752,7 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 
 	t.Run("test on SignAndExecuteTransactionBlock", func(t *testing.T) {
-		signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+		signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 		if err != nil {
 			fmt.Println(err.Error())
 			t.FailNow()
