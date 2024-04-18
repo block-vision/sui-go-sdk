@@ -6,10 +6,11 @@ package sui
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/utils"
-	"testing"
 )
 
 var ctx = context.Background()
@@ -752,7 +753,7 @@ func TestOnWriteTransactionToSui(t *testing.T) {
 
 
 	t.Run("test on SignAndExecuteTransactionBlock", func(t *testing.T) {
-		signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+		signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 		if err != nil {
 			fmt.Println(err.Error())
 			t.FailNow()

@@ -16,7 +16,6 @@ type GetNormalizedMoveModulesByPackageRequest struct {
 
 type GetNormalizedMoveModulesByPackageResponse map[string]sui_json_rpc_types.SuiMoveNormalizedModule
 
-
 type GetNormalizedMoveModuleRequest struct {
 	Package    string `json:"package"`
 	ModuleName string `json:"moduleName"`

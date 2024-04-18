@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/signer"
@@ -88,7 +89,7 @@ func SuiDevInspectTransactionBlock() {
 
 // send signed transactions
 func SignAndExecuteTransactionBlock() {
-	signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+	signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 	if err != nil {
 		fmt.Println(err.Error())
 		return

@@ -5,9 +5,10 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/hex"
-	"golang.org/x/crypto/blake2b"
 	"log"
 	"strings"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 type InputObjectKind map[string]interface{}

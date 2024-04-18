@@ -14,7 +14,7 @@ The Sui-Go-SDK provided by BlockVision aims to offer access to all Sui RPC metho
 additional features that make the integration easier.
 Sui-Go-SDK is designed for Layer 1 BlockChain [Sui](https://github.com/MystenLabs/sui) in Go programming language.
 
-Powred by [BlockVision](https://blockvision.org/) & [SuiVision](https://suivision.xyz/) team. Feel free to contact us on [Discord](https://discord.gg/Re6prK86Tr) if you have any questions.
+Powered by [BlockVision](https://blockvision.org/) & [SuiVision](https://suivision.xyz/) team. Feel free to contact us on [Discord](https://discord.gg/Re6prK86Tr) if you have any questions.
 
 ### Features
 
@@ -127,7 +127,7 @@ func main() {
   var ctx = context.Background()
   var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
-  signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+  signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 
   if err != nil {
     fmt.Println(err.Error())
@@ -192,7 +192,7 @@ func main() {
 	var ctx = context.Background()
 	var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
-	signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+	signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -258,7 +258,7 @@ func main() {
 	var ctx = context.Background()
 	var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
-	signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+	signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -333,7 +333,7 @@ func main() {
   var ctx = context.Background()
   var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
-  signerAccount, err := signer.NewSignertWithMnemonic("input your mnemonic")
+  signerAccount, err := signer.NewSignerWithMnemonic("input your mnemonic")
 
   if err != nil {
     fmt.Println(err.Error())
