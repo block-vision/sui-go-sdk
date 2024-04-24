@@ -36,8 +36,8 @@ type SuiMoveNormalizedModule struct {
 }
 
 type SuiRawMovePackage struct {
-	Id        string `json:"id,omitempty"`
-	ModuleMap string `json:"moduleMap,omitempty"`
+	Id        string            `json:"id,omitempty"`
+	ModuleMap map[string]string `json:"moduleMap,omitempty"`
 }
 
 type SuiRawData struct {
