@@ -74,7 +74,7 @@ func faucetRequest(faucetUrl string, body interface{}, headers map[string]string
 		return errors.New(fmt.Sprintf("Read response body error: %s", err.Error()))
 	}
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode < 200 || 300 <= resp.StatusCode {
 		return errors.New(fmt.Sprintf("Request faucet failed, statusCode: %d, err: %+v", resp.StatusCode, string(bodyBytes)))
 	}
 
