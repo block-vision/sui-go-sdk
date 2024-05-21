@@ -20,7 +20,7 @@ type SuiMoveObject struct {
 }
 
 type SuiMovePackage struct {
-	Disassembled string `json:"disassembled"`
+	Disassembled interface{} `json:"disassembled"`
 }
 
 type SuiMoveModuleId struct {
