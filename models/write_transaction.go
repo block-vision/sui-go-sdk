@@ -26,7 +26,7 @@ type MoveCallRequest struct {
 	// the arguments to the function
 	Arguments []interface{} `json:"arguments"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 
