@@ -89,7 +89,28 @@ type SuiObjectResponseError struct {
 	Digest   string `json:"digest"`
 }
 
-type ObjectOwner struct {
+func (o *ObjectOwner) UnmarshalJSON(data []byte) error {
+	res := gjson.ParseBytes(data)
+	if !res.IsObject() {
+		o.ObjectType = res.String()
+		return nil
+	}
+	o.AddressOwner = res.Get("AddressOwner").String()
+	o.ObjectOwner = res.Get("ObjectOwner").String()
+	shard := res.Get("Shared").String()
+	if shard != "" {
+		var objectShare ObjectShare
+		err := json.Unmarshal([]byte(shard), &objectShare)
+		if err != nil {
+			return err
+		}
+		o.Shared = objectShare
+	}
+	return nil
+}
+
+type ObjectOwner struct { //This struct has its own UnmarshalJSON method !!!
+	ObjectType string `json:"ObjectType"` //if Immutable return  Immutable
 	// the owner's Sui address
 	AddressOwner string      `json:"AddressOwner"`
 	ObjectOwner  string      `json:"ObjectOwner"`
