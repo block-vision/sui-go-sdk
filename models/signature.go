@@ -5,9 +5,13 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/hex"
-	"golang.org/x/crypto/blake2b"
+	"fmt"
 	"log"
 	"strings"
+
+	"github.com/block-vision/sui-go-sdk/constant"
+
+	"golang.org/x/crypto/blake2b"
 )
 
 type InputObjectKind map[string]interface{}
@@ -36,6 +40,12 @@ const (
 
 type HexData struct {
 	data []byte
+}
+
+type SignaturePubkeyPair struct {
+	SignatureScheme string
+	Signature       []byte
+	PubKey          []byte
 }
 
 func NewHexData(str string) (*HexData, error) {
@@ -113,7 +123,7 @@ func (txn *TxnMetaData) SignSerializedSigWith(privateKey ed25519.PrivateKey) *Si
 	}
 	return &SignedTransactionSerializedSig{
 		TxBytes:   txn.TxBytes,
-		Signature: toSerializedSignature(sigBytes, privateKey.Public().(ed25519.PublicKey)),
+		Signature: ToSerializedSignature(sigBytes, privateKey.Public().(ed25519.PublicKey)),
 	}
 }
 
@@ -125,7 +135,7 @@ func messageWithIntent(message []byte) []byte {
 	return intentMessage
 }
 
-func toSerializedSignature(signature, pubKey []byte) string {
+func ToSerializedSignature(signature, pubKey []byte) string {
 	signatureLen := len(signature)
 	pubKeyLen := len(pubKey)
 	serializedSignature := make([]byte, 1+signatureLen+pubKeyLen)
@@ -133,4 +143,77 @@ func toSerializedSignature(signature, pubKey []byte) string {
 	copy(serializedSignature[1:], signature)
 	copy(serializedSignature[1+signatureLen:], pubKey)
 	return base64.StdEncoding.EncodeToString(serializedSignature)
+}
+
+func FromSerializedSignature(serializedSignature string) (*SignaturePubkeyPair, error) {
+	_bytes, err := base64.StdEncoding.DecodeString(serializedSignature)
+	if err != nil {
+		return nil, err
+	}
+	signatureScheme := parseSignatureScheme(_bytes[0])
+	if strings.EqualFold(serializedSignature, "") {
+		return nil, fmt.Errorf("multiSig is not supported")
+	}
+
+	signature := _bytes[1 : len(_bytes)-32]
+	pubKeyBytes := _bytes[1+len(signature):]
+
+	keyPair := &SignaturePubkeyPair{
+		SignatureScheme: signatureScheme,
+		Signature:       signature,
+		PubKey:          pubKeyBytes,
+	}
+	return keyPair, nil
+}
+
+func parseSignatureScheme(scheme byte) string {
+	switch scheme {
+	case 0:
+		return "ED25519"
+	case 1:
+		return "Secp256k1"
+	case 2:
+		return "Secp256r1"
+	case 3:
+		return "MultiSig"
+	default:
+		return "ED25519"
+	}
+}
+
+func VerifyPersonalMessage(message string, signature string) (signer string, pass bool, err error) {
+	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
+	return VerifyMessage(b64Message, signature, constant.PersonalMessageIntentScope)
+}
+
+func VerifyTransaction(b64Message string, signature string) (signer string, pass bool, err error) {
+	return VerifyMessage(b64Message, signature, constant.TransactionDataIntentScope)
+}
+
+func VerifyMessage(message, signature string, scope constant.IntentScope) (signer string, pass bool, err error) {
+	b64Bytes, _ := base64.StdEncoding.DecodeString(message)
+	messageBytes := NewMessageWithIntent(b64Bytes, scope)
+
+	serializedSignature, err := FromSerializedSignature(signature)
+	if err != nil {
+		return "", false, err
+	}
+	digest := blake2b.Sum256(messageBytes)
+
+	pass = ed25519.Verify(serializedSignature.PubKey[:], digest[:], serializedSignature.Signature)
+
+	signer = Ed25519PublicKeyToSuiAddress(serializedSignature.PubKey)
+	if err != nil {
+		return "", false, fmt.Errorf("invalid signer %v", err)
+	}
+
+	return
+}
+
+func Ed25519PublicKeyToSuiAddress(pubKey []byte) string {
+	newPubkey := []byte{byte(SigFlagEd25519)}
+	newPubkey = append(newPubkey, pubKey...)
+
+	addrBytes := blake2b.Sum256(newPubkey)
+	return fmt.Sprintf("0x%s", hex.EncodeToString(addrBytes[:])[:64])
 }
