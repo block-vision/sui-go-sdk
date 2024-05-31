@@ -49,8 +49,8 @@ type MoveCallSuiTransaction struct {
 	Function      string   `json:"function"`
 	TypeArguments []string `json:"type_arguments"`
 	Arguments     []struct {
-		Input  int `json:"Input,omitempty"`
-		Result int `json:"Result,omitempty"`
+		Input  int `json:"Input"`
+		Result int `json:"Result"`
 	} `json:"arguments"`
 }
 
