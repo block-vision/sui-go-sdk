@@ -55,9 +55,25 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Conte
 	if gjson.ParseBytes(respBytes).Get("error").Exists() {
 		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	raws := gjson.ParseBytes(respBytes).Get("result")
+	err = json.Unmarshal([]byte(raws.Raw), &rsp)
 	if err != nil {
 		return rsp, err
+	}
+	objectChanges := raws.Get("objectChanges").Array()
+	if len(objectChanges) != len(rsp.ObjectChanges) {
+		return rsp, nil
+	}
+	for index, item := range objectChanges {
+		owner := item.Get("owner")
+		if owner.IsObject() {
+			var ownerObject models.ObjectOwner
+			err = json.Unmarshal([]byte(owner.Raw), &ownerObject)
+			if err != nil {
+				return rsp, err
+			}
+			rsp.ObjectChanges[index].Owner = ownerObject
+		}
 	}
 	return rsp, nil
 }
