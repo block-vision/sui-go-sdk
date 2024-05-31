@@ -189,7 +189,7 @@ type SuiTransactionBlockResponse struct {
 type ObjectChange struct {
 	Type            string      `json:"type"`
 	Sender          string      `json:"sender"`
-	Owner           interface{} `json:"owner"`
+	Owner           interface{} `json:"owner"` //sometime string,sometime object
 	ObjectType      string      `json:"objectType"`
 	ObjectId        string      `json:"objectId"`
 	PackageId       string      `json:"packageId"`
