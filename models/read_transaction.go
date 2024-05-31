@@ -1,5 +1,10 @@
 package models
 
+import (
+	"encoding/json"
+	"github.com/tidwall/gjson"
+)
+
 type GetTransactionMetaData struct {
 	GatewayTxSeqNumber uint64 `json:"gatewayTxSeqNumber"`
 	TransactionDigest  string `json:"transactionDigest"`
@@ -186,10 +191,57 @@ type SuiTransactionBlockResponse struct {
 	ConfirmedLocalExecution bool                `json:"confirmedLocalExecution,omitempty"`
 }
 
+func (o ObjectChange) GetObjectChangeAddressOwner() string {
+	b, err := json.Marshal(o.Owner)
+	if err != nil {
+		return ""
+	}
+
+	if gjson.ParseBytes(b).IsObject() {
+		var owner ObjectOwner
+		err = json.Unmarshal(b, &owner)
+		if err == nil {
+			return owner.AddressOwner
+		}
+	}
+	return ""
+}
+func (o ObjectChange) GetObjectChangeObjectOwner() string {
+	b, err := json.Marshal(o.Owner)
+	if err != nil {
+		return ""
+	}
+
+	if gjson.ParseBytes(b).IsObject() {
+		var owner ObjectOwner
+		err = json.Unmarshal(b, &owner)
+		if err == nil {
+			return owner.ObjectOwner
+		}
+	}
+	return ""
+}
+func (o ObjectChange) GetObjectOwnerShare() ObjectShare {
+	var share ObjectShare
+	b, err := json.Marshal(o.Owner)
+	if err != nil {
+		return share
+	}
+
+	if gjson.ParseBytes(b).IsObject() {
+		var owner ObjectOwner
+		err = json.Unmarshal(b, &owner)
+		if err == nil {
+			return owner.Shared
+		}
+	}
+	return share
+}
+
 type ObjectChange struct {
 	Type            string      `json:"type"`
 	Sender          string      `json:"sender"`
-	Owner           ObjectOwner `json:"owner"`
+	Owner           interface{} `json:"owner"`
 	ObjectType      string      `json:"objectType"`
 	ObjectId        string      `json:"objectId"`
 	PackageId       string      `json:"packageId"`
