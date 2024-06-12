@@ -49,14 +49,11 @@ type ProgrammableTransaction struct {
 }
 
 type MoveCallSuiTransaction struct {
-	Package       string   `json:"package"`
-	Module        string   `json:"module"`
-	Function      string   `json:"function"`
-	TypeArguments []string `json:"type_arguments"`
-	Arguments     []struct {
-		Input  int `json:"Input"`
-		Result int `json:"Result"`
-	} `json:"arguments"`
+	Package       string        `json:"package"`
+	Module        string        `json:"module"`
+	Function      string        `json:"function"`
+	TypeArguments []string      `json:"type_arguments"`
+	Arguments     []interface{} `json:"arguments"`
 }
 
 type SuiTransactionBlockData struct {
