@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/signer"
@@ -214,6 +215,8 @@ func SuiXQueryTransactionBlocks() {
 }
 
 func MoveCall() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.MoveCall(ctx, models.MoveCallRequest{
 		Signer:          "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		PackageObjectId: "0x7d584c9a27ca4a546e8203b005b0e9ae746c9bec6c8c3c0bc84611bcf4ceab5f",
@@ -227,7 +230,7 @@ func MoveCall() {
 			"web3",
 			"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 		},
-		Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:       &gasObj,
 		GasBudget: "1000",
 	})
 
@@ -240,11 +243,13 @@ func MoveCall() {
 }
 
 func MergeCoins() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.MergeCoins(ctx, models.MergeCoinsRequest{
 		Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		PrimaryCoin: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 		CoinToMerge: "0x92f03fdec6e0278dcb6fa3f4467eeee3e0bee1ac41825351ef53431677d2e2f7",
-		Gas:         "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:         &gasObj,
 		GasBudget:   "1000000",
 	})
 
@@ -257,11 +262,13 @@ func MergeCoins() {
 }
 
 func SplitCoin() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.SplitCoin(ctx, models.SplitCoinRequest{
 		Signer:       "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		CoinObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 		SplitAmounts: []string{"1000", "1000"},
-		Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:          &gasObj,
 		GasBudget:    "1000",
 	})
 
@@ -274,11 +281,13 @@ func SplitCoin() {
 }
 
 func SplitCoinEqual() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.SplitCoinEqual(ctx, models.SplitCoinEqualRequest{
 		Signer:       "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		CoinObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 		SplitCount:   "2",
-		Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:          &gasObj,
 		GasBudget:    "1000",
 	})
 
@@ -291,13 +300,15 @@ func SplitCoinEqual() {
 }
 
 func Publish() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.Publish(ctx, models.PublishRequest{
 		Sender: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		CompiledModules: []string{
 			"oRzrCwUAAAALAQAOAg4kAzJZBIsBFgWhAZoBB7sC5wEIogQoBsoECgrUBBoM7gSjAQ2RBgQAAAEBAQIBAwEEAQUBBgAHCAAACAgAAAkIAAIKDAEAAQQLAgAGDAIAAxIEAAEUBAEAAQANAAEAAA4CAQAADwMBAAAQBAEAAhUHCAEAAhYJCgEAARcLDAEAARgNCAEAAxkEDgAGGg8QAAUFEQEBCAEVEwgBAAIbFBUBAAMcDgEAAR0BDAEABR4ZAQEIBAYFBgYGBwYKAwsGDAYKFgoXDgYPGAMHCAEHCwMBCAQHCAUAAwYIAgcIAQcIBQEIAAEHCAUCBwsHAQgECwcBCAQBCAQBBgsDAQkAAQMBBwsDAQkAAQcLBwEJAAIHCwcBCQADAQsHAQkAAgcLBwEJAAsHAQkAAQgGAQYIBQEFAgkABQIDCwMBCAQBBgsHAQkAAwcLBwEJAAMHCAUBCwMBCQABCwMBCAQBCAIBCAEBCQAGZG9udXRzB2JhbGFuY2UEY29pbgZvYmplY3QDc3VpCHRyYW5zZmVyCnR4X2NvbnRleHQFRG9udXQJRG9udXRTaG9wDFNob3BPd25lckNhcARDb2luA1NVSQlUeENvbnRleHQJYnV5X2RvbnV0D2NvbGxlY3RfcHJvZml0cwllYXRfZG9udXQEaW5pdAJpZANVSUQFcHJpY2UHQmFsYW5jZQV2YWx1ZQtiYWxhbmNlX211dAVzcGxpdARqb2luA25ldwZzZW5kZXIEdGFrZQZkZWxldGUEemVybwxzaGFyZV9vYmplY3QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAwgAAAAAAAAAAAACAREIBgECAxEIBhMDAQsHAQgEAgIBEQgGAAEEAAUmCgEuOAAKABAAFCYDEAsAAQsBAQsCAQcAJwsBOAEMAwsDCgAQABQ4AgwECwAPAQsEOAMBCgIRCBIACwIuEQk4BAIBAQQAEhAKARABOAUMAwsBDwELAwoCOAYMBAsECwIuEQk4BwICAQQADgYLABMADAELARENAgMAAAABDgoAEQgSAgoALhEJOAgLABEIBugDAAAAAAAAOAkSATgKAgEBAQIA",
 		},
 		Dependencies: []string{"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"},
-		Gas:          "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:          &gasObj,
 		GasBudget:    "1000",
 	})
 
@@ -310,10 +321,12 @@ func Publish() {
 }
 
 func TransferObject() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.TransferObject(ctx, models.TransferObjectRequest{
 		Signer:    "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		ObjectId:  "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
-		Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:       &gasObj,
 		GasBudget: "1000",
 		Recipient: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 	})
@@ -344,12 +357,14 @@ func TransferSui() {
 }
 
 func Pay() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.Pay(ctx, models.PayRequest{
 		Signer:      "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		SuiObjectId: []string{"0x92f03fdec6e0278dcb6fa3f4467eeee3e0bee1ac41825351ef53431677d2e2f7"},
 		Recipient:   []string{"0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff"},
 		Amount:      []string{"1"},
-		Gas:         "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:         &gasObj,
 		GasBudget:   "1000000",
 	})
 
@@ -395,12 +410,14 @@ func PayAllSui() {
 }
 
 func RequestAddStake() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.RequestAddStake(ctx, models.AddStakeRequest{
 		Signer:    "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		Coins:     []string{"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"},
 		Amount:    "1",
 		Validator: "0x884515e99dab69c4c28662149db81ca563ed4c36e0c8ce44a58e40e25a0a64a1",
-		Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:       &gasObj,
 		GasBudget: "1000",
 	})
 
@@ -413,10 +430,12 @@ func RequestAddStake() {
 }
 
 func RequestWithdrawStake() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.RequestWithdrawStake(ctx, models.WithdrawStakeRequest{
 		Signer:         "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		StakedObjectId: "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
-		Gas:            "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:            &gasObj,
 		GasBudget:      "1000",
 	})
 
@@ -429,6 +448,8 @@ func RequestWithdrawStake() {
 }
 
 func BatchTransaction() {
+	gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
 	rsp, err := cli.BatchTransaction(ctx, models.BatchTransactionRequest{
 		Signer: "0x4ae8be62692d1bbf892b657ee78a59954240ee0525f20a5b5687a70995cf0eff",
 		RPCTransactionRequestParams: []models.RPCTransactionRequestParams{
@@ -454,7 +475,7 @@ func BatchTransaction() {
 				},
 			},
 		},
-		Gas:                            "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+		Gas:                            &gasObj,
 		GasBudget:                      "1000",
 		SuiTransactionBlockBuilderMode: "DevInspect",
 	})
