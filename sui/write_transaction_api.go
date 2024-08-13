@@ -13,7 +13,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// TODO fix Gas
 type IWriteTransactionAPI interface {
 	SuiExecuteTransactionBlock(ctx context.Context, req models.SuiExecuteTransactionBlockRequest) (models.SuiTransactionBlockResponse, error)
 	MoveCall(ctx context.Context, req models.MoveCallRequest) (models.TxnMetaData, error)
