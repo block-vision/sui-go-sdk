@@ -137,10 +137,12 @@ func main() {
   priKey := signerAccount.PriKey
   fmt.Printf("signerAccount.Address: %s\n", signerAccount.Address)
 
+  gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
   rsp, err := cli.TransferObject(ctx, models.TransferObjectRequest{
     Signer:    signerAccount.Address,
     ObjectId:  "0x99b51302b66bd65b070cdb549b86e4b9aa7370cfddc70211c2b5a478140c7999",
-    Gas:       "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+    Gas:       &gasObj,
     GasBudget: "100000000",
     Recipient: "0xaf9f4d20c205f26051a7e1758601c4c47a9f99df3f9823f70926c17c80882d36",
   })
@@ -268,6 +270,8 @@ func main() {
 	priKey := signerAccount.PriKey
 	fmt.Printf("signerAccount.Address: %s\n", signerAccount.Address)
 
+  gasObj := "0x58c103930dc52c0ab86319d99218e301596fda6fd80c4efafd7f4c9df1d0b6d0"
+
 	rsp, err := cli.MoveCall(ctx, models.MoveCallRequest{
 		Signer:          signerAccount.Address,
 		PackageObjectId: "0x7d584c9a27ca4a546e8203b005b0e9ae746c9bec6c8c3c0bc84611bcf4ceab5f",
@@ -281,7 +285,7 @@ func main() {
 			"BlockVision",
 			"0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
 		},
-		Gas:       "0x58c103930dc52c0ab86319d99218e301596fda6fd80c4efafd7f4c9df1d0b6d0",
+		Gas:       &gasObj,
 		GasBudget: "100000000",
 	})
 
@@ -343,11 +347,13 @@ func main() {
   priKey := signerAccount.PriKey
   fmt.Printf("signerAccount.Address: %s\n", signerAccount.Address)
 
+  gasObj := "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1"
+
   rsp, err := cli.MergeCoins(ctx, models.MergeCoinsRequest{
     Signer:      signerAccount.Address,
     PrimaryCoin: "0x180fe0c159644fe4b376e4488498e524b2a564919775cb2719734a4699ae7b28",
     CoinToMerge: "0x3b4644f82b4dc339c17ed5f786f4050e1f765b38e9297ffdacdfc5ead482669f",
-    Gas:         "0xc699c6014da947778fe5f740b2e9caf905ca31fb4c81e346f467ae126e3c03f1",
+    Gas:         &gasObj,
     GasBudget:   "100000000",
   })
 

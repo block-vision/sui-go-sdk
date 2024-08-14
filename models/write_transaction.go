@@ -2,6 +2,7 @@ package models
 
 import (
 	"crypto/ed25519"
+
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 )
 
@@ -45,7 +46,7 @@ type MergeCoinsRequest struct {
 	PrimaryCoin string `json:"primaryCoin"`
 	CoinToMerge string `json:"coinToMerge"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -56,7 +57,7 @@ type SplitCoinRequest struct {
 	CoinObjectId string   `json:"coinObjectId"`
 	SplitAmounts []string `json:"splitAmounts"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -67,7 +68,7 @@ type SplitCoinEqualRequest struct {
 	CoinObjectId string `json:"coinObjectId"`
 	SplitCount   string `json:"splitCount"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -78,7 +79,7 @@ type PublishRequest struct {
 	CompiledModules []string `json:"compiled_modules"`
 	Dependencies    []string `json:"dependencies"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -88,7 +89,7 @@ type TransferObjectRequest struct {
 	Signer   string `json:"signer"`
 	ObjectId string `json:"objectId"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 	Recipient string `json:"recipient"`
@@ -111,7 +112,7 @@ type PayRequest struct {
 	Recipient   []string `json:"recipient"`
 	Amount      []string `json:"amount"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -145,7 +146,7 @@ type AddStakeRequest struct {
 	// the validator's Sui address
 	Validator string `json:"validator"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -156,7 +157,7 @@ type WithdrawStakeRequest struct {
 	// StakedSui object ID
 	StakedObjectId string `json:"stakedObjectId"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 }
@@ -173,7 +174,7 @@ type BatchTransactionRequest struct {
 	// list of transaction request parameters
 	RPCTransactionRequestParams []RPCTransactionRequestParams `json:"RPCTransactionRequestParams"`
 	// gas object to be used in this transaction, node will pick one from the signer's possession if not provided
-	Gas string `json:"gas"`
+	Gas *string `json:"gas"`
 	// the gas budget, the transaction will fail if the gas cost exceed the budget
 	GasBudget string `json:"gasBudget"`
 	// Whether this is a regular transaction or a Dev Inspect Transaction
