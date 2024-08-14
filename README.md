@@ -11,10 +11,9 @@
 ## Overview
 
 The Sui-Go-SDK provided by BlockVision aims to offer access to all Sui RPC methods with Golang and also offers some
-additional features that make the integration easier.
-Sui-Go-SDK is designed for Layer 1 BlockChain [Sui](https://github.com/MystenLabs/sui) in Go programming language.
+additional features that make the integration easier.Sui-Go-SDK is designed for [Sui](https://github.com/MystenLabs/sui) in Go programming language.
 
-Powred by [BlockVision](https://blockvision.org/) & [SuiVision](https://suivision.xyz/) team. Feel free to contact us on [Discord](https://discord.gg/Re6prK86Tr) if you have any questions.
+Powred by [SuiVision](https://suivision.xyz/) team.
 
 ### Features
 
