@@ -60,6 +60,7 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 	}
 	request = request.WithContext(ctx)
 	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 	rsp, err := h.c.Do(request.WithContext(ctx))
 	if err != nil {
 		return []byte{}, err
