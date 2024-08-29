@@ -12,29 +12,29 @@ import (
 )
 
 var ctx = context.Background()
-var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
+var cli = sui.NewSuiClient(constant.BvMainnetEndpoint)
 
 func main() {
-	SuiGetTotalTransactionBlocks()
+	//SuiGetTotalTransactionBlocks()
 	SuiGetTransactionBlock()
-	SuiMultiGetTransactionBlocks()
-	SuiXQueryTransactionBlocks()
-	MoveCall()
-	MergeCoins()
-	SplitCoin()
-	SplitCoinEqual()
-	Publish()
-	TransferObject()
-	TransferSui()
-	Pay()
-	PaySui()
-	PayAllSui()
-	RequestAddStake()
-	RequestWithdrawStake()
-	BatchTransaction()
-	SuiExecuteTransactionBlock()
-	SuiDryRunTransactionBlock()
-	SignAndExecuteTransactionBlock()
+	//SuiMultiGetTransactionBlocks()
+	//SuiXQueryTransactionBlocks()
+	//MoveCall()
+	//MergeCoins()
+	//SplitCoin()
+	//SplitCoinEqual()
+	//Publish()
+	//TransferObject()
+	//TransferSui()
+	//Pay()
+	//PaySui()
+	//PayAllSui()
+	//RequestAddStake()
+	//RequestWithdrawStake()
+	//BatchTransaction()
+	//SuiExecuteTransactionBlock()
+	//SuiDryRunTransactionBlock()
+	//SignAndExecuteTransactionBlock()
 }
 
 func SuiExecuteTransactionBlock() {
@@ -143,7 +143,7 @@ func SuiGetTotalTransactionBlocks() {
 
 func SuiGetTransactionBlock() {
 	rsp, err := cli.SuiGetTransactionBlock(ctx, models.SuiGetTransactionBlockRequest{
-		Digest: "CeVpDXKKU3Gs89efej9pKiYYQyTzifE2BDxWwquUaUht",
+		Digest: "AhZYEiFFQtv5i1nLaURHiyvQNiyUBzNCHodnKFxgc2Lf",
 		Options: models.SuiTransactionBlockOptions{
 			ShowInput:          true,
 			ShowRawInput:       true,

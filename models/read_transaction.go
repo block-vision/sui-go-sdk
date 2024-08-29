@@ -28,12 +28,24 @@ type SuiArgument map[string]interface{}
 type SuiCallArg map[string]interface{}
 
 type SuiTransactionBlockKind struct {
-	Kind         string           `json:"kind"`
-	Inputs       []SuiCallArg     `json:"inputs"`
-	Transactions []SuiTransaction `json:"transactions"`
+	Kind         string       `json:"kind"`
+	Inputs       []SuiCallArg `json:"inputs"`
+	Transactions []any        `json:"transactions"`
 }
 
-type SuiTransaction struct {
+func MoveCall(data any) *MoveCallSuiTransaction {
+	bs, _ := json.Marshal(data)
+	res := gjson.GetBytes(bs, "MoveCall").Raw
+
+	if res != "" {
+		var data *MoveCallSuiTransaction
+		_ = json.Unmarshal([]byte(res), &data)
+		return data
+	}
+	return nil
+}
+
+type SuiTransactionEnum struct {
 	MakeMoveVec     []interface{}           `json:"MakeMoveVec,omitempty"`
 	MergeCoins      []interface{}           `json:"MergeCoins,omitempty"`
 	SplitCoins      []interface{}           `json:"SplitCoins,omitempty"`
@@ -44,8 +56,8 @@ type SuiTransaction struct {
 }
 
 type ProgrammableTransaction struct {
-	Transactions []SuiTransaction `json:"transactions"`
-	Inputs       []SuiCallArg     `json:"inputs"`
+	Transactions []any        `json:"transactions"`
+	Inputs       []SuiCallArg `json:"inputs"`
 }
 
 type MoveCallSuiTransaction struct {
