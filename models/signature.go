@@ -21,7 +21,7 @@ type Digest = Base64Data
 type ObjectRef struct {
 	Digest   string   `json:"digest"`
 	ObjectId ObjectId `json:"objectId"`
-	Version  int64    `json:"version"`
+	Version  uint64   `json:"version"`
 }
 
 type SigScheme string

@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+
 	"github.com/tidwall/gjson"
 )
 
@@ -85,7 +86,7 @@ type SuiObjectResponseError struct {
 	Code     string `json:"code"`
 	Error    string `json:"error"`
 	ObjectId string `json:"object_id"`
-	Version  int    `json:"version"`
+	Version  uint64 `json:"version"`
 	Digest   string `json:"digest"`
 }
 
@@ -97,13 +98,13 @@ type ObjectOwner struct {
 }
 
 type ObjectShare struct {
-	InitialSharedVersion int `json:"initial_shared_version"`
+	InitialSharedVersion uint64 `json:"initial_shared_version"`
 }
 
 type SuiRawMoveObject struct {
 	Type              string `json:"type"`
 	HasPublicTransfer bool   `json:"hasPublicTransfer"`
-	Version           int    `json:"version"`
+	Version           uint64 `json:"version"`
 	BcsBytes          string `json:"bcsBytes"`
 }
 
@@ -195,7 +196,7 @@ type DynamicFieldInfo struct {
 	Type       string           `json:"type"`
 	ObjectType string           `json:"objectType"`
 	ObjectId   string           `json:"objectId"`
-	Version    int              `json:"version"`
+	Version    uint64           `json:"version"`
 	Digest     string           `json:"digest"`
 }
 
