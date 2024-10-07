@@ -2,9 +2,13 @@ package utils
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	"github.com/mr-tron/base58"
+	"golang.org/x/crypto/blake2b"
 )
 
 func PrettyPrint(v interface{}) {
@@ -34,4 +38,47 @@ func IsFieldNonEmpty(v interface{}, fieldName string) bool {
 	}
 
 	return !field.IsZero()
+}
+
+// GetTxDigest get transaction digest from tx bytes in base64
+// go version of https://github.com/MystenLabs/sui/blob/main/sdk/typescript/src/transactions/TransactionData.ts
+func GetTxDigest(txBytesB64 string) (string, error) {
+
+	txBytes, err := base64.StdEncoding.DecodeString(txBytesB64)
+	if err != nil {
+		return "", err
+	}
+
+	return GetTxDigestFromBytes(txBytes)
+}
+
+// GetTxDigestFromBytes get transaction digest from tx bytes
+func GetTxDigestFromBytes(txBytes []byte) (string, error) {
+	typedData, err := hashTypedData("TransactionData", txBytes)
+	if err != nil {
+		return "", err
+	}
+
+	return base58.Encode(typedData), nil
+}
+
+func hashTypedData(typeTag string, data []byte) ([]byte, error) {
+	// Convert typeTag to bytes and append "::"
+	typeTagBytes := []byte(typeTag + "::")
+
+	// Create a new byte array to hold typeTagBytes and data
+	dataWithTag := append(typeTagBytes, data...)
+
+	// Perform BLAKE2b hashing with a digest size of 32 bytes
+	hash, err := blake2b.New(32, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = hash.Write(dataWithTag)
+	if err != nil {
+		return nil, err
+	}
+
+	return hash.Sum(nil), nil
 }
