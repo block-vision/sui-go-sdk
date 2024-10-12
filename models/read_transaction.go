@@ -345,9 +345,9 @@ type SuiDevInspectTransactionBlockRequest struct {
 	// BCS encoded TransactionKind(as opposed to TransactionData, which include gasBudget and gasPrice)
 	TxBytes string `json:"txBytes"`
 	// Gas is not charged, but gas usage is still calculated. Default to use reference gas price
-	GasPrice string `json:"gasPrice"`
+	GasPrice string `json:"gasPrice,omitempty"`
 	// The epoch to perform the call. Will be set from the system state object if not provided
-	Epoch string `json:"epoch"`
+	Epoch string `json:"epoch,omitempty"`
 }
 
 type SuiXSubscribeEventsRequest struct {
