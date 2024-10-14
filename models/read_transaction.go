@@ -199,6 +199,7 @@ type SuiTransactionBlockResponse struct {
 	TimestampMs             string              `json:"timestampMs,omitempty"`
 	Checkpoint              string              `json:"checkpoint,omitempty"`
 	ConfirmedLocalExecution bool                `json:"confirmedLocalExecution,omitempty"`
+	Results                 json.RawMessage     `json:"results,omitempty"`
 }
 
 func (o ObjectChange) GetObjectChangeAddressOwner() string {
