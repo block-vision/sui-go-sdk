@@ -829,11 +829,11 @@ func main() {
 ```
 
 ## API Documentation
-The Go Client SDK API documentation is currently available at [godoc.org](https://pkg.go.dev/github.com/block-vision/sui-go-sdk).
+The Go Client SDK API documentation is currently available at [pkg.go.dev](https://pkg.go.dev/github.com/block-vision/sui-go-sdk).
 
 ## Contribution
 
-+ We welcome your suggestions, comments (including criticisms), comments and contributions.
++ We welcome your suggestions, comments (including criticisms) and contributions.
 + Please follow the PR/issue template provided to ensure that your contributions are clear and easy to understand.
 + Thank you to all the people who participate in building better infrastructure!
 
