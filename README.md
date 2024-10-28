@@ -12,7 +12,7 @@
 
 The Sui-Go-SDK aims to offer access to all Sui RPC methods with Golang and also offers some
 additional features that make the integration easier.
-Powred by [SuiVision](https://suivision.xyz/) team.
+Powered by [SuiVision](https://suivision.xyz/) team.
 
 ### Features
 
