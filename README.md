@@ -10,10 +10,9 @@
 
 ## Overview
 
-The Sui-Go-SDK provided by BlockVision aims to offer access to all Sui RPC methods with Golang and also offers some
-additional features that make the integration easier. Sui-Go-SDK is designed for [Sui](https://github.com/MystenLabs/sui) in Go programming language.
-
-Powred by [SuiVision](https://suivision.xyz/) team.
+The Sui-Go-SDK aims to offer access to all Sui RPC methods with Golang and also offers some
+additional features that make the integration easier.
+Powered by [SuiVision](https://suivision.xyz/) team.
 
 ### Features
 
@@ -829,11 +828,11 @@ func main() {
 ```
 
 ## API Documentation
-The Go Client SDK API documentation is currently available at [godoc.org](https://pkg.go.dev/github.com/block-vision/sui-go-sdk).
+The Go Client SDK API documentation is currently available at [pkg.go.dev](https://pkg.go.dev/github.com/block-vision/sui-go-sdk).
 
 ## Contribution
 
-+ We welcome your suggestions, comments (including criticisms), comments and contributions.
++ We welcome your suggestions, comments (including criticisms) and contributions.
 + Please follow the PR/issue template provided to ensure that your contributions are clear and easy to understand.
 + Thank you to all the people who participate in building better infrastructure!
 
