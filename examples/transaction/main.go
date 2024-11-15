@@ -12,7 +12,7 @@ import (
 )
 
 var ctx = context.Background()
-var cli = sui.NewSuiClient(constant.BvMainnetEndpoint)
+var cli = sui.NewSuiClient(constant.BvTestnetEndpoint)
 
 func main() {
 	//SuiGetTotalTransactionBlocks()
@@ -143,7 +143,7 @@ func SuiGetTotalTransactionBlocks() {
 
 func SuiGetTransactionBlock() {
 	rsp, err := cli.SuiGetTransactionBlock(ctx, models.SuiGetTransactionBlockRequest{
-		Digest: "AhZYEiFFQtv5i1nLaURHiyvQNiyUBzNCHodnKFxgc2Lf",
+		Digest: "DjubVWzkndWDTzcWVd6g3xbQsfG3H2Gt7vMfrm1YjLNJ",
 		Options: models.SuiTransactionBlockOptions{
 			ShowInput:          true,
 			ShowRawInput:       true,

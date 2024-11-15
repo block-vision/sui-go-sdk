@@ -189,7 +189,7 @@ type SuiSystemStateSummary struct {
 	InactivePoolsSize                     string                `json:"inactivePoolsSize"`
 	ValidatorCandidatesId                 string                `json:"validatorCandidatesId"`
 	ValidatorCandidatesSize               string                `json:"validatorCandidatesSize"`
-	AtRiskValidators                      []string              `json:"atRiskValidators"`
+	AtRiskValidators                      []interface{}         `json:"atRiskValidators"`
 	ValidatorReportRecords                [][]interface{}       `json:"validatorReportRecords"`
 }
 
