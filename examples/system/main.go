@@ -13,17 +13,17 @@ var ctx = context.Background()
 var cli = sui.NewSuiClient(constant.BvMainnetEndpoint)
 
 func main() {
-	SuiGetCheckpoint()
-	SuiGetCheckpoints()
-	SuiGetLatestCheckpointSequenceNumber()
-	SuiXGetReferenceGasPrice()
-	SuiXGetCommitteeInfo()
-	SuiXGetStakes()
-	SuiXGetStakesByIds()
+	//SuiGetCheckpoint()
+	//SuiGetCheckpoints()
+	//SuiGetLatestCheckpointSequenceNumber()
+	//SuiXGetReferenceGasPrice()
+	//SuiXGetCommitteeInfo()
+	//SuiXGetStakes()
+	//SuiXGetStakesByIds()
 	SuiXGetLatestSuiSystemState()
-	SuiGetChainIdentifier()
-	SuiXGetValidatorsApy()
-	SuiGetProtocolConfig()
+	//SuiGetChainIdentifier()
+	//SuiXGetValidatorsApy()
+	//SuiGetProtocolConfig()
 }
 
 func SuiGetCheckpoint() {

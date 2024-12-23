@@ -263,9 +263,9 @@ type ObjectChange struct {
 }
 
 type BalanceChanges struct {
-	Owner    ObjectOwner `json:"owner"`
-	CoinType string      `json:"coinType"`
-	Amount   string      `json:"amount"`
+	Owner    any    `json:"owner"`
+	CoinType string `json:"coinType"`
+	Amount   string `json:"amount"`
 }
 
 type SuiMultiGetTransactionBlocksRequest struct {
