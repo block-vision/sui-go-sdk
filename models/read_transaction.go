@@ -2,7 +2,6 @@ package models
 
 import (
 	"encoding/json"
-
 	"github.com/tidwall/gjson"
 )
 
@@ -263,9 +262,41 @@ type ObjectChange struct {
 }
 
 type BalanceChanges struct {
-	Owner    any    `json:"owner"`
-	CoinType string `json:"coinType"`
-	Amount   string `json:"amount"`
+	Owner    json.RawMessage `json:"owner"`
+	CoinType string          `json:"coinType"`
+	Amount   string          `json:"amount"`
+}
+
+type IOwner interface {
+	GetBalanceChangeOwner() string
+}
+
+type OwnerString string
+
+func (o OwnerString) GetBalanceChangeOwner() string {
+	return string(o)
+}
+
+type BalanceChangeOwner struct {
+	AddressOwner string `json:"AddressOwner"`
+	ObjectOwner  string `json:"ObjectOwner"`
+}
+
+func (o BalanceChanges) GetBalanceChangeOwner() string {
+	var addressOwner BalanceChangeOwner
+	if err := json.Unmarshal(o.Owner, &addressOwner); err == nil {
+		if addressOwner.AddressOwner != "" {
+			return addressOwner.AddressOwner
+		}
+	}
+
+	var immutableOwner string
+	if err := json.Unmarshal(o.Owner, &immutableOwner); err == nil {
+		if immutableOwner == "Immutable" {
+			return "Immutable"
+		}
+	}
+	return ""
 }
 
 type SuiMultiGetTransactionBlocksRequest struct {
