@@ -30,10 +30,7 @@ type ZkLoginPublicIdentifier struct {
 }
 
 func NewZkLoginPublicIdentifier(data []byte, options *ZkLoginPublicIdentifierOptions) *ZkLoginPublicIdentifier {
-	return &ZkLoginPublicIdentifier{
-		data:    data,
-		options: options,
-	}
+	panic("not implemented")
 }
 
 /**
@@ -44,6 +41,7 @@ func (p *ZkLoginPublicIdentifier) toRawBytes() []byte {
 }
 
 func (p *ZkLoginPublicIdentifier) ToSuiAddress() string {
+	panic("not implemented")
 
 	// Each hex char represents half a byte, hence hex address doubles the length
 	// return normalizeSuiAddress(
@@ -51,7 +49,7 @@ func (p *ZkLoginPublicIdentifier) ToSuiAddress() string {
 	// );
 
 	// Convert the public identifier to a Sui address
-	return "0x" + mystenbcs.ToHex(mystenbcs.Blake2b(p.toSuiBytes(), 32))[:40]
+	// return "0x" + mystenbcs.ToHex(mystenbcs.Blake2b(p.toSuiBytes(), 32))[:40]
 }
 
 func (pk *ZkLoginPublicIdentifier) VerifyPersonalMessage(message []byte, signature []byte, client *graphql.Client) (bool, error) {
