@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/utils"
@@ -161,7 +162,7 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetStakes(ctx context.Context, req models
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal suix_getStakes err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }
@@ -183,7 +184,7 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetStakesByIds(ctx context.Context, req m
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal suix_getStakesByIds err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }
@@ -207,7 +208,7 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetEpochs(ctx context.Context, req models
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal suix_getEpochs err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }

@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/tidwall/gjson"
@@ -57,7 +58,7 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Conte
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal sui_getTransactionBlock err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }
@@ -80,7 +81,7 @@ func (s *suiReadTransactionFromSuiImpl) SuiMultiGetTransactionBlocks(ctx context
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal sui_multiGetTransactionBlocks err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }
@@ -108,7 +109,7 @@ func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.C
 	}
 	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
 	if err != nil {
-		return rsp, err
+		return rsp, fmt.Errorf("unmarshal suix_queryTransactionBlocks err: %v response: %s", err, string(respBytes))
 	}
 	return rsp, nil
 }
