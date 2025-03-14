@@ -1,6 +1,7 @@
 package signer
 
 import (
+	"bytes"
 	"crypto"
 	"crypto/ed25519"
 	"encoding/base64"
@@ -9,6 +10,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/common/keypair"
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
+	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	"github.com/tyler-smith/go-bip39"
 	"golang.org/x/crypto/blake2b"
 )
@@ -92,4 +94,32 @@ func (s *Signer) SignTransaction(b64TxBytes string) (*models.SignedTransactionSe
 func (s *Signer) SignPersonalMessage(message string) (*SignedMessageSerializedSig, error) {
 	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
 	return s.SignMessage(b64Message, constant.PersonalMessageIntentScope)
+}
+
+// SignPersonalMessageV1 is the same as SignPersonalMessage, but it uses the new message format for personal messages.
+func (s *Signer) SignPersonalMessageV1(message string) (*SignedMessageSerializedSig, error) {
+	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
+	return s.SignMessageV1(b64Message, constant.PersonalMessageIntentScope)
+}
+
+// SignMessageV1 is the same as SignMessage, but it uses the new message format for personal messages.
+func (s *Signer) SignMessageV1(data string, scope constant.IntentScope) (*SignedMessageSerializedSig, error) {
+	b64Bytes, _ := base64.StdEncoding.DecodeString(data)
+
+	bcsEncodedMsg := bytes.Buffer{}
+	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+	bcsEncoder.Encode(b64Bytes)
+	message := models.NewMessageWithIntent(bcsEncodedMsg.Bytes(), scope)
+	digest := blake2b.Sum256(message)
+	var noHash crypto.Hash
+	sigBytes, err := s.PriKey.Sign(nil, digest[:], noHash)
+	if err != nil {
+		return nil, err
+	}
+
+	ret := &SignedMessageSerializedSig{
+		Message:   data,
+		Signature: models.ToSerializedSignature(sigBytes, s.PriKey.Public().(ed25519.PublicKey)),
+	}
+	return ret, nil
 }
