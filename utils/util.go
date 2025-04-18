@@ -6,10 +6,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/blake2b"
 )
+
+func NormalizeSuiAddress(input string) string {
+	addr := strings.ToLower(input)
+	if strings.HasPrefix(addr, "0x") {
+		addr = addr[2:]
+	}
+
+	addr = strings.Repeat("0", 64-len(addr)) + addr
+	return "0x" + addr
+}
 
 func PrettyPrint(v interface{}) {
 	b, err := json.Marshal(v)

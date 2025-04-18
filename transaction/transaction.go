@@ -1,10 +1,14 @@
 package transaction
 
 import (
+	"bytes"
+	"errors"
 	"math"
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
+	"github.com/block-vision/sui-go-sdk/mystenbcs"
+	"github.com/block-vision/sui-go-sdk/utils"
 )
 
 type Transaction struct {
@@ -70,19 +74,15 @@ func (tx *Transaction) Gas() Argument {
 }
 
 func (tx *Transaction) Add(command Command) Argument {
-	tx.Data.Commands = append(tx.Data.Commands, command)
-	index := uint16(len(tx.Data.Commands) - 1)
+	index := tx.Data.AddCommand(command)
 	return createTransactionResult(index, nil)
 }
 
 func (tx *Transaction) SplitCoins(coin Argument, amount []Argument) Argument {
-	cmd := splitCoins(SplitCoinsValue{
+	return tx.Add(splitCoins(SplitCoinsValue{
 		Coin:   coin,
 		Amount: amount,
-	})
-	tx.Data.Commands = append(tx.Data.Commands, cmd)
-	index := uint16(len(tx.Data.Commands) - 1)
-	return createTransactionResult(index, nil)
+	}))
 }
 
 func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argument {
@@ -143,18 +143,99 @@ func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argum
 	}))
 }
 
-func (tx *Transaction) Object(obj string) Argument {
-	// TODO
-	return InputObject{
-		Value: obj,
+func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
+	var callArg CallArg
+
+	// Get inputObject's ID
+	var id string
+	if inputObject.Value == nil {
+		id = inputObject.ObjectId
+		if id == "" {
+			return nil, errors.New("object id is empty")
+		}
+
+		callArg = UnresolvedObject{
+			ObjectId: utils.NormalizeSuiAddress(id),
+		}
+	} else {
+		objArg := inputObject.Value.Value
+		switch objArg.(type) {
+		case ImmOrOwnedObject:
+			id = objArg.(ImmOrOwnedObject).Value.ObjectId
+		case SharedObject:
+			id = objArg.(SharedObject).Value.ObjectId
+		case Receiving:
+			id = objArg.(Receiving).Value.ObjectId
+		default:
+			return nil, errors.New("object value is not supported")
+		}
+
+		callArg = Object{
+			Value: objArg,
+		}
 	}
+
+	// Check obj id if exists in tx
+	isInserted := false
+	for _, input := range tx.Data.Inputs {
+		var inputId string
+
+		switch input.(type) {
+		case Object:
+			obj := input.(Object).Value
+			switch obj.(type) {
+			case ImmOrOwnedObject:
+				inputId = obj.(ImmOrOwnedObject).Value.ObjectId
+			case SharedObject:
+				inputId = obj.(SharedObject).Value.ObjectId
+			case Receiving:
+				inputId = obj.(Receiving).Value.ObjectId
+			default:
+				return nil, errors.New("object value on tx is not supported")
+			}
+		case UnresolvedObject:
+			inputId = input.(UnresolvedObject).ObjectId
+		}
+
+		if inputId == id {
+			isInserted = true
+			break
+		}
+	}
+
+	if isInserted {
+		return nil, errors.New("object id already exists in tx")
+	}
+
+	input := tx.Data.AddInput(callArg)
+	arg := Input{
+		Input: input.(Input).Input,
+		Type:  input.(Input).Type,
+	}
+
+	return arg, nil
 }
 
-func (tx *Transaction) Pure(input string) Argument {
-	// TODO
-	return InputPure{
-		Value: []byte{},
+func (tx *Transaction) Pure(inputPure InputPure) (Argument, error) {
+	value := inputPure.Value
+	bcsEncodedMsg := bytes.Buffer{}
+	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+	err := bcsEncoder.Encode(value)
+	if err != nil {
+		return nil, err
 	}
+
+	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg.Bytes())
+
+	input := tx.Data.AddInput(Pure{
+		bcsBase64,
+	})
+	arg := Input{
+		Input: input.(Input).Input,
+		Type:  input.(Input).Type,
+	}
+
+	return arg, nil
 }
 
 func createTransactionResult(index uint16, length *uint16) Argument {

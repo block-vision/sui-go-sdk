@@ -1,6 +1,8 @@
 package transaction
 
 import (
+	"strings"
+
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 )
@@ -12,6 +14,23 @@ type TransactionData struct {
 	GasData    GasData
 	Inputs     []CallArg
 	Commands   []Command
+}
+
+func (td *TransactionData) AddCommand(command Command) (index uint16) {
+	index = uint16(len(td.Commands))
+	td.Commands = append(td.Commands, command)
+
+	return index
+}
+
+func (td *TransactionData) AddInput(input CallArg) Argument {
+	index := len(td.Inputs)
+	td.Inputs = append(td.Inputs, input)
+
+	return Input{
+		Input: uint16(index),
+		Type:  strings.ToLower(input.callArgKind()),
+	}
 }
 
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
@@ -36,12 +55,15 @@ type ProgrammableTransaction struct {
 // CallArg https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L80
 // - Pure
 // - Object
+// - UnresolvedPure
+// - UnresolvedObject
 type CallArg interface {
 	callArgKind() string
 }
 
 type Pure struct {
-	Value []byte
+	// BCSBates's Base64
+	Bytes string
 }
 
 func (p Pure) callArgKind() string {
@@ -54,6 +76,22 @@ type Object struct {
 
 func (o Object) callArgKind() string {
 	return "Object"
+}
+
+type UnresolvedPure struct {
+	Value string
+}
+
+func (u UnresolvedPure) callArgKind() string {
+	return "UnresolvedPure"
+}
+
+type UnresolvedObject struct {
+	ObjectId string
+}
+
+func (u UnresolvedObject) callArgKind() string {
+	return "UnresolvedObject"
 }
 
 // ObjectArg
@@ -199,6 +237,7 @@ type UpgradeValue struct {
 
 // Argument https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L745
 // - GasCoin
+// - Input
 // - InputPure
 // - InputObject
 // - Result
@@ -215,8 +254,18 @@ func (g GasCoin) argumentKind() string {
 	return "GasCoin"
 }
 
+type Input struct {
+	// Index
+	Input uint16
+	Type  string
+}
+
+func (i Input) argumentKind() string {
+	return "Input"
+}
+
 type InputPure struct {
-	Value []byte
+	Value string
 }
 
 func (i InputPure) argumentKind() string {
@@ -224,7 +273,8 @@ func (i InputPure) argumentKind() string {
 }
 
 type InputObject struct {
-	Value string
+	ObjectId string
+	Value    *Object
 }
 
 func (i InputObject) argumentKind() string {
