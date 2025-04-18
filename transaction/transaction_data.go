@@ -33,6 +33,40 @@ func (td *TransactionData) AddInput(input CallArg) Argument {
 	}
 }
 
+func (td *TransactionData) GetObject(objectId string) Argument {
+	for i, input := range td.Inputs {
+		var inputId string
+
+		switch input.(type) {
+		case Object:
+			obj := input.(Object).Value
+			switch obj.(type) {
+			case ImmOrOwnedObject:
+				inputId = obj.(ImmOrOwnedObject).Value.ObjectId
+			case SharedObject:
+				inputId = obj.(SharedObject).Value.ObjectId
+			case Receiving:
+				inputId = obj.(Receiving).Value.ObjectId
+			default:
+				panic("object value is not supported")
+			}
+		case UnresolvedObject:
+			inputId = input.(UnresolvedObject).ObjectId
+		default:
+			continue
+		}
+
+		if inputId == objectId {
+			return Input{
+				Input: uint16(i),
+				Type:  strings.ToLower(input.callArgKind()),
+			}
+		}
+	}
+
+	return nil
+}
+
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
 type GasData struct {
 	Payment []sui_types.SuiObjectRef

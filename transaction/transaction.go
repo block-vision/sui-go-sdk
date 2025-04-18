@@ -146,7 +146,6 @@ func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argum
 func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 	var callArg CallArg
 
-	// Get inputObject's ID
 	var id string
 	if inputObject.Value == nil {
 		id = inputObject.ObjectId
@@ -175,36 +174,9 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 		}
 	}
 
-	// Check obj id if exists in tx
-	isInserted := false
-	for _, input := range tx.Data.Inputs {
-		var inputId string
-
-		switch input.(type) {
-		case Object:
-			obj := input.(Object).Value
-			switch obj.(type) {
-			case ImmOrOwnedObject:
-				inputId = obj.(ImmOrOwnedObject).Value.ObjectId
-			case SharedObject:
-				inputId = obj.(SharedObject).Value.ObjectId
-			case Receiving:
-				inputId = obj.(Receiving).Value.ObjectId
-			default:
-				return nil, errors.New("object value on tx is not supported")
-			}
-		case UnresolvedObject:
-			inputId = input.(UnresolvedObject).ObjectId
-		}
-
-		if inputId == id {
-			isInserted = true
-			break
-		}
-	}
-
-	if isInserted {
-		return nil, errors.New("object id already exists in tx")
+	findObj := tx.Data.GetObject(id)
+	if findObj != nil {
+		return findObj, nil
 	}
 
 	input := tx.Data.AddInput(callArg)
