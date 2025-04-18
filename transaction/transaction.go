@@ -147,6 +147,7 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 	var callArg CallArg
 
 	var id string
+	isSharedObjectAndSetMutable := false
 	if inputObject.Value == nil {
 		id = inputObject.ObjectId
 		if id == "" {
@@ -162,7 +163,9 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 		case ImmOrOwnedObject:
 			id = objArg.(ImmOrOwnedObject).Value.ObjectId
 		case SharedObject:
-			id = objArg.(SharedObject).Value.ObjectId
+			val := objArg.(SharedObject).Value
+			isSharedObjectAndSetMutable = val.Mutable
+			id = val.ObjectId
 		case Receiving:
 			id = objArg.(Receiving).Value.ObjectId
 		default:
@@ -174,8 +177,22 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 		}
 	}
 
-	findObj := tx.Data.GetObject(id)
+	findObj := tx.Data.GetInputObject(id)
 	if findObj != nil {
+		if isSharedObjectAndSetMutable {
+			index := findObj.(Input).Input
+			existedInput := tx.Data.Inputs[index]
+			if obj, ok := existedInput.(Object); ok {
+				if objArg, ok := obj.Value.(SharedObject); ok {
+					newObjArg := objArg
+					newObjArg.Value.Mutable = true
+					tx.Data.Inputs[index] = Object{
+						Value: newObjArg,
+					}
+				}
+			}
+		}
+
 		return findObj, nil
 	}
 

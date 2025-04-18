@@ -33,7 +33,7 @@ func (td *TransactionData) AddInput(input CallArg) Argument {
 	}
 }
 
-func (td *TransactionData) GetObject(objectId string) Argument {
+func (td *TransactionData) GetInputObject(objectId string) Argument {
 	for i, input := range td.Inputs {
 		var inputId string
 
