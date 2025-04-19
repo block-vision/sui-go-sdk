@@ -1,43 +1,43 @@
 package transaction
 
 func moveCall(input ProgrammableMoveCall) Command {
-	return MoveCall{
-		Value: input,
+	return Command{
+		MoveCall: input,
 	}
 }
 
-func transferObjects(input TransferObjectsValue) Command {
-	return TransferObjects{
-		Value: input,
+func transferObjects(input TransferObjects) Command {
+	return Command{
+		TransferObjects: input,
 	}
 }
 
-func splitCoins(input SplitCoinsValue) Command {
-	return SplitCoins{
-		Value: input,
+func splitCoins(input SplitCoins) Command {
+	return Command{
+		SplitCoins: input,
 	}
 }
 
-func mergeCoins(input MergeCoinsValue) Command {
-	return MergeCoins{
-		Value: input,
+func mergeCoins(input MergeCoins) Command {
+	return Command{
+		MergeCoins: input,
 	}
 }
 
-func publish(input PublishValue) Command {
-	return Publish{
-		Value: input,
+func publish(input Publish) Command {
+	return Command{
+		Publish: input,
 	}
 }
 
-func makeMoveVec(input MakeMoveVecValue) Command {
-	return MakeMoveVec{
-		Value: input,
+func makeMoveVec(input MakeMoveVec) Command {
+	return Command{
+		MakeMoveVec: input,
 	}
 }
 
-func upgrade(input UpgradeValue) Command {
-	return Upgrade{
-		Value: input,
+func upgrade(input Upgrade) Command {
+	return Command{
+		Upgrade: input,
 	}
 }

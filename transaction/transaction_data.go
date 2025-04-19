@@ -2,61 +2,59 @@ package transaction
 
 import (
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/models/sui_types"
+	"github.com/block-vision/sui-go-sdk/mystenbcs"
 )
 
 // TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
 type TransactionDataV1 struct {
-	Sender     *models.SuiAddress
+	Sender     models.SuiAddressBytes
 	Expiration TransactionExpiration
 	GasData    GasData
-	TransactionKind
+	Kind       TransactionKind
 }
 
 func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
-	index = uint16(len(td.TransactionKind.ProgrammableTransaction.Commands))
-	td.TransactionKind.ProgrammableTransaction.Commands = append(td.TransactionKind.ProgrammableTransaction.Commands, command)
+	index = uint16(len(td.Kind.ProgrammableTransaction.Commands))
+	td.Kind.ProgrammableTransaction.Commands = append(td.Kind.ProgrammableTransaction.Commands, command)
 
 	return index
 }
 
-func (td *TransactionDataV1) AddInput(input CallArg, inputType string) Argument {
-	index := len(td.TransactionKind.ProgrammableTransaction.Inputs)
-	td.TransactionKind.ProgrammableTransaction.Inputs = append(td.TransactionKind.ProgrammableTransaction.Inputs, input)
+func (td *TransactionDataV1) AddInput(input CallArg) Argument {
+	index := len(td.Kind.ProgrammableTransaction.Inputs)
+	td.Kind.ProgrammableTransaction.Inputs = append(td.Kind.ProgrammableTransaction.Inputs, input)
 
-	return Input{
+	return Argument{
 		Input: uint16(index),
-		Type:  inputType,
 	}
 }
 
-func (td *TransactionDataV1) GetInputObject(objectId string) Argument {
-	for i, input := range td.TransactionKind.ProgrammableTransaction.Inputs {
-		var inputId string
+func (td *TransactionDataV1) GetInputObjectIndex(address models.SuiAddress) *uint16 {
+	addressBytes, err := ConvertSuiAddressStringToBytes(address)
+	if err != nil {
+		return nil
+	}
 
-		switch input.(type) {
-		case Object:
-			obj := input.(Object).Value
-			switch obj.(type) {
-			case ImmOrOwnedObject:
-				inputId = obj.(ImmOrOwnedObject).Value.ObjectId
-			case SharedObject:
-				inputId = obj.(SharedObject).Value.ObjectId
-			case Receiving:
-				inputId = obj.(Receiving).Value.ObjectId
-			default:
-				panic("object value is not supported")
+	for i, input := range td.Kind.ProgrammableTransaction.Inputs {
+		if !input.Object.ImmOrOwnedObject.ObjectId.IsZero() {
+			objectId := input.Object.ImmOrOwnedObject.ObjectId
+			if objectId.IsEqual(*addressBytes) {
+				index := uint16(i)
+				return &index
 			}
-		case UnresolvedObject:
-			inputId = input.(UnresolvedObject).ObjectId
-		default:
-			continue
 		}
-
-		if inputId == objectId {
-			return Input{
-				Input: uint16(i),
-				Type:  input.callArgKind(),
+		if !input.Object.SharedObject.ObjectId.IsZero() {
+			objectId := input.Object.SharedObject.ObjectId
+			if objectId.IsEqual(*addressBytes) {
+				index := uint16(i)
+				return &index
+			}
+		}
+		if !input.Object.Receiving.ObjectId.IsZero() {
+			objectId := input.Object.Receiving.ObjectId
+			if objectId.IsEqual(*addressBytes) {
+				index := uint16(i)
+				return &index
 			}
 		}
 	}
@@ -68,42 +66,63 @@ type TransactionData struct {
 	V1 TransactionDataV1
 }
 
-func (td *TransactionData) MarshalBCS() ([]byte, error) {
+func (td *TransactionData) Marshal() ([]byte, error) {
 	// TODO
 	return []byte{}, nil
 }
 
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
 type GasData struct {
-	Payment []sui_types.SuiObjectRef
-	Owner   *models.SuiAddress
-	Price   *uint64
-	Budget  *uint64
+	Payment []SuiObjectRef
+	Owner   models.SuiAddressBytes
+	Price   uint64
+	Budget  uint64
 }
 
-func (g *GasData) IsFullySet() bool {
-	return len(g.Payment) > 0 && g.Owner != nil && g.Price != nil && g.Budget != nil
+func (gd *GasData) IsFullySet() bool {
+	if len(gd.Payment) == 0 {
+		return false
+	}
+	if gd.Owner.IsZero() {
+
+	}
+	if gd.Price == 0 || gd.Budget == 0 {
+		return false
+	}
+
+	return true
 }
 
 // TransactionExpiration https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1608
+// - None
+// - Epoch
 type TransactionExpiration struct {
-	Epoch *uint64
+	mystenbcs.Option[*uint64]
 }
+
+func (*TransactionExpiration) IsBcsEnum() {}
 
 // ProgrammableTransaction https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L702
 type ProgrammableTransaction struct {
-	Inputs   []CallArg
-	Commands []Command
+	Inputs   []CallArg `bcs:""`
+	Commands []Command `bcs:""`
 }
 
+// TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
+// - ProgrammableTransaction
+// - ChangeEpoch
+// - Genesis
+// - ConsensusCommitPrologue
 type TransactionKind struct {
 	ProgrammableTransaction ProgrammableTransaction
-	// ChangeEpoch
-	// Genesis
-	// ConsensusCommitPrologue
+	ChangeEpoch             bool
+	Genesis                 bool
+	ConsensusCommitPrologue bool
 }
 
-func (tk *TransactionKind) MarshalBCS() ([]byte, error) {
+func (*TransactionKind) IsBcsEnum() {}
+
+func (*TransactionKind) Marshal() ([]byte, error) {
 	// TODO
 	return []byte{}, nil
 }
@@ -113,74 +132,33 @@ func (tk *TransactionKind) MarshalBCS() ([]byte, error) {
 // - Object
 // - UnresolvedPure
 // - UnresolvedObject
-type CallArg interface {
-	callArgKind() string
-}
-
-type Pure struct {
-	// BCSBates's Base64
-	Bytes string
-}
-
-func (p Pure) callArgKind() string {
-	return "Pure"
-}
-
-type Object struct {
-	Value ObjectArg
-}
-
-func (o Object) callArgKind() string {
-	return "Object"
-}
-
-type UnresolvedPure struct {
-	Value string
-}
-
-func (u UnresolvedPure) callArgKind() string {
-	return "UnresolvedPure"
+type CallArg struct {
+	Pure             []byte
+	Object           ObjectArg
+	UnresolvedPure   any
+	UnresolvedObject UnresolvedObject
 }
 
 type UnresolvedObject struct {
-	ObjectId string
+	ObjectId models.SuiAddressBytes
+	// Version
+	// Digest
+	// InitialSharedVersion
 }
 
-func (u UnresolvedObject) callArgKind() string {
-	return "UnresolvedObject"
-}
+func (*CallArg) IsBcsEnum() {}
 
 // ObjectArg
 // - ImmOrOwnedObject
 // - SharedObject
 // - Receiving
-type ObjectArg interface {
-	objectArgKind() string
+type ObjectArg struct {
+	ImmOrOwnedObject SuiObjectRef
+	SharedObject     SharedObjectRef
+	Receiving        SuiObjectRef
 }
 
-type ImmOrOwnedObject struct {
-	Value sui_types.SuiObjectRef
-}
-
-func (i ImmOrOwnedObject) objectArgKind() string {
-	return "ImmOrOwnedObject"
-}
-
-type SharedObject struct {
-	Value sui_types.SharedObject
-}
-
-func (s SharedObject) objectArgKind() string {
-	return "SharedObject"
-}
-
-type Receiving struct {
-	Value sui_types.SuiObjectRef
-}
-
-func (r Receiving) objectArgKind() string {
-	return "Receiving"
-}
+func (*ObjectArg) IsBcsEnum() {}
 
 // Command https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L712
 // - MoveCall
@@ -190,170 +168,86 @@ func (r Receiving) objectArgKind() string {
 // - Publish
 // - MakeMoveVec
 // - Upgrade
-type Command interface {
-	commandKind() string
+type Command struct {
+	MoveCall        ProgrammableMoveCall
+	TransferObjects TransferObjects
+	SplitCoins      SplitCoins
+	MergeCoins      MergeCoins
+	Publish         Publish
+	MakeMoveVec     MakeMoveVec
+	Upgrade         Upgrade
 }
 
-type MoveCall struct {
-	Value ProgrammableMoveCall
-}
-
-func (m MoveCall) commandKind() string {
-	return "MoveCall"
-}
-
-type TransferObjects struct {
-	Value TransferObjectsValue
-}
-
-func (t TransferObjects) commandKind() string {
-	return "TransferObjects"
-}
-
-type SplitCoins struct {
-	Value SplitCoinsValue
-}
-
-func (s SplitCoins) commandKind() string {
-	return "SplitCoins"
-}
-
-type MergeCoins struct {
-	Value MergeCoinsValue
-}
-
-func (m MergeCoins) commandKind() string {
-	return "MergeCoins"
-}
-
-type Publish struct {
-	Value PublishValue
-}
-
-func (p Publish) commandKind() string {
-	return "Publish"
-}
-
-type MakeMoveVec struct {
-	Value MakeMoveVecValue
-}
-
-func (m MakeMoveVec) commandKind() string {
-	return "MakeMoveVec"
-}
-
-type Upgrade struct {
-	Value UpgradeValue
-}
-
-func (u Upgrade) commandKind() string {
-	return "Upgrade"
-}
+func (*Command) IsBcsEnum() {}
 
 // ProgrammableMoveCall https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L762
 type ProgrammableMoveCall struct {
-	Package       string
+	Package       models.SuiAddressBytes
 	Module        string
 	Function      string
 	TypeArguments []string
 	Arguments     []Argument
 }
 
-type TransferObjectsValue struct {
+type TransferObjects struct {
 	Objects []Argument
 	Address Argument
 }
 
-type SplitCoinsValue struct {
+type SplitCoins struct {
 	Coin   Argument
 	Amount []Argument
 }
 
-type MergeCoinsValue struct {
+type MergeCoins struct {
 	Destination Argument
 	Sources     []Argument
 }
 
-type PublishValue struct {
-	Modules      []string
-	Dependencies []string
+type Publish struct {
+	Modules      [][]models.SuiAddressBytes
+	Dependencies [][]models.SuiAddressBytes
 }
 
-type MakeMoveVecValue struct {
-	Type     *string
+type MakeMoveVec struct {
+	Type     *string `bcs:"optional"`
 	Elements []Argument
 }
 
-type UpgradeValue struct {
-	Modules      []string
-	Dependencies []string
-	Package      string
+type Upgrade struct {
+	Modules      [][]models.SuiAddressBytes
+	Dependencies []models.SuiAddressBytes
+	Package      models.SuiAddressBytes
 	Ticket       Argument
 }
 
 // Argument https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L745
 // - GasCoin
 // - Input
-// - InputPure
-// - InputObject
 // - Result
 // - NestedResult
-type Argument interface {
-	argumentKind() string
+type Argument struct {
+	GasCoin      bool
+	Input        uint16
+	Result       uint16
+	NestedResult NestedResult
 }
 
-type GasCoin struct {
-	Value bool
-}
-
-func (g GasCoin) argumentKind() string {
-	return "GasCoin"
-}
-
-type Input struct {
-	// Index
-	Input uint16
-	Type  string
-}
-
-func (i Input) argumentKind() string {
-	return "Input"
-}
-
-type InputPure struct {
-	Value any
-}
-
-func (i InputPure) argumentKind() string {
-	return "Pure"
-}
-
-type InputObject struct {
-	ObjectId string
-	Value    *Object
-}
-
-func (i InputObject) argumentKind() string {
-	return "Object"
-}
-
-type Result struct {
-	Value uint16
-}
-
-func (r Result) argumentKind() string {
-	return "Result"
-}
+func (*Argument) IsBcsEnum() {}
 
 type NestedResult struct {
-	Value NestedResultValue
-}
-
-func (n NestedResult) argumentKind() string {
-	return "NestedResult"
-}
-
-type NestedResultValue struct {
 	Index       uint16
 	ResultIndex uint16
+}
+
+type SuiObjectRef struct {
+	ObjectId models.SuiAddressBytes
+	Version  uint64
+	Digest   models.ObjectDigestBytes
+}
+
+type SharedObjectRef struct {
+	ObjectId             models.SuiAddressBytes
+	InitialSharedVersion uint64
+	Mutable              bool
 }

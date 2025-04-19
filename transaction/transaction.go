@@ -2,23 +2,21 @@ package transaction
 
 import (
 	"bytes"
-	"encoding/hex"
 	"math"
 
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/block-vision/sui-go-sdk/models/sui_types"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	"github.com/block-vision/sui-go-sdk/signer"
 	"github.com/block-vision/sui-go-sdk/utils"
 )
 
 type Transaction struct {
-	Data   TransactionDataV1
+	Data   TransactionData
 	Signer *signer.Signer
 }
 
 func NewTransaction() *Transaction {
-	data := TransactionDataV1{}
+	data := TransactionData{}
 
 	return &Transaction{
 		Data: data,
@@ -27,108 +25,181 @@ func NewTransaction() *Transaction {
 
 func (tx *Transaction) SetSigner(signer *signer.Signer) *Transaction {
 	tx.Signer = signer
+
 	return tx
 }
 
 func (tx *Transaction) SetSender(sender models.SuiAddress) *Transaction {
-	tx.Data.Sender = &sender
+	address := utils.NormalizeSuiAddress(string(sender))
+	addressBytes, err := ConvertSuiAddressStringToBytes(address)
+	if err != nil {
+		panic(err)
+	}
+	tx.Data.V1.Sender = *addressBytes
+
 	return tx
 }
 
 func (tx *Transaction) SetSenderIfNotSet(sender models.SuiAddress) *Transaction {
-	if tx.Data.Sender == nil {
-		tx.Data.Sender = &sender
+	if tx.Data.V1.Sender.IsZero() {
+		tx.SetSender(sender)
 	}
+
 	return tx
 }
 
 func (tx *Transaction) SetExpiration(expiration TransactionExpiration) *Transaction {
-	tx.Data.Expiration = expiration
+	tx.Data.V1.Expiration = expiration
+
 	return tx
 }
 
-func (tx *Transaction) SetGasPayment(payment []sui_types.SuiObjectRef) *Transaction {
-	tx.Data.GasData.Payment = payment
+func (tx *Transaction) SetGasPayment(payment []SuiObjectRef) *Transaction {
+	tx.Data.V1.GasData.Payment = payment
+
 	return tx
 }
 
 func (tx *Transaction) SetGasOwner(owner models.SuiAddress) *Transaction {
-	tx.Data.GasData.Owner = &owner
+	addressBytes, err := ConvertSuiAddressStringToBytes(owner)
+	if err != nil {
+		panic(err)
+	}
+	tx.Data.V1.GasData.Owner = *addressBytes
+
 	return tx
 }
 
 func (tx *Transaction) SetGasPrice(price uint64) *Transaction {
-	tx.Data.GasData.Price = &price
+	tx.Data.V1.GasData.Price = price
+
 	return tx
 }
 
 func (tx *Transaction) SetGasBudget(budget uint64) *Transaction {
-	tx.Data.GasData.Budget = &budget
+	tx.Data.V1.GasData.Budget = budget
+
 	return tx
 }
 
 func (tx *Transaction) SetGasBudgetIfNotSet(budget uint64) *Transaction {
-	if tx.Data.GasData.Budget == nil {
-		tx.Data.GasData.Budget = &budget
+	if tx.Data.V1.GasData.Budget == 0 {
+		tx.Data.V1.GasData.Budget = budget
 	}
+
 	return tx
 }
 
 func (tx *Transaction) Gas() Argument {
-	return GasCoin{
-		Value: true,
+	return Argument{
+		GasCoin: true,
 	}
 }
 
 func (tx *Transaction) Add(command Command) Argument {
-	index := tx.Data.AddCommand(command)
+	index := tx.Data.V1.AddCommand(command)
 	return createTransactionResult(index, nil)
 }
 
 func (tx *Transaction) SplitCoins(coin Argument, amount []Argument) Argument {
-	return tx.Add(splitCoins(SplitCoinsValue{
+	return tx.Add(splitCoins(SplitCoins{
 		Coin:   coin,
 		Amount: amount,
 	}))
 }
 
 func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argument {
-	return tx.Add(mergeCoins(MergeCoinsValue{
+	return tx.Add(mergeCoins(MergeCoins{
 		Destination: destination,
 		Sources:     sources,
 	}))
 }
 
-func (tx *Transaction) Publish(modules []string, dependencies []string) Argument {
-	return tx.Add(publish(PublishValue{
-		Modules:      modules,
-		Dependencies: dependencies,
+func (tx *Transaction) Publish(modules [][]models.SuiAddress, dependencies [][]models.SuiAddress) Argument {
+	moduleAddress := make([][]models.SuiAddressBytes, len(modules))
+	for i, module := range modules {
+		moduleAddress[i] = make([]models.SuiAddressBytes, len(module))
+		for j, address := range module {
+			v, err := ConvertSuiAddressStringToBytes(address)
+			if err != nil {
+				panic(err)
+			}
+			moduleAddress[i][j] = *v
+		}
+	}
+
+	dependenciesAddress := make([][]models.SuiAddressBytes, len(dependencies))
+	for i, dependency := range dependencies {
+		dependenciesAddress[i] = make([]models.SuiAddressBytes, len(dependency))
+		for j, address := range dependency {
+			v, err := ConvertSuiAddressStringToBytes(address)
+			if err != nil {
+				panic(err)
+			}
+			dependenciesAddress[i][j] = *v
+		}
+	}
+
+	return tx.Add(publish(Publish{
+		Modules:      moduleAddress,
+		Dependencies: dependenciesAddress,
 	}))
 }
 
 func (tx *Transaction) Upgrade(
-	modules []string,
-	dependencies []string,
-	packageId string,
+	modules [][]models.SuiAddress,
+	dependencies []models.SuiAddress,
+	packageId models.SuiAddress,
 	ticket Argument,
 ) Argument {
-	return tx.Add(upgrade(UpgradeValue{
-		Modules:      modules,
-		Dependencies: dependencies,
-		Package:      packageId,
+	moduleAddress := make([][]models.SuiAddressBytes, len(modules))
+	for i, module := range modules {
+		moduleAddress[i] = make([]models.SuiAddressBytes, len(module))
+		for j, address := range module {
+			v, err := ConvertSuiAddressStringToBytes(address)
+			if err != nil {
+				panic(err)
+			}
+			moduleAddress[i][j] = *v
+		}
+	}
+
+	dependenciesAddress := make([]models.SuiAddressBytes, len(dependencies))
+	for i, dependency := range dependencies {
+		v, err := ConvertSuiAddressStringToBytes(dependency)
+		if err != nil {
+			panic(err)
+		}
+		dependenciesAddress[i] = *v
+	}
+
+	packageIdBytes, err := ConvertSuiAddressStringToBytes(packageId)
+	if err != nil {
+		panic(err)
+	}
+
+	return tx.Add(upgrade(Upgrade{
+		Modules:      moduleAddress,
+		Dependencies: dependenciesAddress,
+		Package:      *packageIdBytes,
 		Ticket:       ticket,
 	}))
 }
 
 func (tx *Transaction) MoveCall(
-	packageId string,
+	packageId models.SuiAddress,
 	module string,
 	function string,
 	typeArguments []string,
 	arguments []Argument,
 ) Argument {
+	packageIdBytes, err := ConvertSuiAddressStringToBytes(packageId)
+	if err != nil {
+		panic(err)
+	}
+
 	return tx.Add(moveCall(ProgrammableMoveCall{
-		Package:       packageId,
+		Package:       *packageIdBytes,
 		Module:        module,
 		Function:      function,
 		TypeArguments: typeArguments,
@@ -137,115 +208,106 @@ func (tx *Transaction) MoveCall(
 }
 
 func (tx *Transaction) transferObjects(objects []Argument, address Argument) Argument {
-	return tx.Add(transferObjects(TransferObjectsValue{
+	return tx.Add(transferObjects(TransferObjects{
 		Objects: objects,
 		Address: address,
 	}))
 }
 
 func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argument {
-	return tx.Add(makeMoveVec(MakeMoveVecValue{
+	return tx.Add(makeMoveVec(MakeMoveVec{
 		Type:     typeValue,
 		Elements: elements,
 	}))
 }
 
-func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
-	var callArg CallArg
+// Object
+// - input: string | CallArg | Argument
+func (tx *Transaction) Object(input any) *Argument {
+	// string
+	if s, ok := input.(string); ok {
+		if utils.IsValidSuiAddress(models.SuiAddress(s)) {
+			address := utils.NormalizeSuiAddress(s)
+			addressBytes, err := ConvertSuiAddressStringToBytes(address)
+			if err != nil {
+				panic(err)
+			}
 
-	var id string
-	isSharedObjectAndSetMutable := false
-	if inputObject.Value == nil {
-		id = inputObject.ObjectId
-		if id == "" {
-			return nil, ErrObjectIdNotSet
-		}
+			arg := tx.Data.V1.AddInput(CallArg{
+				UnresolvedObject: UnresolvedObject{
+					ObjectId: *addressBytes,
+				},
+			})
 
-		callArg = UnresolvedObject{
-			ObjectId: utils.NormalizeSuiAddress(id),
-		}
-	} else {
-		objArg := inputObject.Value.Value
-		switch objArg.(type) {
-		case ImmOrOwnedObject:
-			id = objArg.(ImmOrOwnedObject).Value.ObjectId
-		case SharedObject:
-			val := objArg.(SharedObject).Value
-			isSharedObjectAndSetMutable = val.Mutable
-			id = val.ObjectId
-		case Receiving:
-			id = objArg.(Receiving).Value.ObjectId
-		default:
-			return nil, ErrObjectTypeNotSupported
-		}
-
-		callArg = Object{
-			Value: objArg,
+			return &arg
+		} else {
+			return nil
 		}
 	}
 
-	findObj := tx.Data.GetInputObject(id)
-	if findObj != nil {
-		if isSharedObjectAndSetMutable {
-			index := findObj.(Input).Input
-			existedInput := tx.Data.TransactionKind.ProgrammableTransaction.Inputs[index]
-			if obj, ok := existedInput.(Object); ok {
-				if objArg, ok := obj.Value.(SharedObject); ok {
-					newObjArg := objArg
-					newObjArg.Value.Mutable = true
-					tx.Data.TransactionKind.ProgrammableTransaction.Inputs[index] = Object{
-						Value: newObjArg,
+	// Argument
+	if arg, ok := input.(Argument); ok {
+		return &arg
+	}
+
+	// CallArg
+	if v, ok := input.(CallArg); ok {
+		if id := v.Object.SharedObject.ObjectId; !id.IsZero() {
+			// SharedObject
+			address := ConvertSuiAddressBytesToString(id)
+			if index := tx.Data.V1.GetInputObjectIndex(address); index != nil {
+				// Already exists
+				if v.Object.SharedObject.Mutable {
+					newExistObject := tx.Data.V1.Kind.ProgrammableTransaction.Inputs[*index]
+					if !newExistObject.Object.SharedObject.ObjectId.IsZero() {
+						newExistObject.Object.SharedObject.Mutable = true
 					}
+					tx.Data.V1.Kind.ProgrammableTransaction.Inputs[*index] = newExistObject
 				}
 			}
+		} else {
+			if id := v.Object.ImmOrOwnedObject.ObjectId; !id.IsZero() {
+				// ImmOrOwnedObject
+				arg := tx.Data.V1.AddInput(CallArg{
+					Object: v.Object,
+				})
+				return &arg
+			} else if id := v.Object.Receiving.ObjectId; !id.IsZero() {
+				// Receiving
+				arg := tx.Data.V1.AddInput(CallArg{
+					Object: v.Object,
+				})
+				return &arg
+			} else {
+				// Not supported
+				return nil
+			}
 		}
-
-		return findObj, nil
 	}
 
-	input := tx.Data.AddInput(callArg, "Object")
-	arg := Input{
-		Input: input.(Input).Input,
-		Type:  input.(Input).Type,
-	}
-
-	return arg, nil
+	return nil
 }
 
-func (tx *Transaction) Pure(inputPure InputPure) (Argument, error) {
-	val := inputPure.Value
-
-	if s, ok := val.(string); ok && utils.IsValidSuiAddress(s) {
-		normalized := utils.NormalizeSuiAddress(s)
-		vBytes, err := hex.DecodeString(normalized[2:])
+func (tx *Transaction) Pure(input any) *Argument {
+	var val any
+	if s, ok := input.(string); ok && utils.IsValidSuiAddress(models.SuiAddress(s)) {
+		bcsAddress, err := ConvertSuiAddressStringToBytes(models.SuiAddress(s))
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
-		if len(vBytes) != 32 {
-			return nil, ErrInvalidSuiAddress
-		}
-
-		var fixedBytes [32]byte
-		copy(fixedBytes[:], vBytes)
-		val = fixedBytes
+		val = *bcsAddress
 	}
 
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
 	err := bcsEncoder.Encode(val)
 	if err != nil {
-		return nil, err
+		tx.Data.V1.AddInput(CallArg{UnresolvedPure: bcsEncodedMsg.Bytes()})
 	}
 
-	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg.Bytes())
+	arg := tx.Data.V1.AddInput(CallArg{Pure: bcsEncodedMsg.Bytes()})
 
-	input := tx.Data.AddInput(Pure{bcsBase64}, "Pure")
-	arg := Input{
-		Input: input.(Input).Input,
-		Type:  input.(Input).Type,
-	}
-
-	return arg, nil
+	return &arg
 }
 
 func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
@@ -287,7 +349,7 @@ func (tx *Transaction) buildTransaction() (string, error) {
 
 func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	if onlyTransactionKind {
-		bcsEncodedMsg, err := tx.Data.TransactionKind.MarshalBCS()
+		bcsEncodedMsg, err := tx.Data.V1.Kind.Marshal()
 		if err != nil {
 			return "", err
 		}
@@ -295,18 +357,15 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 		return bcsBase64, nil
 	}
 
-	if tx.Data.Sender == nil {
+	if tx.Data.V1.Sender.IsZero() {
 		return "", ErrSenderNotSet
 	}
 	// TODO: Support get latest gas data online
-	if !tx.Data.GasData.IsFullySet() {
+	if !tx.Data.V1.GasData.IsFullySet() {
 		return "", ErrGasDataNotFullySet
 	}
 
-	transactionData := TransactionData{
-		V1: tx.Data,
-	}
-	bcsEncodedMsg, err := transactionData.MarshalBCS()
+	bcsEncodedMsg, err := tx.Data.Marshal()
 	if err != nil {
 		return "", err
 	}
@@ -322,7 +381,7 @@ func createTransactionResult(index uint16, length *uint16) Argument {
 	}
 
 	// TODO: Support NestedResult
-	return Result{
-		Value: index,
+	return Argument{
+		Result: index,
 	}
 }

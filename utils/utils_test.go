@@ -40,7 +40,7 @@ func TestNormalizeSuiAddress(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			result := NormalizeSuiAddress(test.input)
-			if result != test.expected {
+			if string(result) != test.expected {
 				t.Errorf("expected %s, got %s", test.expected, result)
 			}
 		})
