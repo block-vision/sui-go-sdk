@@ -6,7 +6,7 @@ type SuiObjectRef struct {
 	Version  uint64 `json:"version"`
 }
 
-type SuiSharedObject struct {
+type SharedObject struct {
 	ObjectId             string `json:"objectId"`
 	InitialSharedVersion uint64 `json:"initialSharedVersion"`
 	Mutable              bool   `json:"mutable"`

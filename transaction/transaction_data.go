@@ -7,24 +7,24 @@ import (
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 )
 
-// TransactionData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
-type TransactionData struct {
+// TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
+type TransactionDataV1 struct {
 	Sender     *models.SuiAddress
 	Expiration TransactionExpiration
 	GasData    GasData
-	ProgrammableTransaction
+	TransactionKind
 }
 
-func (td *TransactionData) AddCommand(command Command) (index uint16) {
-	index = uint16(len(td.Commands))
-	td.Commands = append(td.Commands, command)
+func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
+	index = uint16(len(td.TransactionKind.ProgrammableTransaction.Commands))
+	td.TransactionKind.ProgrammableTransaction.Commands = append(td.TransactionKind.ProgrammableTransaction.Commands, command)
 
 	return index
 }
 
-func (td *TransactionData) AddInput(input CallArg) Argument {
-	index := len(td.Inputs)
-	td.Inputs = append(td.Inputs, input)
+func (td *TransactionDataV1) AddInput(input CallArg) Argument {
+	index := len(td.TransactionKind.ProgrammableTransaction.Inputs)
+	td.TransactionKind.ProgrammableTransaction.Inputs = append(td.TransactionKind.ProgrammableTransaction.Inputs, input)
 
 	return Input{
 		Input: uint16(index),
@@ -32,8 +32,8 @@ func (td *TransactionData) AddInput(input CallArg) Argument {
 	}
 }
 
-func (td *TransactionData) GetInputObject(objectId string) Argument {
-	for i, input := range td.Inputs {
+func (td *TransactionDataV1) GetInputObject(objectId string) Argument {
+	for i, input := range td.TransactionKind.ProgrammableTransaction.Inputs {
 		var inputId string
 
 		switch input.(type) {
@@ -66,12 +66,25 @@ func (td *TransactionData) GetInputObject(objectId string) Argument {
 	return nil
 }
 
+type TransactionData struct {
+	V1 TransactionDataV1
+}
+
+func (td *TransactionData) MarshalBCS() ([]byte, error) {
+	// TODO
+	return []byte{}, nil
+}
+
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
 type GasData struct {
 	Payment []sui_types.SuiObjectRef
 	Owner   *models.SuiAddress
 	Price   *uint64
 	Budget  *uint64
+}
+
+func (g *GasData) IsFullySet() bool {
+	return len(g.Payment) > 0 && g.Owner != nil && g.Price != nil && g.Budget != nil
 }
 
 // TransactionExpiration https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1608
@@ -83,6 +96,18 @@ type TransactionExpiration struct {
 type ProgrammableTransaction struct {
 	Inputs   []CallArg
 	Commands []Command
+}
+
+type TransactionKind struct {
+	ProgrammableTransaction ProgrammableTransaction
+	// ChangeEpoch
+	// Genesis
+	// ConsensusCommitPrologue
+}
+
+func (tk *TransactionKind) MarshalBCS() ([]byte, error) {
+	// TODO
+	return []byte{}, nil
 }
 
 // CallArg https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L80
@@ -144,7 +169,7 @@ func (i ImmOrOwnedObject) objectArgKind() string {
 }
 
 type SharedObject struct {
-	Value sui_types.SuiSharedObject
+	Value sui_types.SharedObject
 }
 
 func (s SharedObject) objectArgKind() string {

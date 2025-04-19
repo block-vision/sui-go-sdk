@@ -12,12 +12,12 @@ import (
 )
 
 type Transaction struct {
-	Data   TransactionData
+	Data   TransactionDataV1
 	Signer *signer.Signer
 }
 
 func NewTransaction() *Transaction {
-	data := TransactionData{}
+	data := TransactionDataV1{}
 
 	return &Transaction{
 		Data: data,
@@ -187,12 +187,12 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 	if findObj != nil {
 		if isSharedObjectAndSetMutable {
 			index := findObj.(Input).Input
-			existedInput := tx.Data.Inputs[index]
+			existedInput := tx.Data.TransactionKind.ProgrammableTransaction.Inputs[index]
 			if obj, ok := existedInput.(Object); ok {
 				if objArg, ok := obj.Value.(SharedObject); ok {
 					newObjArg := objArg
 					newObjArg.Value.Mutable = true
-					tx.Data.Inputs[index] = Object{
+					tx.Data.TransactionKind.ProgrammableTransaction.Inputs[index] = Object{
 						Value: newObjArg,
 					}
 				}
@@ -267,11 +267,36 @@ func (tx *Transaction) buildTransaction() (string, error) {
 	tx.SetGasBudgetIfNotSet(defaultGasBudget)
 	tx.SetSenderIfNotSet(models.SuiAddress(tx.Signer.Address))
 
-	return tx.build()
+	return tx.build(false)
 }
 
-func (tx *Transaction) build() (string, error) {
-	return "", nil
+func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
+	if onlyTransactionKind {
+		bcsEncodedMsg, err := tx.Data.TransactionKind.MarshalBCS()
+		if err != nil {
+			return "", err
+		}
+		bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg)
+		return bcsBase64, nil
+	}
+
+	if tx.Data.Sender == nil {
+		return "", ErrSenderNotSet
+	}
+	if !tx.Data.GasData.IsFullySet() {
+		return "", ErrGasDataNotFullySet
+	}
+
+	transactionData := TransactionData{
+		V1: tx.Data,
+	}
+	bcsEncodedMsg, err := transactionData.MarshalBCS()
+	if err != nil {
+		return "", err
+	}
+	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg)
+
+	return bcsBase64, nil
 }
 
 func createTransactionResult(index uint16, length *uint16) Argument {
