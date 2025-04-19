@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"bytes"
+	"encoding/hex"
 	"math"
 
 	"github.com/block-vision/sui-go-sdk/models"
@@ -202,7 +203,7 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 		return findObj, nil
 	}
 
-	input := tx.Data.AddInput(callArg)
+	input := tx.Data.AddInput(callArg, "Object")
 	arg := Input{
 		Input: input.(Input).Input,
 		Type:  input.(Input).Type,
@@ -212,19 +213,33 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 }
 
 func (tx *Transaction) Pure(inputPure InputPure) (Argument, error) {
-	value := inputPure.Value
+	val := inputPure.Value
+
+	if s, ok := val.(string); ok && utils.IsValidSuiAddress(s) {
+		normalized := utils.NormalizeSuiAddress(s)
+		vBytes, err := hex.DecodeString(normalized[2:])
+		if err != nil {
+			return nil, err
+		}
+		if len(vBytes) != 32 {
+			return nil, ErrInvalidSuiAddress
+		}
+
+		var fixedBytes [32]byte
+		copy(fixedBytes[:], vBytes)
+		val = fixedBytes
+	}
+
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
-	err := bcsEncoder.Encode(value)
+	err := bcsEncoder.Encode(val)
 	if err != nil {
 		return nil, err
 	}
 
 	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg.Bytes())
 
-	input := tx.Data.AddInput(Pure{
-		bcsBase64,
-	})
+	input := tx.Data.AddInput(Pure{bcsBase64}, "Pure")
 	arg := Input{
 		Input: input.(Input).Input,
 		Type:  input.(Input).Type,
@@ -283,6 +298,7 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	if tx.Data.Sender == nil {
 		return "", ErrSenderNotSet
 	}
+	// TODO: Support get latest gas data online
 	if !tx.Data.GasData.IsFullySet() {
 		return "", ErrGasDataNotFullySet
 	}
@@ -301,16 +317,12 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 
 func createTransactionResult(index uint16, length *uint16) Argument {
 	if length == nil {
-		max := uint16(math.MaxUint16)
-		length = &max
+		m := uint16(math.MaxUint16)
+		length = &m
 	}
 
-	// TODO: Support multiple results
-
-	return NestedResult{
-		Value: NestedResultValue{
-			Index:       index,
-			ResultIndex: 0,
-		},
+	// TODO: Support NestedResult
+	return Result{
+		Value: index,
 	}
 }

@@ -22,6 +22,11 @@ func NormalizeSuiAddress(input string) string {
 	return "0x" + addr
 }
 
+func IsValidSuiAddress(addr string) bool {
+	addr = NormalizeSuiAddress(addr)
+	return len(addr) == 66 && strings.HasPrefix(addr, "0x")
+}
+
 func PrettyPrint(v interface{}) {
 	b, err := json.Marshal(v)
 	if err != nil {

@@ -1,8 +1,6 @@
 package transaction
 
 import (
-	"strings"
-
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 )
@@ -22,13 +20,13 @@ func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
 	return index
 }
 
-func (td *TransactionDataV1) AddInput(input CallArg) Argument {
+func (td *TransactionDataV1) AddInput(input CallArg, inputType string) Argument {
 	index := len(td.TransactionKind.ProgrammableTransaction.Inputs)
 	td.TransactionKind.ProgrammableTransaction.Inputs = append(td.TransactionKind.ProgrammableTransaction.Inputs, input)
 
 	return Input{
 		Input: uint16(index),
-		Type:  strings.ToLower(input.callArgKind()),
+		Type:  inputType,
 	}
 }
 
@@ -58,7 +56,7 @@ func (td *TransactionDataV1) GetInputObject(objectId string) Argument {
 		if inputId == objectId {
 			return Input{
 				Input: uint16(i),
-				Type:  strings.ToLower(input.callArgKind()),
+				Type:  input.callArgKind(),
 			}
 		}
 	}
@@ -323,7 +321,7 @@ func (i Input) argumentKind() string {
 }
 
 type InputPure struct {
-	Value string
+	Value any
 }
 
 func (i InputPure) argumentKind() string {

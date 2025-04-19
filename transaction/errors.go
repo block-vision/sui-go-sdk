@@ -8,4 +8,5 @@ var (
 	ErrGasDataNotFullySet     = errors.New("gas data not fully set")
 	ErrObjectIdNotSet         = errors.New("object id not set")
 	ErrObjectTypeNotSupported = errors.New("object type not supported")
+	ErrInvalidSuiAddress      = errors.New("invalid Sui address")
 )
