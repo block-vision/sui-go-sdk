@@ -8,6 +8,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	"github.com/block-vision/sui-go-sdk/signer"
 	"github.com/block-vision/sui-go-sdk/utils"
+	"github.com/samber/lo"
 )
 
 type Transaction struct {
@@ -92,7 +93,7 @@ func (tx *Transaction) SetGasBudgetIfNotSet(budget uint64) *Transaction {
 
 func (tx *Transaction) Gas() Argument {
 	return Argument{
-		GasCoin: true,
+		GasCoin: lo.ToPtr(true),
 	}
 }
 
@@ -234,7 +235,7 @@ func (tx *Transaction) Object(input any) *Argument {
 			}
 
 			arg := tx.Data.V1.AddInput(CallArg{
-				UnresolvedObject: UnresolvedObject{
+				UnresolvedObject: &UnresolvedObject{
 					ObjectId: *addressBytes,
 				},
 			})
@@ -302,10 +303,10 @@ func (tx *Transaction) Pure(input any) *Argument {
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
 	err := bcsEncoder.Encode(val)
 	if err != nil {
-		tx.Data.V1.AddInput(CallArg{UnresolvedPure: bcsEncodedMsg.Bytes()})
+		tx.Data.V1.AddInput(CallArg{UnresolvedPure: lo.ToPtr(bcsEncodedMsg.Bytes())})
 	}
 
-	arg := tx.Data.V1.AddInput(CallArg{Pure: bcsEncodedMsg.Bytes()})
+	arg := tx.Data.V1.AddInput(CallArg{Pure: lo.ToPtr(bcsEncodedMsg.Bytes())})
 
 	return &arg
 }
@@ -376,12 +377,11 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 
 func createTransactionResult(index uint16, length *uint16) Argument {
 	if length == nil {
-		m := uint16(math.MaxUint16)
-		length = &m
+		length = lo.ToPtr(uint16(math.MaxUint16))
 	}
 
 	// TODO: Support NestedResult
 	return Argument{
-		Result: index,
+		Result: lo.ToPtr(index),
 	}
 }

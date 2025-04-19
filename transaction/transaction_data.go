@@ -1,6 +1,8 @@
 package transaction
 
 import (
+	"bytes"
+
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 )
@@ -21,11 +23,11 @@ func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
 }
 
 func (td *TransactionDataV1) AddInput(input CallArg) Argument {
-	index := len(td.Kind.ProgrammableTransaction.Inputs)
+	index := uint16(len(td.Kind.ProgrammableTransaction.Inputs))
 	td.Kind.ProgrammableTransaction.Inputs = append(td.Kind.ProgrammableTransaction.Inputs, input)
 
 	return Argument{
-		Input: uint16(index),
+		Input: &index,
 	}
 }
 
@@ -67,8 +69,14 @@ type TransactionData struct {
 }
 
 func (td *TransactionData) Marshal() ([]byte, error) {
-	// TODO
-	return []byte{}, nil
+	bcsEncodedMsg := bytes.Buffer{}
+	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+	err := bcsEncoder.Encode(td)
+	if err != nil {
+		return nil, err
+	}
+
+	return bcsEncodedMsg.Bytes(), nil
 }
 
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
@@ -97,15 +105,16 @@ func (gd *GasData) IsFullySet() bool {
 // - None
 // - Epoch
 type TransactionExpiration struct {
-	mystenbcs.Option[*uint64]
+	None  *bool
+	Epoch *uint64
 }
 
 func (*TransactionExpiration) IsBcsEnum() {}
 
 // ProgrammableTransaction https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L702
 type ProgrammableTransaction struct {
-	Inputs   []CallArg `bcs:""`
-	Commands []Command `bcs:""`
+	Inputs   []CallArg
+	Commands []Command
 }
 
 // TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
@@ -114,17 +123,23 @@ type ProgrammableTransaction struct {
 // - Genesis
 // - ConsensusCommitPrologue
 type TransactionKind struct {
-	ProgrammableTransaction ProgrammableTransaction
-	ChangeEpoch             bool
-	Genesis                 bool
-	ConsensusCommitPrologue bool
+	ProgrammableTransaction *ProgrammableTransaction
+	ChangeEpoch             *bool
+	Genesis                 *bool
+	ConsensusCommitPrologue *bool
 }
 
 func (*TransactionKind) IsBcsEnum() {}
 
-func (*TransactionKind) Marshal() ([]byte, error) {
-	// TODO
-	return []byte{}, nil
+func (tk *TransactionKind) Marshal() ([]byte, error) {
+	bcsEncodedMsg := bytes.Buffer{}
+	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+	err := bcsEncoder.Encode(tk)
+	if err != nil {
+		return nil, err
+	}
+
+	return bcsEncodedMsg.Bytes(), nil
 }
 
 // CallArg https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L80
@@ -133,11 +148,13 @@ func (*TransactionKind) Marshal() ([]byte, error) {
 // - UnresolvedPure
 // - UnresolvedObject
 type CallArg struct {
-	Pure             []byte
-	Object           ObjectArg
+	Pure             *[]byte
+	Object           *ObjectArg
 	UnresolvedPure   any
-	UnresolvedObject UnresolvedObject
+	UnresolvedObject *UnresolvedObject
 }
+
+func (*CallArg) IsBcsEnum() {}
 
 type UnresolvedObject struct {
 	ObjectId models.SuiAddressBytes
@@ -146,16 +163,14 @@ type UnresolvedObject struct {
 	// InitialSharedVersion
 }
 
-func (*CallArg) IsBcsEnum() {}
-
 // ObjectArg
 // - ImmOrOwnedObject
 // - SharedObject
 // - Receiving
 type ObjectArg struct {
-	ImmOrOwnedObject SuiObjectRef
-	SharedObject     SharedObjectRef
-	Receiving        SuiObjectRef
+	ImmOrOwnedObject *SuiObjectRef
+	SharedObject     *SharedObjectRef
+	Receiving        *SuiObjectRef
 }
 
 func (*ObjectArg) IsBcsEnum() {}
@@ -169,13 +184,13 @@ func (*ObjectArg) IsBcsEnum() {}
 // - MakeMoveVec
 // - Upgrade
 type Command struct {
-	MoveCall        ProgrammableMoveCall
-	TransferObjects TransferObjects
-	SplitCoins      SplitCoins
-	MergeCoins      MergeCoins
-	Publish         Publish
-	MakeMoveVec     MakeMoveVec
-	Upgrade         Upgrade
+	MoveCall        *ProgrammableMoveCall
+	TransferObjects *TransferObjects
+	SplitCoins      *SplitCoins
+	MergeCoins      *MergeCoins
+	Publish         *Publish
+	MakeMoveVec     *MakeMoveVec
+	Upgrade         *Upgrade
 }
 
 func (*Command) IsBcsEnum() {}
@@ -210,7 +225,7 @@ type Publish struct {
 }
 
 type MakeMoveVec struct {
-	Type     *string `bcs:"optional"`
+	Type     *string
 	Elements []Argument
 }
 
@@ -227,10 +242,10 @@ type Upgrade struct {
 // - Result
 // - NestedResult
 type Argument struct {
-	GasCoin      bool
-	Input        uint16
-	Result       uint16
-	NestedResult NestedResult
+	GasCoin      *bool
+	Input        *uint16
+	Result       *uint16
+	NestedResult *NestedResult
 }
 
 func (*Argument) IsBcsEnum() {}

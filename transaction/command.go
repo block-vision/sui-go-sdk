@@ -1,43 +1,45 @@
 package transaction
 
+import "github.com/samber/lo"
+
 func moveCall(input ProgrammableMoveCall) Command {
 	return Command{
-		MoveCall: input,
+		MoveCall: lo.ToPtr(input),
 	}
 }
 
 func transferObjects(input TransferObjects) Command {
 	return Command{
-		TransferObjects: input,
+		TransferObjects: lo.ToPtr(input),
 	}
 }
 
 func splitCoins(input SplitCoins) Command {
 	return Command{
-		SplitCoins: input,
+		SplitCoins: lo.ToPtr(input),
 	}
 }
 
 func mergeCoins(input MergeCoins) Command {
 	return Command{
-		MergeCoins: input,
+		MergeCoins: lo.ToPtr(input),
 	}
 }
 
 func publish(input Publish) Command {
 	return Command{
-		Publish: input,
+		Publish: lo.ToPtr(input),
 	}
 }
 
 func makeMoveVec(input MakeMoveVec) Command {
 	return Command{
-		MakeMoveVec: input,
+		MakeMoveVec: lo.ToPtr(input),
 	}
 }
 
 func upgrade(input Upgrade) Command {
 	return Command{
-		Upgrade: input,
+		Upgrade: lo.ToPtr(input),
 	}
 }
