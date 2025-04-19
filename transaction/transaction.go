@@ -116,7 +116,6 @@ func (tx *Transaction) SplitCoins(coin Argument, amount []Argument) Argument {
 }
 
 func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argument {
-
 	return tx.Add(mergeCoins(MergeCoins{
 		Destination: &destination,
 		Sources:     convertArgumentsToArgumentPtrs(sources),
@@ -297,7 +296,7 @@ func (tx *Transaction) Object(input any) *Argument {
 }
 
 func (tx *Transaction) Pure(input any) *Argument {
-	var val any
+	val := input
 	if s, ok := input.(string); ok && utils.IsValidSuiAddress(models.SuiAddress(s)) {
 		bcsAddress, err := ConvertSuiAddressStringToBytes(models.SuiAddress(s))
 		if err != nil {
@@ -305,7 +304,6 @@ func (tx *Transaction) Pure(input any) *Argument {
 		}
 		val = *bcsAddress
 	}
-	val = input
 
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)

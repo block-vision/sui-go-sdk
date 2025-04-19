@@ -21,7 +21,7 @@ func ConvertSuiAddressStringToBytes(address models.SuiAddress) (*models.SuiAddre
 	var fixedBytes [32]byte
 	copy(fixedBytes[:], decoded)
 
-	return (*models.SuiAddressBytes)((&fixedBytes)), nil
+	return (*models.SuiAddressBytes)(&fixedBytes), nil
 }
 
 func ConvertSuiAddressBytesToString(addr models.SuiAddressBytes) models.SuiAddress {
