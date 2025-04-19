@@ -2,17 +2,18 @@ package transaction
 
 import (
 	"bytes"
-	"errors"
 	"math"
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/models/sui_types"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
+	"github.com/block-vision/sui-go-sdk/signer"
 	"github.com/block-vision/sui-go-sdk/utils"
 )
 
 type Transaction struct {
-	Data TransactionData
+	Data   TransactionData
+	Signer *signer.Signer
 }
 
 func NewTransaction() *Transaction {
@@ -21,6 +22,11 @@ func NewTransaction() *Transaction {
 	return &Transaction{
 		Data: data,
 	}
+}
+
+func (tx *Transaction) SetSigner(signer *signer.Signer) *Transaction {
+	tx.Signer = signer
+	return tx
 }
 
 func (tx *Transaction) SetSender(sender models.SuiAddress) *Transaction {
@@ -151,7 +157,7 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 	if inputObject.Value == nil {
 		id = inputObject.ObjectId
 		if id == "" {
-			return nil, errors.New("object id is empty")
+			return nil, ErrObjectIdNotSet
 		}
 
 		callArg = UnresolvedObject{
@@ -169,7 +175,7 @@ func (tx *Transaction) Object(inputObject InputObject) (Argument, error) {
 		case Receiving:
 			id = objArg.(Receiving).Value.ObjectId
 		default:
-			return nil, errors.New("object value is not supported")
+			return nil, ErrObjectTypeNotSupported
 		}
 
 		callArg = Object{
@@ -227,11 +233,54 @@ func (tx *Transaction) Pure(inputPure InputPure) (Argument, error) {
 	return arg, nil
 }
 
-func createTransactionResult(index uint16, length *uint16) Argument {
-	// TODO: Support multiple results
-	if length == nil {
-		length = math.MaxInt
+func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
+	options models.SuiTransactionBlockOptions,
+	requestType string,
+) (*models.SuiExecuteTransactionBlockRequest, error) {
+	if tx.Signer == nil {
+		return nil, ErrSignerNotSet
 	}
+
+	txBytes, err := tx.buildTransaction()
+	if err != nil {
+		return nil, err
+	}
+
+	signedTransaction, err := tx.Signer.SignTransaction(txBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.SuiExecuteTransactionBlockRequest{
+		TxBytes:     signedTransaction.TxBytes,
+		Signature:   []string{signedTransaction.Signature},
+		Options:     options,
+		RequestType: requestType,
+	}, nil
+}
+
+func (tx *Transaction) buildTransaction() (string, error) {
+	if tx.Signer == nil {
+		return "", ErrSignerNotSet
+	}
+
+	tx.SetGasBudgetIfNotSet(defaultGasBudget)
+	tx.SetSenderIfNotSet(models.SuiAddress(tx.Signer.Address))
+
+	return tx.build()
+}
+
+func (tx *Transaction) build() (string, error) {
+	return "", nil
+}
+
+func createTransactionResult(index uint16, length *uint16) Argument {
+	if length == nil {
+		max := uint16(math.MaxUint16)
+		length = &max
+	}
+
+	// TODO: Support multiple results
 
 	return NestedResult{
 		Value: NestedResultValue{

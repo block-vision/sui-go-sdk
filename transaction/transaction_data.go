@@ -12,8 +12,7 @@ type TransactionData struct {
 	Sender     *models.SuiAddress
 	Expiration TransactionExpiration
 	GasData    GasData
-	Inputs     []CallArg
-	Commands   []Command
+	ProgrammableTransaction
 }
 
 func (td *TransactionData) AddCommand(command Command) (index uint16) {
