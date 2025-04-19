@@ -122,29 +122,23 @@ func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argu
 	}))
 }
 
-func (tx *Transaction) Publish(modules [][]models.SuiAddress, dependencies [][]models.SuiAddress) Argument {
-	moduleAddress := make([][]models.SuiAddressBytes, len(modules))
+func (tx *Transaction) Publish(modules []models.SuiAddress, dependencies []models.SuiAddress) Argument {
+	moduleAddress := make([]models.SuiAddressBytes, len(modules))
 	for i, module := range modules {
-		moduleAddress[i] = make([]models.SuiAddressBytes, len(module))
-		for j, address := range module {
-			v, err := ConvertSuiAddressStringToBytes(address)
-			if err != nil {
-				panic(err)
-			}
-			moduleAddress[i][j] = *v
+		v, err := ConvertSuiAddressStringToBytes(module)
+		if err != nil {
+			panic(err)
 		}
+		moduleAddress[i] = *v
 	}
 
-	dependenciesAddress := make([][]models.SuiAddressBytes, len(dependencies))
+	dependenciesAddress := make([]models.SuiAddressBytes, len(dependencies))
 	for i, dependency := range dependencies {
-		dependenciesAddress[i] = make([]models.SuiAddressBytes, len(dependency))
-		for j, address := range dependency {
-			v, err := ConvertSuiAddressStringToBytes(address)
-			if err != nil {
-				panic(err)
-			}
-			dependenciesAddress[i][j] = *v
+		v, err := ConvertSuiAddressStringToBytes(dependency)
+		if err != nil {
+			panic(err)
 		}
+		dependenciesAddress[i] = *v
 	}
 
 	return tx.Add(publish(Publish{
@@ -154,21 +148,18 @@ func (tx *Transaction) Publish(modules [][]models.SuiAddress, dependencies [][]m
 }
 
 func (tx *Transaction) Upgrade(
-	modules [][]models.SuiAddress,
+	modules []models.SuiAddress,
 	dependencies []models.SuiAddress,
 	packageId models.SuiAddress,
 	ticket Argument,
 ) Argument {
-	moduleAddress := make([][]models.SuiAddressBytes, len(modules))
+	moduleAddress := make([]models.SuiAddressBytes, len(modules))
 	for i, module := range modules {
-		moduleAddress[i] = make([]models.SuiAddressBytes, len(module))
-		for j, address := range module {
-			v, err := ConvertSuiAddressStringToBytes(address)
-			if err != nil {
-				panic(err)
-			}
-			moduleAddress[i][j] = *v
+		v, err := ConvertSuiAddressStringToBytes(module)
+		if err != nil {
+			panic(err)
 		}
+		moduleAddress[i] = *v
 	}
 
 	dependenciesAddress := make([]models.SuiAddressBytes, len(dependencies))
