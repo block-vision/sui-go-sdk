@@ -18,6 +18,12 @@ type Transaction struct {
 
 func NewTransaction() *Transaction {
 	data := TransactionData{}
+	data.V1.Kind = &TransactionKind{
+		ProgrammableTransaction: &ProgrammableTransaction{},
+	}
+	data.V1.Expiration = &TransactionExpiration{
+		None: lo.ToPtr(true),
+	}
 
 	return &Transaction{
 		Data: data,
@@ -50,7 +56,7 @@ func (tx *Transaction) SetSenderIfNotSet(sender models.SuiAddress) *Transaction 
 }
 
 func (tx *Transaction) SetExpiration(expiration TransactionExpiration) *Transaction {
-	tx.Data.V1.Expiration = expiration
+	tx.Data.V1.Expiration = &expiration
 
 	return tx
 }
@@ -66,26 +72,26 @@ func (tx *Transaction) SetGasOwner(owner models.SuiAddress) *Transaction {
 	if err != nil {
 		panic(err)
 	}
-	tx.Data.V1.GasData.Owner = *addressBytes
+	tx.Data.V1.GasData.Owner = addressBytes
 
 	return tx
 }
 
 func (tx *Transaction) SetGasPrice(price uint64) *Transaction {
-	tx.Data.V1.GasData.Price = price
+	tx.Data.V1.GasData.Price = &price
 
 	return tx
 }
 
 func (tx *Transaction) SetGasBudget(budget uint64) *Transaction {
-	tx.Data.V1.GasData.Budget = budget
+	tx.Data.V1.GasData.Budget = &budget
 
 	return tx
 }
 
 func (tx *Transaction) SetGasBudgetIfNotSet(budget uint64) *Transaction {
-	if tx.Data.V1.GasData.Budget == 0 {
-		tx.Data.V1.GasData.Budget = budget
+	if tx.Data.V1.GasData.Budget == nil {
+		tx.Data.V1.GasData.Budget = &budget
 	}
 
 	return tx
@@ -104,15 +110,16 @@ func (tx *Transaction) Add(command Command) Argument {
 
 func (tx *Transaction) SplitCoins(coin Argument, amount []Argument) Argument {
 	return tx.Add(splitCoins(SplitCoins{
-		Coin:   coin,
-		Amount: amount,
+		Coin:   &coin,
+		Amount: convertArgumentsToArgumentPtrs(amount),
 	}))
 }
 
 func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argument {
+
 	return tx.Add(mergeCoins(MergeCoins{
-		Destination: destination,
-		Sources:     sources,
+		Destination: &destination,
+		Sources:     convertArgumentsToArgumentPtrs(sources),
 	}))
 }
 
@@ -183,7 +190,7 @@ func (tx *Transaction) Upgrade(
 		Modules:      moduleAddress,
 		Dependencies: dependenciesAddress,
 		Package:      *packageIdBytes,
-		Ticket:       ticket,
+		Ticket:       &ticket,
 	}))
 }
 
@@ -204,21 +211,21 @@ func (tx *Transaction) MoveCall(
 		Module:        module,
 		Function:      function,
 		TypeArguments: typeArguments,
-		Arguments:     arguments,
+		Arguments:     convertArgumentsToArgumentPtrs(arguments),
 	}))
 }
 
 func (tx *Transaction) transferObjects(objects []Argument, address Argument) Argument {
 	return tx.Add(transferObjects(TransferObjects{
-		Objects: objects,
-		Address: address,
+		Objects: convertArgumentsToArgumentPtrs(objects),
+		Address: &address,
 	}))
 }
 
 func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argument {
 	return tx.Add(makeMoveVec(MakeMoveVec{
 		Type:     typeValue,
-		Elements: elements,
+		Elements: convertArgumentsToArgumentPtrs(elements),
 	}))
 }
 
@@ -298,6 +305,7 @@ func (tx *Transaction) Pure(input any) *Argument {
 		}
 		val = *bcsAddress
 	}
+	val = input
 
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
@@ -306,7 +314,9 @@ func (tx *Transaction) Pure(input any) *Argument {
 		tx.Data.V1.AddInput(CallArg{UnresolvedPure: lo.ToPtr(bcsEncodedMsg.Bytes())})
 	}
 
-	arg := tx.Data.V1.AddInput(CallArg{Pure: lo.ToPtr(bcsEncodedMsg.Bytes())})
+	arg := tx.Data.V1.AddInput(CallArg{Pure: &Pure{
+		Bytes: bcsEncodedMsg.Bytes(),
+	}})
 
 	return &arg
 }
@@ -384,4 +394,13 @@ func createTransactionResult(index uint16, length *uint16) Argument {
 	return Argument{
 		Result: lo.ToPtr(index),
 	}
+}
+
+func convertArgumentsToArgumentPtrs(args []Argument) []*Argument {
+	argPtrs := make([]*Argument, len(args))
+	for i, arg := range args {
+		argPtrs[i] = &arg
+	}
+
+	return argPtrs
 }

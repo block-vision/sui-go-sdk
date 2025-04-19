@@ -7,24 +7,39 @@ import (
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 )
 
+type TransactionData struct {
+	V1 TransactionDataV1
+}
+
+func (td *TransactionData) Marshal() ([]byte, error) {
+	bcsEncodedMsg := bytes.Buffer{}
+	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+	err := bcsEncoder.Encode(td)
+	if err != nil {
+		return nil, err
+	}
+
+	return bcsEncodedMsg.Bytes(), nil
+}
+
 // TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
 type TransactionDataV1 struct {
+	Kind       *TransactionKind
 	Sender     models.SuiAddressBytes
-	Expiration TransactionExpiration
 	GasData    GasData
-	Kind       TransactionKind
+	Expiration *TransactionExpiration
 }
 
 func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
 	index = uint16(len(td.Kind.ProgrammableTransaction.Commands))
-	td.Kind.ProgrammableTransaction.Commands = append(td.Kind.ProgrammableTransaction.Commands, command)
+	td.Kind.ProgrammableTransaction.Commands = append(td.Kind.ProgrammableTransaction.Commands, &command)
 
 	return index
 }
 
 func (td *TransactionDataV1) AddInput(input CallArg) Argument {
 	index := uint16(len(td.Kind.ProgrammableTransaction.Inputs))
-	td.Kind.ProgrammableTransaction.Inputs = append(td.Kind.ProgrammableTransaction.Inputs, input)
+	td.Kind.ProgrammableTransaction.Inputs = append(td.Kind.ProgrammableTransaction.Inputs, &input)
 
 	return Argument{
 		Input: &index,
@@ -64,37 +79,19 @@ func (td *TransactionDataV1) GetInputObjectIndex(address models.SuiAddress) *uin
 	return nil
 }
 
-type TransactionData struct {
-	V1 TransactionDataV1
-}
-
-func (td *TransactionData) Marshal() ([]byte, error) {
-	bcsEncodedMsg := bytes.Buffer{}
-	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
-	err := bcsEncoder.Encode(td)
-	if err != nil {
-		return nil, err
-	}
-
-	return bcsEncodedMsg.Bytes(), nil
-}
-
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
 type GasData struct {
 	Payment []SuiObjectRef
-	Owner   models.SuiAddressBytes
-	Price   uint64
-	Budget  uint64
+	Owner   *models.SuiAddressBytes
+	Price   *uint64
+	Budget  *uint64
 }
 
 func (gd *GasData) IsFullySet() bool {
 	if len(gd.Payment) == 0 {
 		return false
 	}
-	if gd.Owner.IsZero() {
-
-	}
-	if gd.Price == 0 || gd.Budget == 0 {
+	if gd.Owner == nil || gd.Price == nil || gd.Budget == nil {
 		return false
 	}
 
@@ -113,8 +110,8 @@ func (*TransactionExpiration) IsBcsEnum() {}
 
 // ProgrammableTransaction https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L702
 type ProgrammableTransaction struct {
-	Inputs   []CallArg
-	Commands []Command
+	Inputs   []*CallArg
+	Commands []*Command
 }
 
 // TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
@@ -148,10 +145,14 @@ func (tk *TransactionKind) Marshal() ([]byte, error) {
 // - UnresolvedPure
 // - UnresolvedObject
 type CallArg struct {
-	Pure             *[]byte
+	Pure             *Pure
 	Object           *ObjectArg
 	UnresolvedPure   any
 	UnresolvedObject *UnresolvedObject
+}
+
+type Pure struct {
+	Bytes []byte
 }
 
 func (*CallArg) IsBcsEnum() {}
@@ -201,22 +202,22 @@ type ProgrammableMoveCall struct {
 	Module        string
 	Function      string
 	TypeArguments []string
-	Arguments     []Argument
+	Arguments     []*Argument
 }
 
 type TransferObjects struct {
-	Objects []Argument
-	Address Argument
+	Objects []*Argument
+	Address *Argument
 }
 
 type SplitCoins struct {
-	Coin   Argument
-	Amount []Argument
+	Coin   *Argument
+	Amount []*Argument
 }
 
 type MergeCoins struct {
-	Destination Argument
-	Sources     []Argument
+	Destination *Argument
+	Sources     []*Argument
 }
 
 type Publish struct {
@@ -226,14 +227,14 @@ type Publish struct {
 
 type MakeMoveVec struct {
 	Type     *string
-	Elements []Argument
+	Elements []*Argument
 }
 
 type Upgrade struct {
 	Modules      [][]models.SuiAddressBytes
 	Dependencies []models.SuiAddressBytes
 	Package      models.SuiAddressBytes
-	Ticket       Argument
+	Ticket       *Argument
 }
 
 // Argument https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L745
