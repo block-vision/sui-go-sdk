@@ -46,6 +46,19 @@ func TestNewTransaction(t *testing.T) {
 			onlyTransactionKind: false,
 			expectBcsBase64:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAWFiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiAgAAAAAAAAAgAAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJAQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgUAAAAAAAAAZAAAAAAAAAABZAAAAAAAAAA=",
 		},
+		{
+			name: "tx transfer",
+			fun: func() *Transaction {
+				tx := setupTransaction()
+				splitCoin := tx.SplitCoins(tx.Gas(), []Argument{
+					*tx.Pure(uint64(1000000000 * 0.1)),
+				})
+				tx.transferObjects([]Argument{splitCoin}, *tx.Pure("0x9"))
+				return tx
+			},
+			onlyTransactionKind: false,
+			expectBcsBase64:     "AAACAAgA4fUFAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkCAgABAQAAAQECAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYgIAAAAAAAAAIAABAgMEBQYHCAkAAQIDBAUGBwgJAAECAwQFBgcICQECAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYFAAAAAAAAAGQAAAAAAAAAAA==",
+		},
 	}
 
 	for _, c := range cases {
