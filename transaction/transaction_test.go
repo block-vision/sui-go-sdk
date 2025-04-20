@@ -53,7 +53,7 @@ func TestNewTransaction(t *testing.T) {
 				splitCoin := tx.SplitCoins(tx.Gas(), []Argument{
 					tx.Pure(uint64(1000000000 * 0.1)),
 				})
-				tx.transferObjects([]Argument{splitCoin}, tx.Pure("0x9"))
+				tx.TransferObjects([]Argument{splitCoin}, tx.Pure("0x9"))
 				return tx
 			},
 			onlyTransactionKind: false,

@@ -57,7 +57,7 @@ func (tx *Transaction) SetSender(sender models.SuiAddress) *Transaction {
 }
 
 func (tx *Transaction) SetSenderIfNotSet(sender models.SuiAddress) *Transaction {
-	if tx.Data.V1.Sender.IsZero() {
+	if tx.Data.V1.Sender == nil {
 		tx.SetSender(sender)
 	}
 
@@ -215,14 +215,14 @@ func (tx *Transaction) MoveCall(
 	}))
 }
 
-func (tx *Transaction) transferObjects(objects []Argument, address Argument) Argument {
+func (tx *Transaction) TransferObjects(objects []Argument, address Argument) Argument {
 	return tx.Add(transferObjects(TransferObjects{
 		Objects: convertArgumentsToArgumentPtrs(objects),
 		Address: &address,
 	}))
 }
 
-func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argument {
+func (tx *Transaction) MakeMoveVec(typeValue *string, elements []Argument) Argument {
 	return tx.Add(makeMoveVec(MakeMoveVec{
 		Type:     typeValue,
 		Elements: convertArgumentsToArgumentPtrs(elements),
@@ -397,7 +397,7 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 		return bcsBase64, nil
 	}
 
-	if tx.Data.V1.Sender.IsZero() {
+	if tx.Data.V1.Sender == nil {
 		return "", ErrSenderNotSet
 	}
 	if tx.Data.V1.GasData.Owner == nil {
@@ -414,6 +414,23 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg)
 
 	return bcsBase64, nil
+}
+
+func NewSuiObjectRef(objectId models.SuiAddress, version uint64, digest models.ObjectDigest) (*SuiObjectRef, error) {
+	objectIdBytes, err := ConvertSuiAddressStringToBytes(objectId)
+	if err != nil {
+		return nil, err
+	}
+	digestBytes, err := ConvertObjectDigestStringToBytes(digest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SuiObjectRef{
+		ObjectId: *objectIdBytes,
+		Version:  version,
+		Digest:   *digestBytes,
+	}, nil
 }
 
 func createTransactionResult(index uint16, length *uint16) Argument {
