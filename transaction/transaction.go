@@ -20,7 +20,9 @@ type Transaction struct {
 }
 
 func NewTransaction() *Transaction {
-	data := TransactionData{}
+	data := TransactionData{
+		V1: &TransactionDataV1{},
+	}
 	data.V1.Kind = &TransactionKind{
 		ProgrammableTransaction: &ProgrammableTransaction{},
 	}
@@ -400,8 +402,11 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	if tx.Data.V1.Sender.IsZero() {
 		return "", ErrSenderNotSet
 	}
-	if !tx.Data.V1.GasData.IsFullySet() {
-		return "", ErrGasDataNotFullySet
+	if tx.Data.V1.GasData.Owner == nil {
+		tx.SetGasOwner(models.SuiAddress(tx.Signer.Address))
+	}
+	if !tx.Data.V1.GasData.IsAllSet() {
+		return "", ErrGasDataNotAllSet
 	}
 
 	bcsEncodedMsg, err := tx.Data.Marshal()

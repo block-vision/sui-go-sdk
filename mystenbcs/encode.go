@@ -54,7 +54,7 @@ func (e *Encoder) Encode(v any) error {
 func (e *Encoder) encode(v reflect.Value) error {
 	// if v not CanInterface,
 	// this value is an unexported value, skip it.
-	if !v.CanInterface() {
+	if !v.IsValid() || !v.CanInterface() {
 		return nil
 	}
 

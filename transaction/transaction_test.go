@@ -7,6 +7,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/google/go-cmp/cmp"
 	"github.com/mr-tron/base58"
+	"github.com/samber/lo"
 )
 
 func TestNewTransaction(t *testing.T) {
@@ -17,7 +18,7 @@ func TestNewTransaction(t *testing.T) {
 		expectBcsBase64     string
 	}{
 		{
-			name: "basic tx only kind",
+			name: "tx only kind",
 			fun: func() *Transaction {
 				return setupTransaction()
 			},
@@ -25,13 +26,25 @@ func TestNewTransaction(t *testing.T) {
 			expectBcsBase64:     "AAAA",
 		},
 		{
-			name: "basic tx",
+			name: "tx setup",
 			fun: func() *Transaction {
 				tx := setupTransaction()
 				return tx
 			},
 			onlyTransactionKind: false,
 			expectBcsBase64:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAWFiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiAgAAAAAAAAAgAAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJAQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgUAAAAAAAAAZAAAAAAAAAAA",
+		},
+		{
+			name: "tx with expiration",
+			fun: func() *Transaction {
+				tx := setupTransaction()
+				tx.SetExpiration(TransactionExpiration{
+					Epoch: lo.ToPtr(uint64(100)),
+				})
+				return tx
+			},
+			onlyTransactionKind: false,
+			expectBcsBase64:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAWFiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiAgAAAAAAAAAgAAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJAQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgUAAAAAAAAAZAAAAAAAAAABZAAAAAAAAAA=",
 		},
 	}
 

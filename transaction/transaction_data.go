@@ -8,8 +8,10 @@ import (
 )
 
 type TransactionData struct {
-	V1 TransactionDataV1
+	V1 *TransactionDataV1
 }
+
+func (*TransactionData) IsBcsEnum() {}
 
 func (td *TransactionData) Marshal() ([]byte, error) {
 	bcsEncodedMsg := bytes.Buffer{}
@@ -26,7 +28,7 @@ func (td *TransactionData) Marshal() ([]byte, error) {
 type TransactionDataV1 struct {
 	Kind       *TransactionKind
 	Sender     *models.SuiAddressBytes
-	GasData    *GasData               `bcs:"optional"`
+	GasData    *GasData
 	Expiration *TransactionExpiration `bcs:"optional"`
 }
 
@@ -87,7 +89,7 @@ type GasData struct {
 	Budget  *uint64
 }
 
-func (gd *GasData) IsFullySet() bool {
+func (gd *GasData) IsAllSet() bool {
 	if gd.Payment == nil || gd.Owner == nil || gd.Price == nil || gd.Budget == nil {
 		return false
 	}
@@ -99,7 +101,8 @@ func (gd *GasData) IsFullySet() bool {
 // - None
 // - Epoch
 type TransactionExpiration struct {
-	mystenbcs.Option[uint64]
+	None  *bool
+	Epoch *uint64
 }
 
 func (*TransactionExpiration) IsBcsEnum() {}
@@ -112,8 +115,14 @@ type ProgrammableTransaction struct {
 
 // TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
 // - ProgrammableTransaction
+// - ChangeEpoch
+// - Genesis
+// - ConsensusCommitPrologue
 type TransactionKind struct {
 	ProgrammableTransaction *ProgrammableTransaction
+	ChangeEpoch             struct{}
+	Genesis                 struct{}
+	ConsensusCommitPrologue struct{}
 }
 
 func (*TransactionKind) IsBcsEnum() {}
