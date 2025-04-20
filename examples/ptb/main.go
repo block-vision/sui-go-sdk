@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
@@ -29,13 +30,32 @@ func main() {
 
 func simpleTransfer(ctx context.Context, suiClient *sui.Client, signer *signer.Signer) {
 	receiver := ""
-
 	gasCoinObjectId := ""
-	gasCoinVersion := uint64(0)
-	gasCoinDigest := ""
+
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
+		ObjectId: gasCoinObjectId,
+		Options: models.SuiObjectDataOptions{
+			ShowContent:             true,
+			ShowDisplay:             true,
+			ShowType:                true,
+			ShowBcs:                 true,
+			ShowOwner:               true,
+			ShowPreviousTransaction: true,
+			ShowStorageRebate:       true,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	gasCoinVersion := gasCoinObj.Data.Version
+	gasCoinDigest := gasCoinObj.Data.Digest
+	version, err := strconv.ParseUint(gasCoinVersion, 10, 64)
+	if err != nil {
+		panic(err)
+	}
 	gasCoin, err := transaction.NewSuiObjectRef(
 		models.SuiAddress(gasCoinObjectId),
-		gasCoinVersion,
+		version,
 		models.ObjectDigest(gasCoinDigest),
 	)
 	if err != nil {
