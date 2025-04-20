@@ -316,6 +316,26 @@ func (tx *Transaction) Pure(input any) *Argument {
 	return &arg
 }
 
+func (tx *Transaction) Execute(
+	ctx context.Context,
+	options models.SuiTransactionBlockOptions,
+	requestType string,
+) (*models.SuiTransactionBlockResponse, error) {
+	if tx.SuiClient == nil {
+		return nil, ErrSuiClientNotSet
+	}
+	req, err := tx.ToSuiExecuteTransactionBlockRequest(ctx, options, requestType)
+	if err != nil {
+		return nil, err
+	}
+	rsp, err := tx.SuiClient.SuiExecuteTransactionBlock(ctx, *req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rsp, nil
+}
+
 func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
 	ctx context.Context,
 	options models.SuiTransactionBlockOptions,
