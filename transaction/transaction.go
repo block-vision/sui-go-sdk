@@ -231,7 +231,7 @@ func (tx *Transaction) makeMoveVec(typeValue *string, elements []Argument) Argum
 
 // Object
 // - input: string | CallArg | Argument
-func (tx *Transaction) Object(input any) *Argument {
+func (tx *Transaction) Object(input any) Argument {
 	// string
 	if s, ok := input.(string); ok {
 		if utils.IsValidSuiAddress(models.SuiAddress(s)) {
@@ -247,15 +247,15 @@ func (tx *Transaction) Object(input any) *Argument {
 				},
 			})
 
-			return &arg
+			return arg
 		} else {
-			return nil
+			panic(ErrObjectNotSupportType)
 		}
 	}
 
 	// Argument
 	if arg, ok := input.(Argument); ok {
-		return &arg
+		return arg
 	}
 
 	// CallArg
@@ -279,47 +279,45 @@ func (tx *Transaction) Object(input any) *Argument {
 				arg := tx.Data.V1.AddInput(CallArg{
 					Object: v.Object,
 				})
-				return &arg
+				return arg
 			} else if id := v.Object.Receiving.ObjectId; !id.IsZero() {
 				// Receiving
 				arg := tx.Data.V1.AddInput(CallArg{
 					Object: v.Object,
 				})
-				return &arg
-			} else {
-				// Not supported
-				return nil
+				return arg
 			}
 		}
 	}
 
-	return nil
+	// Not supported input type
+	panic(ErrObjectNotSupportType)
 }
 
-func (tx *Transaction) Pure(input any) *Argument {
-	val := input
+func (tx *Transaction) Pure(input any) Argument {
+	var val []byte
 	if s, ok := input.(string); ok && utils.IsValidSuiAddress(models.SuiAddress(s)) {
-		bcsAddress, err := ConvertSuiAddressStringToBytes(models.SuiAddress(s))
+		fixedAddressBytes, err := ConvertSuiAddressStringToBytes(models.SuiAddress(s))
 		if err != nil {
 			panic(err)
 		}
-		val = *bcsAddress
-	}
-
-	bcsEncodedMsg := bytes.Buffer{}
-	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
-	err := bcsEncoder.Encode(val)
-	if err != nil {
-		tx.Data.V1.AddInput(CallArg{UnresolvedPure: &UnresolvedPure{
-			Value: input,
-		}})
+		addressBytes := fixedAddressBytes[:]
+		val = addressBytes
+	} else {
+		bcsEncodedMsg := bytes.Buffer{}
+		bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
+		err := bcsEncoder.Encode(input)
+		if err != nil {
+			panic(err)
+		}
+		val = bcsEncodedMsg.Bytes()
 	}
 
 	arg := tx.Data.V1.AddInput(CallArg{Pure: &Pure{
-		Bytes: bcsEncodedMsg.Bytes(),
+		Bytes: val,
 	}})
 
-	return &arg
+	return arg
 }
 
 func (tx *Transaction) Execute(

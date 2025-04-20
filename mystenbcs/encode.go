@@ -331,7 +331,7 @@ func fixedByteArrayToSlice(v reflect.Value) []byte {
 	}
 
 	// If the value is Sui address bytes, not to add uleb125 prefix
-	if isSuiAddressBytes(v) {
+	if isCustomSuiAddressBytes(v) {
 		return nil
 	}
 
@@ -343,6 +343,6 @@ func fixedByteArrayToSlice(v reflect.Value) []byte {
 	return slice
 }
 
-func isSuiAddressBytes(v reflect.Value) bool {
+func isCustomSuiAddressBytes(v reflect.Value) bool {
 	return v.Type().Name() == "SuiAddressBytes"
 }
