@@ -70,9 +70,9 @@ func generateObjectRef() SuiObjectRef {
 	digestBytes, _ := ConvertObjectDigestStringToBytes(models.ObjectDigest(digest))
 
 	return SuiObjectRef{
-		ObjectId: objectIdBytes,
+		ObjectId: *objectIdBytes,
 		Version:  2,
-		Digest:   digestBytes,
+		Digest:   *digestBytes,
 	}
 }
 

@@ -103,6 +103,10 @@ func (e *Encoder) encode(v reflect.Value) error {
 		return e.encodeSlice(v)
 
 	case reflect.Array: // encode array
+		// check if the element is [n]byte
+		if byteSlice := fixedByteArrayToSlice(v); byteSlice != nil {
+			return e.encodeByteSlice(byteSlice)
+		}
 		return e.encodeArray(v)
 
 	case reflect.String:
@@ -316,4 +320,29 @@ func MustMarshal(v any) []byte {
 	}
 
 	return result
+}
+
+func fixedByteArrayToSlice(v reflect.Value) []byte {
+	if v.Kind() != reflect.Array {
+		return nil
+	}
+	if v.Type().Elem().Kind() != reflect.Uint8 {
+		return nil
+	}
+
+	// If the value is Sui address bytes, not to add uleb125 prefix
+	if isSuiAddressBytes(v) {
+		return nil
+	}
+
+	length := v.Len()
+	slice := make([]byte, length)
+	for i := 0; i < length; i++ {
+		slice[i] = byte(v.Index(i).Uint())
+	}
+	return slice
+}
+
+func isSuiAddressBytes(v reflect.Value) bool {
+	return v.Type().Name() == "SuiAddressBytes"
 }

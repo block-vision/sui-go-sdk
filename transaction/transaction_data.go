@@ -26,7 +26,7 @@ func (td *TransactionData) Marshal() ([]byte, error) {
 type TransactionDataV1 struct {
 	Kind       *TransactionKind
 	Sender     *models.SuiAddressBytes
-	GasData    *GasData
+	GasData    *GasData               `bcs:"optional"`
 	Expiration *TransactionExpiration `bcs:"optional"`
 }
 
@@ -251,9 +251,9 @@ type NestedResult struct {
 }
 
 type SuiObjectRef struct {
-	ObjectId *models.SuiAddressBytes `bcs:"optional"`
+	ObjectId models.SuiAddressBytes
 	Version  uint64
-	Digest   *models.ObjectDigestBytes `bcs:"optional"`
+	Digest   models.ObjectDigestBytes
 }
 
 type SharedObjectRef struct {
