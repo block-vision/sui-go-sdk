@@ -5,6 +5,7 @@ import (
 	"context"
 	"math"
 
+	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	"github.com/block-vision/sui-go-sdk/signer"
@@ -349,19 +350,18 @@ func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
 		return nil, ErrSignerNotSet
 	}
 
-	txBytes, err := tx.buildTransaction(ctx)
+	b64TxBytes, err := tx.buildTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	signedTransaction, err := tx.Signer.SignTransaction(txBytes)
+	message, err := tx.Signer.SignMessage(b64TxBytes, constant.TransactionDataIntentScope)
 	if err != nil {
 		return nil, err
 	}
 
 	return &models.SuiExecuteTransactionBlockRequest{
-		TxBytes:     signedTransaction.TxBytes,
-		Signature:   []string{signedTransaction.Signature},
+		TxBytes:     message.Message,
+		Signature:   []string{message.Signature},
 		Options:     options,
 		RequestType: requestType,
 	}, nil
