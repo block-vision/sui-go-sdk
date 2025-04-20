@@ -108,7 +108,7 @@ func (tx *Transaction) SetGasBudgetIfNotSet(budget uint64) *Transaction {
 
 func (tx *Transaction) Gas() Argument {
 	return Argument{
-		GasCoin: lo.ToPtr(true),
+		GasCoin: struct{}{},
 	}
 }
 

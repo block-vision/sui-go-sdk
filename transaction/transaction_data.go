@@ -101,7 +101,7 @@ func (gd *GasData) IsAllSet() bool {
 // - None
 // - Epoch
 type TransactionExpiration struct {
-	None  *bool
+	None  any
 	Epoch *uint64
 }
 
@@ -246,7 +246,7 @@ type Upgrade struct {
 // - Result
 // - NestedResult
 type Argument struct {
-	GasCoin      *bool
+	GasCoin      any
 	Input        *uint16
 	Result       *uint16
 	NestedResult *NestedResult
