@@ -2,27 +2,27 @@ package transaction
 
 import (
 	"bytes"
+	"context"
 	"math"
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	"github.com/block-vision/sui-go-sdk/signer"
+	"github.com/block-vision/sui-go-sdk/sui"
 	"github.com/block-vision/sui-go-sdk/utils"
 	"github.com/samber/lo"
 )
 
 type Transaction struct {
-	Data   TransactionData
-	Signer *signer.Signer
+	Data      TransactionData
+	Signer    *signer.Signer
+	SuiClient *sui.Client
 }
 
 func NewTransaction() *Transaction {
 	data := TransactionData{}
 	data.V1.Kind = &TransactionKind{
 		ProgrammableTransaction: &ProgrammableTransaction{},
-	}
-	data.V1.Expiration = &TransactionExpiration{
-		None: lo.ToPtr(true),
 	}
 
 	return &Transaction{
@@ -36,13 +36,19 @@ func (tx *Transaction) SetSigner(signer *signer.Signer) *Transaction {
 	return tx
 }
 
+func (tx *Transaction) SetSuiClient(client *sui.Client) *Transaction {
+	tx.SuiClient = client
+
+	return tx
+}
+
 func (tx *Transaction) SetSender(sender models.SuiAddress) *Transaction {
 	address := utils.NormalizeSuiAddress(string(sender))
 	addressBytes, err := ConvertSuiAddressStringToBytes(address)
 	if err != nil {
 		panic(err)
 	}
-	tx.Data.V1.Sender = *addressBytes
+	tx.Data.V1.Sender = addressBytes
 
 	return tx
 }
@@ -311,6 +317,7 @@ func (tx *Transaction) Pure(input any) *Argument {
 }
 
 func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
+	ctx context.Context,
 	options models.SuiTransactionBlockOptions,
 	requestType string,
 ) (*models.SuiExecuteTransactionBlockRequest, error) {
@@ -318,7 +325,7 @@ func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
 		return nil, ErrSignerNotSet
 	}
 
-	txBytes, err := tx.buildTransaction()
+	txBytes, err := tx.buildTransaction(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -336,11 +343,20 @@ func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
 	}, nil
 }
 
-func (tx *Transaction) buildTransaction() (string, error) {
+func (tx *Transaction) buildTransaction(ctx context.Context) (string, error) {
 	if tx.Signer == nil {
 		return "", ErrSignerNotSet
 	}
 
+	if tx.Data.V1.GasData.Price == nil {
+		if tx.SuiClient != nil {
+			rsp, err := tx.SuiClient.SuiXGetReferenceGasPrice(ctx)
+			if err != nil {
+				return "", err
+			}
+			tx.SetGasPrice(rsp)
+		}
+	}
 	tx.SetGasBudgetIfNotSet(defaultGasBudget)
 	tx.SetSenderIfNotSet(models.SuiAddress(tx.Signer.Address))
 
@@ -360,7 +376,6 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	if tx.Data.V1.Sender.IsZero() {
 		return "", ErrSenderNotSet
 	}
-	// TODO: Support get latest gas data online
 	if !tx.Data.V1.GasData.IsFullySet() {
 		return "", ErrGasDataNotFullySet
 	}

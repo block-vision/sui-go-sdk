@@ -79,7 +79,9 @@ func generateObjectRef() SuiObjectRef {
 func setupTransaction() *Transaction {
 	tx := NewTransaction()
 	tx.SetSender("0x2").
-		SetGasPrice(5).SetGasBudget(100).SetGasOwner("0x6").
-		SetGasPayment([]SuiObjectRef{generateObjectRef()})
+		SetGasPrice(5).
+		SetGasBudget(100).
+		SetGasPayment([]SuiObjectRef{generateObjectRef()}).
+		SetGasOwner("0x6")
 	return tx
 }

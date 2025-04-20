@@ -25,9 +25,9 @@ func (td *TransactionData) Marshal() ([]byte, error) {
 // TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
 type TransactionDataV1 struct {
 	Kind       *TransactionKind
-	Sender     models.SuiAddressBytes
+	Sender     *models.SuiAddressBytes `bcs:"optional"`
 	GasData    GasData
-	Expiration *TransactionExpiration
+	Expiration *TransactionExpiration `bcs:"optional"`
 }
 
 func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
@@ -102,8 +102,7 @@ func (gd *GasData) IsFullySet() bool {
 // - None
 // - Epoch
 type TransactionExpiration struct {
-	None  *bool
-	Epoch *uint64
+	mystenbcs.Option[uint64]
 }
 
 func (*TransactionExpiration) IsBcsEnum() {}
