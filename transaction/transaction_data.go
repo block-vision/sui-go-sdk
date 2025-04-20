@@ -25,8 +25,8 @@ func (td *TransactionData) Marshal() ([]byte, error) {
 // TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
 type TransactionDataV1 struct {
 	Kind       *TransactionKind
-	Sender     *models.SuiAddressBytes `bcs:"optional"`
-	GasData    GasData
+	Sender     *models.SuiAddressBytes
+	GasData    *GasData
 	Expiration *TransactionExpiration `bcs:"optional"`
 }
 
@@ -81,17 +81,14 @@ func (td *TransactionDataV1) GetInputObjectIndex(address models.SuiAddress) *uin
 
 // GasData https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1600
 type GasData struct {
-	Payment []SuiObjectRef
+	Payment *[]SuiObjectRef
 	Owner   *models.SuiAddressBytes
 	Price   *uint64
 	Budget  *uint64
 }
 
 func (gd *GasData) IsFullySet() bool {
-	if len(gd.Payment) == 0 {
-		return false
-	}
-	if gd.Owner == nil || gd.Price == nil || gd.Budget == nil {
+	if gd.Payment == nil || gd.Owner == nil || gd.Price == nil || gd.Budget == nil {
 		return false
 	}
 
@@ -115,14 +112,8 @@ type ProgrammableTransaction struct {
 
 // TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
 // - ProgrammableTransaction
-// - ChangeEpoch
-// - Genesis
-// - ConsensusCommitPrologue
 type TransactionKind struct {
 	ProgrammableTransaction *ProgrammableTransaction
-	ChangeEpoch             *bool
-	Genesis                 *bool
-	ConsensusCommitPrologue *bool
 }
 
 func (*TransactionKind) IsBcsEnum() {}
@@ -146,12 +137,16 @@ func (tk *TransactionKind) Marshal() ([]byte, error) {
 type CallArg struct {
 	Pure             *Pure
 	Object           *ObjectArg
-	UnresolvedPure   any
+	UnresolvedPure   *UnresolvedPure
 	UnresolvedObject *UnresolvedObject
 }
 
 type Pure struct {
 	Bytes []byte
+}
+
+type UnresolvedPure struct {
+	Value any
 }
 
 func (*CallArg) IsBcsEnum() {}
@@ -256,9 +251,9 @@ type NestedResult struct {
 }
 
 type SuiObjectRef struct {
-	ObjectId models.SuiAddressBytes
+	ObjectId *models.SuiAddressBytes `bcs:"optional"`
 	Version  uint64
-	Digest   models.ObjectDigestBytes
+	Digest   *models.ObjectDigestBytes `bcs:"optional"`
 }
 
 type SharedObjectRef struct {

@@ -24,6 +24,7 @@ func NewTransaction() *Transaction {
 	data.V1.Kind = &TransactionKind{
 		ProgrammableTransaction: &ProgrammableTransaction{},
 	}
+	data.V1.GasData = &GasData{}
 
 	return &Transaction{
 		Data: data,
@@ -68,7 +69,7 @@ func (tx *Transaction) SetExpiration(expiration TransactionExpiration) *Transact
 }
 
 func (tx *Transaction) SetGasPayment(payment []SuiObjectRef) *Transaction {
-	tx.Data.V1.GasData.Payment = payment
+	tx.Data.V1.GasData.Payment = &payment
 
 	return tx
 }
@@ -111,6 +112,7 @@ func (tx *Transaction) Gas() Argument {
 
 func (tx *Transaction) Add(command Command) Argument {
 	index := tx.Data.V1.AddCommand(command)
+
 	return createTransactionResult(index, nil)
 }
 
@@ -306,7 +308,9 @@ func (tx *Transaction) Pure(input any) *Argument {
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
 	err := bcsEncoder.Encode(val)
 	if err != nil {
-		tx.Data.V1.AddInput(CallArg{UnresolvedPure: lo.ToPtr(bcsEncodedMsg.Bytes())})
+		tx.Data.V1.AddInput(CallArg{UnresolvedPure: &UnresolvedPure{
+			Value: input,
+		}})
 	}
 
 	arg := tx.Data.V1.AddInput(CallArg{Pure: &Pure{
