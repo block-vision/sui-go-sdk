@@ -343,6 +343,8 @@ func fixedByteArrayToSlice(v reflect.Value) []byte {
 	return slice
 }
 
+const SuiAddressBytesName = "SuiAddressBytes"
+
 func isCustomSuiAddressBytes(v reflect.Value) bool {
-	return v.Type().Name() == "SuiAddressBytes"
+	return v.Type().Name() == SuiAddressBytesName
 }

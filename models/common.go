@@ -1,10 +1,23 @@
 package models
 
+import (
+	"reflect"
+
+	"github.com/block-vision/sui-go-sdk/mystenbcs"
+)
+
 type SuiAddress string
 type SuiAddressBytes [32]byte
 type TransactionDigest string
 type ObjectDigest string
 type ObjectDigestBytes [32]byte
+
+func init() {
+	var suiAddressBytes SuiAddressBytes
+	if reflect.ValueOf(suiAddressBytes).Type().Name() != mystenbcs.SuiAddressBytesName {
+		panic("SuiAddressBytes type name not match")
+	}
+}
 
 func (s *SuiAddressBytes) IsZero() bool {
 	for _, b := range s {

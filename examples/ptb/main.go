@@ -110,7 +110,10 @@ func sponsoredTransaction(ctx context.Context, suiClient *sui.Client, rawSigner 
 
 	// Sponsored transaction
 	sponsoredGasCoinObjectId := ""
-	newTx := tx.NewTransactionFromKind()
+	newTx, err := tx.NewTransactionFromKind()
+	if err != nil {
+		panic(err)
+	}
 	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
 		ObjectId: sponsoredGasCoinObjectId,
 		Options: models.SuiObjectDataOptions{

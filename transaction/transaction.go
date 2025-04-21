@@ -11,6 +11,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/signer"
 	"github.com/block-vision/sui-go-sdk/sui"
 	"github.com/block-vision/sui-go-sdk/utils"
+	"github.com/jinzhu/copier"
 	"github.com/samber/lo"
 )
 
@@ -432,10 +433,13 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	return bcsBase64, nil
 }
 
-func (tx *Transaction) NewTransactionFromKind() (newTx *Transaction) {
+func (tx *Transaction) NewTransactionFromKind() (newTx *Transaction, err error) {
 	newTx = NewTransaction()
-	newTx.Data.V1.Kind = tx.Data.V1.Kind
-	return newTx
+	err = copier.CopyWithOption(&newTx.Data.V1.Kind, &tx.Data.V1.Kind, copier.Option{DeepCopy: true})
+	if err != nil {
+		return nil, err
+	}
+	return newTx, nil
 }
 
 func NewSuiObjectRef(objectId models.SuiAddress, version uint64, digest models.ObjectDigest) (*SuiObjectRef, error) {

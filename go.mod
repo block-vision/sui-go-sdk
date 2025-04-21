@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/google/go-cmp v0.7.0
 	github.com/gorilla/websocket v1.5.0
+	github.com/jinzhu/copier v0.4.0
 	github.com/machinebox/graphql v0.2.2
 	github.com/mr-tron/base58 v1.2.0
 	github.com/samber/lo v1.49.1
