@@ -25,10 +25,12 @@ func main() {
 	}
 	fmt.Println(signerAccount.Address)
 
-	simpleTransfer(ctx, client, signerAccount)
+	simpleTransaction(ctx, client, signerAccount)
+	// TODO: sponsored transaction not work now
+	// sponsoredTransaction(ctx, client, signerAccount)
 }
 
-func simpleTransfer(ctx context.Context, suiClient *sui.Client, signer *signer.Signer) {
+func simpleTransaction(ctx context.Context, suiClient *sui.Client, signer *signer.Signer) {
 	receiver := ""
 	gasCoinObjectId := ""
 
@@ -47,16 +49,14 @@ func simpleTransfer(ctx context.Context, suiClient *sui.Client, signer *signer.S
 	if err != nil {
 		panic(err)
 	}
-	gasCoinVersion := gasCoinObj.Data.Version
-	gasCoinDigest := gasCoinObj.Data.Digest
-	version, err := strconv.ParseUint(gasCoinVersion, 10, 64)
+	version, err := strconv.ParseUint(gasCoinObj.Data.Version, 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	gasCoin, err := transaction.NewSuiObjectRef(
 		models.SuiAddress(gasCoinObjectId),
 		version,
-		models.ObjectDigest(gasCoinDigest),
+		models.ObjectDigest(gasCoinObj.Data.Digest),
 	)
 	if err != nil {
 		panic(err)
@@ -78,6 +78,77 @@ func simpleTransfer(ctx context.Context, suiClient *sui.Client, signer *signer.S
 	tx.TransferObjects([]transaction.Argument{splitCoin}, tx.Pure(receiver))
 
 	resp, err := tx.Execute(
+		ctx,
+		models.SuiTransactionBlockOptions{
+			ShowInput:    true,
+			ShowRawInput: true,
+			ShowEffects:  true,
+			ShowEvents:   true,
+		},
+		"WaitForLocalExecution",
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(resp.Digest, resp.Effects, resp.Results)
+}
+
+func sponsoredTransaction(ctx context.Context, suiClient *sui.Client, rawSigner *signer.Signer) {
+	sponsoredSigner, err := signer.NewSignertWithMnemonic("")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Sponsored: ", sponsoredSigner.Address)
+
+	receiver := ""
+	transferCoinObjectId := ""
+
+	// Raw transaction
+	tx := transaction.NewTransaction()
+	tx.TransferObjects([]transaction.Argument{tx.Object(transferCoinObjectId)}, tx.Pure(receiver))
+
+	// Sponsored transaction
+	sponsoredGasCoinObjectId := ""
+	newTx := tx.NewTransactionFromKind()
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
+		ObjectId: sponsoredGasCoinObjectId,
+		Options: models.SuiObjectDataOptions{
+			ShowContent:             true,
+			ShowDisplay:             true,
+			ShowType:                true,
+			ShowBcs:                 true,
+			ShowOwner:               true,
+			ShowPreviousTransaction: true,
+			ShowStorageRebate:       true,
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	version, err := strconv.ParseUint(gasCoinObj.Data.Version, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	gasCoin, err := transaction.NewSuiObjectRef(
+		models.SuiAddress(sponsoredGasCoinObjectId),
+		version,
+		models.ObjectDigest(gasCoinObj.Data.Digest),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	newTx.SetSuiClient(suiClient).
+		SetSigner(rawSigner).
+		SetSponsoredSigner(sponsoredSigner).
+		SetSender(models.SuiAddress(rawSigner.Address)).
+		SetGasPrice(1000).
+		SetGasBudget(50000000).
+		SetGasPayment([]transaction.SuiObjectRef{*gasCoin}).
+		SetGasOwner(models.SuiAddress(sponsoredSigner.Address))
+
+	resp, err := newTx.Execute(
 		ctx,
 		models.SuiTransactionBlockOptions{
 			ShowInput:    true,

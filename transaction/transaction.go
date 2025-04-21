@@ -15,9 +15,10 @@ import (
 )
 
 type Transaction struct {
-	Data      TransactionData
-	Signer    *signer.Signer
-	SuiClient *sui.Client
+	Data            TransactionData
+	Signer          *signer.Signer
+	SponsoredSigner *signer.Signer
+	SuiClient       *sui.Client
 }
 
 func NewTransaction() *Transaction {
@@ -36,6 +37,12 @@ func NewTransaction() *Transaction {
 
 func (tx *Transaction) SetSigner(signer *signer.Signer) *Transaction {
 	tx.Signer = signer
+
+	return tx
+}
+
+func (tx *Transaction) SetSponsoredSigner(signer *signer.Signer) *Transaction {
+	tx.SponsoredSigner = signer
 
 	return tx
 }
@@ -354,14 +361,23 @@ func (tx *Transaction) ToSuiExecuteTransactionBlockRequest(
 	if err != nil {
 		return nil, err
 	}
+	var signatures []string
+	if tx.SponsoredSigner != nil {
+		sponsoredMessage, err := tx.SponsoredSigner.SignMessage(b64TxBytes, constant.TransactionDataIntentScope)
+		if err != nil {
+			return nil, err
+		}
+		signatures = append(signatures, sponsoredMessage.Signature)
+	}
 	message, err := tx.Signer.SignMessage(b64TxBytes, constant.TransactionDataIntentScope)
 	if err != nil {
 		return nil, err
 	}
+	signatures = append(signatures, message.Signature)
 
 	return &models.SuiExecuteTransactionBlockRequest{
-		TxBytes:     message.Message,
-		Signature:   []string{message.Signature},
+		TxBytes:     b64TxBytes,
+		Signature:   signatures,
 		Options:     options,
 		RequestType: requestType,
 	}, nil
@@ -414,6 +430,12 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	bcsBase64 := mystenbcs.ToBase64(bcsEncodedMsg)
 
 	return bcsBase64, nil
+}
+
+func (tx *Transaction) NewTransactionFromKind() (newTx *Transaction) {
+	newTx = NewTransaction()
+	newTx.Data.V1.Kind = tx.Data.V1.Kind
+	return newTx
 }
 
 func NewSuiObjectRef(objectId models.SuiAddress, version uint64, digest models.ObjectDigest) (*SuiObjectRef, error) {
