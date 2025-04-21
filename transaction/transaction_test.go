@@ -59,6 +59,39 @@ func TestNewTransaction(t *testing.T) {
 			onlyTransactionKind: false,
 			expectBcsBase64:     "AAACAAgA4fUFAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkCAgABAQAAAQECAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYgIAAAAAAAAAIAABAgMEBQYHCAkAAQIDBAUGBwgJAAECAwQFBgcICQECAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYFAAAAAAAAAGQAAAAAAAAAAA==",
 		},
+		{
+			name: "tx move call",
+			fun: func() *Transaction {
+				tx := setupTransaction()
+
+				addressBytes, err := ConvertSuiAddressStringToBytes("0x0000000000000000000000000000000000000000000000000000000000000002")
+				if err != nil {
+					panic(err)
+				}
+
+				tx.MoveCall(
+					"0xeffc8ae61f439bb34c9b905ff8f29ec56873dcedf81c7123ff2f1f67c45ec302",
+					"utils",
+					"check_coin_threshold",
+					[]TypeTag{
+						{
+							Struct: &StructTag{
+								Address: *addressBytes,
+								Module:  "sui",
+								Name:    "SUI",
+							},
+						},
+					},
+					[]Argument{
+						tx.Gas(),
+						tx.Pure(uint64(1000000000 * 0.1)),
+					},
+				)
+				return tx
+			},
+			onlyTransactionKind: false,
+			expectBcsBase64:     "AAABAAgA4fUFAAAAAAEA7/yK5h9Dm7NMm5Bf+PKexWhz3O34HHEj/y8fZ8RewwIFdXRpbHMUY2hlY2tfY29pbl90aHJlc2hvbGQBBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA3N1aQNTVUkAAgABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYgIAAAAAAAAAIAABAgMEBQYHCAkAAQIDBAUGBwgJAAECAwQFBgcICQECAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYFAAAAAAAAAGQAAAAAAAAAAA==",
+		},
 	}
 
 	for _, c := range cases {

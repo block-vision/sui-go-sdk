@@ -120,9 +120,9 @@ type ProgrammableTransaction struct {
 // - ConsensusCommitPrologue
 type TransactionKind struct {
 	ProgrammableTransaction *ProgrammableTransaction
-	ChangeEpoch             struct{}
-	Genesis                 struct{}
-	ConsensusCommitPrologue struct{}
+	ChangeEpoch             any
+	Genesis                 any
+	ConsensusCommitPrologue any
 }
 
 func (*TransactionKind) IsBcsEnum() {}
@@ -204,7 +204,7 @@ type ProgrammableMoveCall struct {
 	Package       models.SuiAddressBytes
 	Module        string
 	Function      string
-	TypeArguments []string
+	TypeArguments []*TypeTag
 	Arguments     []*Argument
 }
 
@@ -270,3 +270,28 @@ type SharedObjectRef struct {
 	InitialSharedVersion uint64
 	Mutable              bool
 }
+
+type StructTag struct {
+	Address    models.SuiAddressBytes
+	Module     string
+	Name       string
+	TypeParams []*TypeTag
+}
+
+// TypeTag https://github.com/MystenLabs/sui/blob/ece197ed5c414eb274f99afc52704664af8d0c38/external-crates/move/crates/move-core-types/src/language_storage.rs#L33
+// Do not reorder the fields, it will break the bcs encoding
+type TypeTag struct {
+	Bool    *bool
+	U8      *bool
+	U128    *bool
+	U256    *bool
+	Address *bool
+	Signer  *bool
+	Vector  *TypeTag
+	Struct  *StructTag
+	U16     *bool
+	U32     *bool
+	U64     *bool
+}
+
+func (*TypeTag) IsBcsEnum() {}

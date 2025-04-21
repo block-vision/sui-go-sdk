@@ -207,7 +207,7 @@ func (tx *Transaction) MoveCall(
 	packageId models.SuiAddress,
 	module string,
 	function string,
-	typeArguments []string,
+	typeArguments []TypeTag,
 	arguments []Argument,
 ) Argument {
 	packageIdBytes, err := ConvertSuiAddressStringToBytes(packageId)
@@ -219,7 +219,7 @@ func (tx *Transaction) MoveCall(
 		Package:       *packageIdBytes,
 		Module:        module,
 		Function:      function,
-		TypeArguments: typeArguments,
+		TypeArguments: convertTypeTagsToTypeTagPtrs(typeArguments),
 		Arguments:     convertArgumentsToArgumentPtrs(arguments),
 	}))
 }
@@ -471,10 +471,22 @@ func createTransactionResult(index uint16, length *uint16) Argument {
 }
 
 func convertArgumentsToArgumentPtrs(args []Argument) []*Argument {
+	fmt.Println(len(args))
 	argPtrs := make([]*Argument, len(args))
 	for i, arg := range args {
-		argPtrs[i] = &arg
+		v := arg
+		argPtrs[i] = &v
 	}
 
 	return argPtrs
+}
+
+func convertTypeTagsToTypeTagPtrs(tags []TypeTag) []*TypeTag {
+	tagPtrs := make([]*TypeTag, len(tags))
+	for i, tag := range tags {
+		v := tag
+		tagPtrs[i] = &v
+	}
+
+	return tagPtrs
 }
