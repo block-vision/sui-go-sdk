@@ -54,7 +54,7 @@ func (e *Encoder) Encode(v any) error {
 func (e *Encoder) encode(v reflect.Value) error {
 	// if v not CanInterface,
 	// this value is an unexported value, skip it.
-	if !v.CanInterface() {
+	if !v.IsValid() || !v.CanInterface() {
 		return nil
 	}
 
@@ -103,6 +103,10 @@ func (e *Encoder) encode(v reflect.Value) error {
 		return e.encodeSlice(v)
 
 	case reflect.Array: // encode array
+		// check if the element is [n]byte
+		if byteSlice := fixedByteArrayToSlice(v); byteSlice != nil {
+			return e.encodeByteSlice(byteSlice)
+		}
 		return e.encodeArray(v)
 
 	case reflect.String:
@@ -316,4 +320,31 @@ func MustMarshal(v any) []byte {
 	}
 
 	return result
+}
+
+func fixedByteArrayToSlice(v reflect.Value) []byte {
+	if v.Kind() != reflect.Array {
+		return nil
+	}
+	if v.Type().Elem().Kind() != reflect.Uint8 {
+		return nil
+	}
+
+	// If the value is Sui address bytes, not to add uleb128 prefix
+	if isCustomSuiAddressBytes(v) {
+		return nil
+	}
+
+	length := v.Len()
+	slice := make([]byte, length)
+	for i := 0; i < length; i++ {
+		slice[i] = byte(v.Index(i).Uint())
+	}
+	return slice
+}
+
+const SuiAddressBytesName = "SuiAddressBytes"
+
+func isCustomSuiAddressBytes(v reflect.Value) bool {
+	return v.Type().Name() == SuiAddressBytesName
 }

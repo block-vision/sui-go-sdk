@@ -6,10 +6,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
+	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/mr-tron/base58"
 	"golang.org/x/crypto/blake2b"
 )
+
+func NormalizeSuiAddress(input string) models.SuiAddress {
+	addr := strings.ToLower(string(input))
+	if strings.HasPrefix(addr, "0x") {
+		addr = addr[2:]
+	}
+
+	addr = strings.Repeat("0", 64-len(addr)) + addr
+	return models.SuiAddress("0x" + addr)
+}
+
+func IsValidSuiAddress(addr models.SuiAddress) bool {
+	addr = NormalizeSuiAddress(string(addr))
+	return len(addr) == 66 && strings.HasPrefix(string(addr), "0x")
+}
 
 func PrettyPrint(v interface{}) {
 	b, err := json.Marshal(v)
