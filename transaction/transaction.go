@@ -251,7 +251,7 @@ func (tx *Transaction) Object(input any) Argument {
 				panic(err)
 			}
 
-			// TODO: Load object from SuiClient
+			// TODO: Support more object types
 			arg := tx.Data.V1.AddInput(CallArg{
 				UnresolvedObject: &UnresolvedObject{
 					ObjectId: *addressBytes,

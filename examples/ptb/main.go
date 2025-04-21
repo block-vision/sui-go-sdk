@@ -33,10 +33,7 @@ func simpleTransaction(ctx context.Context, suiClient *sui.Client, signer *signe
 	receiver := ""
 	gasCoinObjectId := ""
 
-	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: gasCoinObjectId,
-		Options:  models.SuiObjectDataOptions{},
-	})
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{ObjectId: gasCoinObjectId})
 	if err != nil {
 		panic(err)
 	}
@@ -84,10 +81,7 @@ func simpleTransaction(ctx context.Context, suiClient *sui.Client, signer *signe
 func moveCallTransaction(ctx context.Context, suiClient *sui.Client, signer *signer.Signer) {
 	gasCoinObjectId := ""
 
-	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: gasCoinObjectId,
-		Options:  models.SuiObjectDataOptions{},
-	})
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{ObjectId: gasCoinObjectId})
 	if err != nil {
 		panic(err)
 	}
@@ -165,10 +159,7 @@ func sponsoredTransaction(ctx context.Context, suiClient *sui.Client, rawSigner 
 	// Raw transaction
 	tx := transaction.NewTransaction().SetSuiClient(suiClient)
 
-	obj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: transferCoinObjectId,
-		Options:  models.SuiObjectDataOptions{},
-	})
+	obj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{ObjectId: transferCoinObjectId})
 	if err != nil {
 		panic(err)
 	}
@@ -200,10 +191,7 @@ func sponsoredTransaction(ctx context.Context, suiClient *sui.Client, rawSigner 
 	}
 	newTx.SetSuiClient(suiClient)
 
-	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: sponsoredGasCoinObjectId,
-		Options:  models.SuiObjectDataOptions{},
-	})
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{ObjectId: sponsoredGasCoinObjectId})
 	if err != nil {
 		panic(err)
 	}
