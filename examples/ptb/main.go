@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
@@ -25,10 +24,9 @@ func main() {
 	}
 	fmt.Println(signerAccount.Address)
 
-	simpleTransaction(ctx, client, signerAccount)
+	// simpleTransaction(ctx, client, signerAccount)
 	// moveCallTransaction(ctx, client, signerAccount)
-	// TODO: sponsored transaction not work now
-	// sponsoredTransaction(ctx, client, signerAccount)
+	sponsoredTransaction(ctx, client, signerAccount)
 }
 
 func simpleTransaction(ctx context.Context, suiClient *sui.Client, signer *signer.Signer) {
@@ -37,26 +35,14 @@ func simpleTransaction(ctx context.Context, suiClient *sui.Client, signer *signe
 
 	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
 		ObjectId: gasCoinObjectId,
-		Options: models.SuiObjectDataOptions{
-			ShowContent:             true,
-			ShowDisplay:             true,
-			ShowType:                true,
-			ShowBcs:                 true,
-			ShowOwner:               true,
-			ShowPreviousTransaction: true,
-			ShowStorageRebate:       true,
-		},
+		Options:  models.SuiObjectDataOptions{},
 	})
-	if err != nil {
-		panic(err)
-	}
-	version, err := strconv.ParseUint(gasCoinObj.Data.Version, 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	gasCoin, err := transaction.NewSuiObjectRef(
 		models.SuiAddress(gasCoinObjectId),
-		version,
+		gasCoinObj.Data.Version,
 		models.ObjectDigest(gasCoinObj.Data.Digest),
 	)
 	if err != nil {
@@ -100,26 +86,14 @@ func moveCallTransaction(ctx context.Context, suiClient *sui.Client, signer *sig
 
 	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
 		ObjectId: gasCoinObjectId,
-		Options: models.SuiObjectDataOptions{
-			ShowContent:             true,
-			ShowDisplay:             true,
-			ShowType:                true,
-			ShowBcs:                 true,
-			ShowOwner:               true,
-			ShowPreviousTransaction: true,
-			ShowStorageRebate:       true,
-		},
+		Options:  models.SuiObjectDataOptions{},
 	})
-	if err != nil {
-		panic(err)
-	}
-	version, err := strconv.ParseUint(gasCoinObj.Data.Version, 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	gasCoin, err := transaction.NewSuiObjectRef(
 		models.SuiAddress(gasCoinObjectId),
-		version,
+		gasCoinObj.Data.Version,
 		models.ObjectDigest(gasCoinObj.Data.Digest),
 	)
 	if err != nil {
@@ -186,47 +160,63 @@ func sponsoredTransaction(ctx context.Context, suiClient *sui.Client, rawSigner 
 
 	receiver := ""
 	transferCoinObjectId := ""
+	sponsoredGasCoinObjectId := ""
 
 	// Raw transaction
-	tx := transaction.NewTransaction()
-	tx.TransferObjects([]transaction.Argument{tx.Object(transferCoinObjectId)}, tx.Pure(receiver))
+	tx := transaction.NewTransaction().SetSuiClient(suiClient)
 
-	// Sponsored transaction
-	sponsoredGasCoinObjectId := ""
-	newTx, err := tx.NewTransactionFromKind()
-	if err != nil {
-		panic(err)
-	}
-	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
-		ObjectId: sponsoredGasCoinObjectId,
-		Options: models.SuiObjectDataOptions{
-			ShowContent:             true,
-			ShowDisplay:             true,
-			ShowType:                true,
-			ShowBcs:                 true,
-			ShowOwner:               true,
-			ShowPreviousTransaction: true,
-			ShowStorageRebate:       true,
-		},
+	obj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
+		ObjectId: transferCoinObjectId,
+		Options:  models.SuiObjectDataOptions{},
 	})
 	if err != nil {
 		panic(err)
 	}
-	version, err := strconv.ParseUint(gasCoinObj.Data.Version, 10, 64)
+	ref, err := transaction.NewSuiObjectRef(
+		models.SuiAddress(obj.Data.ObjectId),
+		obj.Data.Version,
+		models.ObjectDigest(obj.Data.Digest),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	tx.TransferObjects(
+		[]transaction.Argument{
+			tx.Object(
+				transaction.CallArg{
+					Object: &transaction.ObjectArg{
+						ImmOrOwnedObject: ref,
+					},
+				},
+			)},
+		tx.Pure(receiver),
+	)
+
+	// Sponsored transaction
+	newTx, err := tx.NewTransactionFromKind()
+	if err != nil {
+		panic(err)
+	}
+	newTx.SetSuiClient(suiClient)
+
+	gasCoinObj, err := suiClient.SuiGetObject(ctx, models.SuiGetObjectRequest{
+		ObjectId: sponsoredGasCoinObjectId,
+		Options:  models.SuiObjectDataOptions{},
+	})
 	if err != nil {
 		panic(err)
 	}
 	gasCoin, err := transaction.NewSuiObjectRef(
 		models.SuiAddress(sponsoredGasCoinObjectId),
-		version,
+		gasCoinObj.Data.Version,
 		models.ObjectDigest(gasCoinObj.Data.Digest),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	newTx.SetSuiClient(suiClient).
-		SetSigner(rawSigner).
+	newTx.SetSigner(rawSigner).
 		SetSponsoredSigner(sponsoredSigner).
 		SetSender(models.SuiAddress(rawSigner.Address)).
 		SetGasPrice(1000).

@@ -47,7 +47,7 @@ func TestNewTransaction(t *testing.T) {
 			expectBcsBase64:     "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAWFiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiAgAAAAAAAAAgAAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJAQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgUAAAAAAAAAZAAAAAAAAAABZAAAAAAAAAA=",
 		},
 		{
-			name: "tx transfer",
+			name: "tx transfer using gas",
 			fun: func() *Transaction {
 				tx := setupTransaction()
 				splitCoin := tx.SplitCoins(tx.Gas(), []Argument{
@@ -58,6 +58,36 @@ func TestNewTransaction(t *testing.T) {
 			},
 			onlyTransactionKind: false,
 			expectBcsBase64:     "AAACAAgA4fUFAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkCAgABAQAAAQECAAABAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgFhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYmNhYgIAAAAAAAAAIAABAgMEBQYHCAkAAQIDBAUGBwgJAAECAwQFBgcICQECAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYFAAAAAAAAAGQAAAAAAAAAAA==",
+		},
+		{
+			name: "tx transfer",
+			fun: func() *Transaction {
+				tx := setupTransaction()
+
+				ref, err := NewSuiObjectRef(
+					"0x12",
+					"100",
+					"1thX6LZfHDZZGkq4tt1q2yRAPVfCTpX99XN4RHFsxM",
+				)
+				if err != nil {
+					panic(err)
+				}
+				tx.TransferObjects(
+					[]Argument{
+						tx.Object(
+							CallArg{
+								Object: &ObjectArg{
+									ImmOrOwnedObject: ref,
+								},
+							},
+						)},
+					tx.Pure("0x9"),
+				)
+
+				return tx
+			},
+			onlyTransactionKind: false,
+			expectBcsBase64:     "AAACAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEmQAAAAAAAAAIAABAgMEBQYHCAkAAQIDBAUGBwgJAAECAwQFBgcICQECACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQEBAQEAAAEBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAWFiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiY2FiAgAAAAAAAAAgAAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJAQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgUAAAAAAAAAZAAAAAAAAAAA",
 		},
 		{
 			name: "tx move call",
@@ -116,6 +146,7 @@ func TestNewTransaction(t *testing.T) {
 func generateObjectRef() SuiObjectRef {
 	objectId := "0x6162636162636162636162636162636162636162636162636162636162636162"
 
+	// 1thX6LZfHDZZGkq4tt1q2yRAPVfCTpX99XN4RHFsxM
 	bytes := []byte{
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,

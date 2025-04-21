@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"math"
+	"strconv"
 
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
@@ -250,6 +251,7 @@ func (tx *Transaction) Object(input any) Argument {
 				panic(err)
 			}
 
+			// TODO: Load object from SuiClient
 			arg := tx.Data.V1.AddInput(CallArg{
 				UnresolvedObject: &UnresolvedObject{
 					ObjectId: *addressBytes,
@@ -269,37 +271,43 @@ func (tx *Transaction) Object(input any) Argument {
 
 	// CallArg
 	if v, ok := input.(CallArg); ok {
-		if id := v.Object.SharedObject.ObjectId; !id.IsZero() {
+		isTypeSupported := false
+
+		if v.Object.SharedObject != nil {
 			// SharedObject
-			address := ConvertSuiAddressBytesToString(id)
+			address := ConvertSuiAddressBytesToString(v.Object.SharedObject.ObjectId)
 			if index := tx.Data.V1.GetInputObjectIndex(address); index != nil {
-				// Already exists
 				if v.Object.SharedObject.Mutable {
 					newExistObject := tx.Data.V1.Kind.ProgrammableTransaction.Inputs[*index]
-					if !newExistObject.Object.SharedObject.ObjectId.IsZero() {
+					if newExistObject.Object.SharedObject != nil {
 						newExistObject.Object.SharedObject.Mutable = true
+						tx.Data.V1.Kind.ProgrammableTransaction.Inputs[*index] = newExistObject
 					}
-					tx.Data.V1.Kind.ProgrammableTransaction.Inputs[*index] = newExistObject
+				}
+
+				return Argument{
+					Input: index,
 				}
 			}
-		} else {
-			if id := v.Object.ImmOrOwnedObject.ObjectId; !id.IsZero() {
-				// ImmOrOwnedObject
-				arg := tx.Data.V1.AddInput(CallArg{
-					Object: v.Object,
-				})
-				return arg
-			} else if id := v.Object.Receiving.ObjectId; !id.IsZero() {
-				// Receiving
-				arg := tx.Data.V1.AddInput(CallArg{
-					Object: v.Object,
-				})
-				return arg
-			}
+
+			isTypeSupported = true
+		}
+
+		if v.Object.ImmOrOwnedObject != nil {
+			isTypeSupported = true
+		}
+		if v.Object.Receiving != nil {
+			isTypeSupported = true
+		}
+
+		if isTypeSupported {
+			arg := tx.Data.V1.AddInput(CallArg{
+				Object: v.Object,
+			})
+			return arg
 		}
 	}
 
-	// Not supported input type
 	panic(ErrObjectNotSupportType)
 }
 
@@ -442,7 +450,7 @@ func (tx *Transaction) NewTransactionFromKind() (newTx *Transaction, err error) 
 	return newTx, nil
 }
 
-func NewSuiObjectRef(objectId models.SuiAddress, version uint64, digest models.ObjectDigest) (*SuiObjectRef, error) {
+func NewSuiObjectRef(objectId models.SuiAddress, version string, digest models.ObjectDigest) (*SuiObjectRef, error) {
 	objectIdBytes, err := ConvertSuiAddressStringToBytes(objectId)
 	if err != nil {
 		return nil, err
@@ -451,10 +459,14 @@ func NewSuiObjectRef(objectId models.SuiAddress, version uint64, digest models.O
 	if err != nil {
 		return nil, err
 	}
+	versionUint64, err := strconv.ParseUint(version, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 
 	return &SuiObjectRef{
 		ObjectId: *objectIdBytes,
-		Version:  version,
+		Version:  versionUint64,
 		Digest:   *digestBytes,
 	}, nil
 }
@@ -471,7 +483,6 @@ func createTransactionResult(index uint16, length *uint16) Argument {
 }
 
 func convertArgumentsToArgumentPtrs(args []Argument) []*Argument {
-	fmt.Println(len(args))
 	argPtrs := make([]*Argument, len(args))
 	for i, arg := range args {
 		v := arg

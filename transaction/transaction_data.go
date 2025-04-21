@@ -55,21 +55,21 @@ func (td *TransactionDataV1) GetInputObjectIndex(address models.SuiAddress) *uin
 	}
 
 	for i, input := range td.Kind.ProgrammableTransaction.Inputs {
-		if !input.Object.ImmOrOwnedObject.ObjectId.IsZero() {
+		if input.Object.ImmOrOwnedObject != nil {
 			objectId := input.Object.ImmOrOwnedObject.ObjectId
 			if objectId.IsEqual(*addressBytes) {
 				index := uint16(i)
 				return &index
 			}
 		}
-		if !input.Object.SharedObject.ObjectId.IsZero() {
+		if input.Object.SharedObject != nil {
 			objectId := input.Object.SharedObject.ObjectId
 			if objectId.IsEqual(*addressBytes) {
 				index := uint16(i)
 				return &index
 			}
 		}
-		if !input.Object.Receiving.ObjectId.IsZero() {
+		if input.Object.Receiving != nil {
 			objectId := input.Object.Receiving.ObjectId
 			if objectId.IsEqual(*addressBytes) {
 				index := uint16(i)
@@ -150,6 +150,8 @@ type CallArg struct {
 	UnresolvedObject *UnresolvedObject
 }
 
+func (*CallArg) IsBcsEnum() {}
+
 type Pure struct {
 	Bytes []byte
 }
@@ -157,8 +159,6 @@ type Pure struct {
 type UnresolvedPure struct {
 	Value any
 }
-
-func (*CallArg) IsBcsEnum() {}
 
 type UnresolvedObject struct {
 	ObjectId models.SuiAddressBytes
@@ -177,7 +177,7 @@ type ObjectArg struct {
 	Receiving        *SuiObjectRef
 }
 
-func (*ObjectArg) IsBcsEnum() {}
+func (ObjectArg) IsBcsEnum() {}
 
 // Command https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L712
 // - MoveCall
