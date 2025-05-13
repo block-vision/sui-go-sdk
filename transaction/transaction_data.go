@@ -55,6 +55,10 @@ func (td *TransactionDataV1) GetInputObjectIndex(address models.SuiAddress) *uin
 	}
 
 	for i, input := range td.Kind.ProgrammableTransaction.Inputs {
+		if input.Object == nil {
+			continue
+		}
+
 		if input.Object.ImmOrOwnedObject != nil {
 			objectId := input.Object.ImmOrOwnedObject.ObjectId
 			if objectId.IsEqual(*addressBytes) {
