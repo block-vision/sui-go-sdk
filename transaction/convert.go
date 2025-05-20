@@ -37,12 +37,9 @@ func ConvertObjectDigestStringToBytes(digest models.ObjectDigest) (*models.Objec
 		return nil, ErrInvalidObjectId
 	}
 
-	var fixedBytes [32]byte
-	copy(fixedBytes[:], decoded)
-
-	return (*models.ObjectDigestBytes)(&fixedBytes), nil
+	return (*models.ObjectDigestBytes)(&decoded), nil
 }
 
 func ConvertObjectDigestBytesToString(digest models.ObjectDigestBytes) models.ObjectDigest {
-	return models.ObjectDigest(base58.Encode(digest[:]))
+	return models.ObjectDigest(base58.Encode(digest))
 }
