@@ -10,7 +10,7 @@ type SuiAddress string
 type SuiAddressBytes [32]byte
 type TransactionDigest string
 type ObjectDigest string
-type ObjectDigestBytes [32]byte
+type ObjectDigestBytes []byte
 
 func init() {
 	var suiAddressBytes SuiAddressBytes
@@ -29,6 +29,10 @@ func (s SuiAddressBytes) IsEqual(other SuiAddressBytes) bool {
 }
 
 func (o ObjectDigestBytes) IsEqual(other ObjectDigestBytes) bool {
+	if len(o) != len(other) {
+		return false
+	}
+
 	for i, b := range o {
 		if b != other[i] {
 			return false

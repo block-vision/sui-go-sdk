@@ -70,7 +70,7 @@ func (d *Decoder) decode(v reflect.Value) (int, error) {
 		switch v.Kind() {
 		case reflect.Pointer, reflect.Interface:
 			if v.IsNil() {
-				return 0, fmt.Errorf("trying to decode into nil pointer/interface")
+				v.Set(reflect.New(v.Type().Elem()))
 			}
 			return d.decodeEnum(v.Elem())
 		default:
@@ -143,6 +143,10 @@ func (d *Decoder) decodeVanilla(v reflect.Value) (int, error) {
 		return d.decodeSlice(v)
 
 	case reflect.Array:
+		arrayType := v.Type().Elem()
+		if arrayType.Kind() == reflect.Uint8 {
+			return d.decodeByteArray(v)
+		}
 		return d.decodeArray(v)
 
 	case reflect.String:
@@ -222,7 +226,7 @@ fieldLoop:
 				return n, err
 			}
 			if isOptional == 0 {
-				field.Set(reflect.Zero(v.Type()))
+				field.Set(reflect.Zero(field.Type()))
 			} else {
 				field.Set(reflect.New(field.Type().Elem()))
 				k, err := d.decode(field.Elem())
@@ -287,6 +291,31 @@ func (d *Decoder) decodeByteSlice(v reflect.Value) (int, error) {
 	return n, nil
 }
 
+func (d *Decoder) decodeByteArray(v reflect.Value) (int, error) {
+	arraySize := v.Len()
+
+	if arraySize == 0 {
+		return 0, nil
+	}
+
+	tmp := make([]byte, arraySize)
+
+	read, err := d.reader.Read(tmp)
+	if err != nil {
+		return read, err
+	}
+
+	if arraySize != read {
+		return read, fmt.Errorf("wrong number of bytes read for [%d]byte, want: %d, got %d", arraySize, arraySize, read)
+	}
+
+	for i := 0; i < arraySize; i++ {
+		v.Index(i).SetUint(uint64(tmp[i]))
+	}
+
+	return read, nil
+}
+
 func (d *Decoder) decodeArray(v reflect.Value) (int, error) {
 	size := v.Len()
 	t := v.Type()
@@ -333,7 +362,7 @@ func (d *Decoder) decodeSlice(v reflect.Value) (int, error) {
 	if elementType.Kind() == reflect.Pointer {
 		for i := 0; i < size; i++ {
 			ind := reflect.New(elementType.Elem())
-			k, err := d.decode(ind.Elem())
+			k, err := d.decode(ind)
 			n += k
 			if err != nil {
 				return n, err
