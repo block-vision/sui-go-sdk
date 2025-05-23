@@ -172,6 +172,7 @@ type SuiObjectData struct {
 	Type                string                `json:"type"`
 	Owner               interface{}           `json:"owner"`
 	PreviousTransaction string                `json:"previousTransaction,omitempty"`
+	StorageRebate       string                `json:"storageRebate"`
 	Display             DisplayFieldsResponse `json:"display"`
 	Content             *SuiParsedData        `json:"content,omitempty"`
 	Bcs                 *SuiRawData           `json:"bcs,omitempty"`
