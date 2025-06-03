@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/block-vision/sui-go-sdk/models"
 	"io/ioutil"
 	"net/http"
@@ -12,13 +13,18 @@ import (
 	"golang.org/x/time/rate"
 )
 
-const defaultTimeout = time.Second * 5
+const (
+	defaultTimeout    = time.Second * 5
+	defaultRetryCount = 3
+)
 
 type HttpConn struct {
-	c       *http.Client
-	rl      *rate.Limiter
-	rpcUrl  string
-	timeout time.Duration
+	c            *http.Client
+	rl           *rate.Limiter
+	rpcUrl       string
+	backupRPCURL []string
+	retryCount   int
+	timeout      time.Duration
 }
 
 func newDefaultRateLimiter() *rate.Limiter {
@@ -26,11 +32,13 @@ func newDefaultRateLimiter() *rate.Limiter {
 	return rateLimiter
 }
 
-func NewHttpConn(rpcUrl string) *HttpConn {
+func NewHttpConn(rpcUrl string, backupRPCs []string) *HttpConn {
 	return &HttpConn{
-		c:       &http.Client{},
-		rpcUrl:  rpcUrl,
-		timeout: defaultTimeout,
+		c:            &http.Client{},
+		rpcUrl:       rpcUrl,
+		backupRPCURL: backupRPCs,
+		timeout:      defaultTimeout,
+		retryCount:   defaultRetryCount,
 	}
 }
 
@@ -54,21 +62,33 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	request, err := http.NewRequest("POST", h.rpcUrl, bytes.NewBuffer(reqBytes))
-	if err != nil {
-		return []byte{}, err
-	}
-	request = request.WithContext(ctx)
-	request.Header.Add("Content-Type", "application/json")
-	rsp, err := h.c.Do(request.WithContext(ctx))
-	if err != nil {
-		return []byte{}, err
-	}
-	defer rsp.Body.Close()
+	// 尝试所有可用的 RPC URL
+	rpcURLs := append([]string{h.rpcUrl}, h.backupRPCURL...)
+	var lastErr error
 
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	if err != nil {
-		return []byte{}, err
+	for _, rpc := range rpcURLs {
+		request, err := http.NewRequest("POST", rpc, bytes.NewBuffer(reqBytes))
+		if err != nil {
+			lastErr = fmt.Errorf("new request %s err: %v rpc: %s", op.Method, err, rpc)
+			continue
+		}
+		request = request.WithContext(ctx)
+		request.Header.Add("Content-Type", "application/json")
+
+		rsp, err := h.c.Do(request.WithContext(ctx))
+		if err != nil {
+			lastErr = fmt.Errorf("request %s err: %v rpc: %s", op.Method, err, rpc)
+			continue
+		}
+		defer rsp.Body.Close()
+
+		bodyBytes, err := ioutil.ReadAll(rsp.Body)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		return bodyBytes, nil
 	}
-	return bodyBytes, nil
+
+	return []byte{}, lastErr
 }

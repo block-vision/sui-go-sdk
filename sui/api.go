@@ -35,8 +35,8 @@ type Client struct {
 }
 
 // NewSuiClient instantiates the Sui client to call the methods of each module.
-func NewSuiClient(rpcUrl string) ISuiAPI {
-	conn := httpconn.NewHttpConn(rpcUrl)
+func NewSuiClient(mainRPC string, backupRPCs ...string) ISuiAPI {
+	conn := httpconn.NewHttpConn(mainRPC, backupRPCs)
 	return newClient(conn)
 }
 
