@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.24.1
 
 require (
+	github.com/cosmos/go-bip39 v1.0.0
 	github.com/fardream/go-bcs v0.7.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/google/go-cmp v0.7.0
@@ -15,7 +16,6 @@ require (
 	github.com/samber/lo v1.49.1
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/tyler-smith/go-bip39 v1.1.0
 	golang.org/x/crypto v0.23.0
 	golang.org/x/time v0.5.0
 )

@@ -11,7 +11,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
-	"github.com/tyler-smith/go-bip39"
+	"github.com/cosmos/go-bip39"
 	"golang.org/x/crypto/blake2b"
 )
 
