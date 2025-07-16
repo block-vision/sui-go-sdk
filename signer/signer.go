@@ -6,11 +6,13 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 
 	"github.com/block-vision/sui-go-sdk/common/keypair"
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
+	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/go-bip39"
 	"golang.org/x/crypto/blake2b"
 )
@@ -43,6 +45,28 @@ func NewSigner(seed []byte) *Signer {
 		PubKey:  pubKey,
 		Address: addr,
 	}
+}
+
+func NewSignerWithSecretKey(secret string) (*Signer, error) {
+	hrp, data, err := bech32.Decode(secret)
+	if err != nil {
+		return nil, err
+	}
+	if hrp != "suiprivkey" {
+		return nil, fmt.Errorf("Invalid bech32 prefix: %s", hrp)
+	}
+
+	// bech32 5bit to 8bit
+	decoded, err := bech32.ConvertBits(data, 5, 8, false)
+	if err != nil {
+		return nil, err
+	}
+	if len(decoded) < 2 {
+		return nil, fmt.Errorf("Invalid bech32 data length: %d", len(decoded))
+	}
+
+	privKey := decoded[1:]
+	return NewSigner(privKey), nil
 }
 
 func NewSignertWithMnemonic(mnemonic string) (*Signer, error) {
