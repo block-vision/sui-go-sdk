@@ -5,6 +5,7 @@ go 1.21
 toolchain go1.24.1
 
 require (
+	github.com/btcsuite/btcutil v1.0.2
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/fardream/go-bcs v0.7.0
 	github.com/go-playground/validator/v10 v10.12.0
@@ -21,8 +22,6 @@ require (
 )
 
 require (
-	github.com/btcsuite/btcd v0.20.1-beta // indirect
-	github.com/btcsuite/btcutil v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
