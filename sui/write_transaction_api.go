@@ -50,10 +50,11 @@ func (s *suiWriteTransactionImpl) SuiExecuteTransactionBlock(ctx context.Context
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -79,10 +80,11 @@ func (s *suiWriteTransactionImpl) MoveCall(ctx context.Context, req models.MoveC
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -105,10 +107,11 @@ func (s *suiWriteTransactionImpl) MergeCoins(ctx context.Context, req models.Mer
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -131,10 +134,11 @@ func (s *suiWriteTransactionImpl) SplitCoin(ctx context.Context, req models.Spli
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -157,10 +161,11 @@ func (s *suiWriteTransactionImpl) SplitCoinEqual(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -183,10 +188,11 @@ func (s *suiWriteTransactionImpl) Publish(ctx context.Context, req models.Publis
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -209,10 +215,11 @@ func (s *suiWriteTransactionImpl) TransferObject(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -235,10 +242,11 @@ func (s *suiWriteTransactionImpl) TransferSui(ctx context.Context, req models.Tr
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -264,10 +272,11 @@ func (s *suiWriteTransactionImpl) Pay(ctx context.Context, req models.PayRequest
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -296,10 +305,11 @@ func (s *suiWriteTransactionImpl) PaySui(ctx context.Context, req models.PaySuiR
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -327,10 +337,11 @@ func (s *suiWriteTransactionImpl) PayAllSui(ctx context.Context, req models.PayA
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -354,10 +365,11 @@ func (s *suiWriteTransactionImpl) RequestAddStake(ctx context.Context, req model
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -379,10 +391,11 @@ func (s *suiWriteTransactionImpl) RequestWithdrawStake(ctx context.Context, req 
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -405,10 +418,11 @@ func (s *suiWriteTransactionImpl) BatchTransaction(ctx context.Context, req mode
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -434,12 +448,12 @@ func (s *suiWriteTransactionImpl) SignAndExecuteTransactionBlock(ctx context.Con
 	if err != nil {
 		return rsp, err
 	}
-
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
 
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}

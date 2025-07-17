@@ -46,10 +46,11 @@ func (s *suiReadSystemFromSuiImpl) SuiGetCheckpoint(ctx context.Context, req mod
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -73,10 +74,11 @@ func (s *suiReadSystemFromSuiImpl) SuiGetCheckpoints(ctx context.Context, req mo
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -93,10 +95,11 @@ func (s *suiReadSystemFromSuiImpl) SuiGetLatestCheckpointSequenceNumber(ctx cont
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -113,10 +116,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetReferenceGasPrice(ctx context.Context)
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -135,10 +139,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetCommitteeInfo(ctx context.Context, req
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -157,10 +162,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetStakes(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal suix_getStakes err: %v response: %s", err, string(respBytes))
 	}
@@ -179,10 +185,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetStakesByIds(ctx context.Context, req m
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal suix_getStakesByIds err: %v response: %s", err, string(respBytes))
 	}
@@ -203,10 +210,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetEpochs(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal suix_getEpochs err: %v response: %s", err, string(respBytes))
 	}
@@ -223,10 +231,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetCurrentEpoch(ctx context.Context) (mod
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -243,10 +252,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetLatestSuiSystemState(ctx context.Conte
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -263,11 +273,11 @@ func (s *suiReadSystemFromSuiImpl) SuiGetChainIdentifier(ctx context.Context) (s
 	if err != nil {
 		return rsp, err
 	}
-
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	rsp = gjson.ParseBytes(respBytes).Get("result").String()
+	rsp = parsedJson.Get("result").String()
 	return rsp, nil
 }
 
@@ -281,10 +291,11 @@ func (s *suiReadSystemFromSuiImpl) SuiXGetValidatorsApy(ctx context.Context) (mo
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -306,10 +317,11 @@ func (s *suiReadSystemFromSuiImpl) SuiGetProtocolConfig(ctx context.Context, req
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}

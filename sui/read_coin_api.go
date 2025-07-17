@@ -38,10 +38,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetBalance(ctx context.Context, req models.
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -60,10 +61,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetAllBalance(ctx context.Context, req mode
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -88,10 +90,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetCoins(ctx context.Context, req models.Su
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -115,10 +118,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetAllCoins(ctx context.Context, req models
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -137,10 +141,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetCoinMetadata(ctx context.Context, req mo
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -159,10 +164,11 @@ func (s *suiReadCoinFromSuiImpl) SuiXGetTotalSupply(ctx context.Context, req mod
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}

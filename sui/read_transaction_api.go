@@ -53,10 +53,11 @@ func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Conte
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").Raw), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal sui_getTransactionBlock err: %v response: %s", err, string(respBytes))
 	}
@@ -76,10 +77,11 @@ func (s *suiReadTransactionFromSuiImpl) SuiMultiGetTransactionBlocks(ctx context
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").Raw), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal sui_multiGetTransactionBlocks err: %v response: %s", err, string(respBytes))
 	}
@@ -104,10 +106,11 @@ func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.C
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").Raw), &rsp)
 	if err != nil {
 		return rsp, fmt.Errorf("unmarshal suix_queryTransactionBlocks err: %v response: %s", err, string(respBytes))
 	}
@@ -126,10 +129,11 @@ func (s *suiReadTransactionFromSuiImpl) SuiDryRunTransactionBlock(ctx context.Co
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").Raw), &rsp)
 	if err != nil {
 		return rsp, err
 	}
