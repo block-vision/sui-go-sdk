@@ -35,10 +35,11 @@ func (s *suiReadMoveFromSuiImpl) SuiGetMoveFunctionArgTypes(ctx context.Context,
 	if err != nil {
 		return rsp, nil
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -57,10 +58,11 @@ func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModulesByPackage(ctx contex
 	if err != nil {
 		return rsp, nil
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -80,10 +82,11 @@ func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModule(ctx context.Context,
 	if err != nil {
 		return rsp, nil
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -104,10 +107,11 @@ func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveStruct(ctx context.Context,
 	if err != nil {
 		return rsp, nil
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
@@ -128,10 +132,11 @@ func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveFunction(ctx context.Contex
 	if err != nil {
 		return rsp, nil
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}

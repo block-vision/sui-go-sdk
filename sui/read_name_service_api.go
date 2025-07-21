@@ -29,11 +29,12 @@ func (s *suiReadNameServiceFromSuiImpl) SuiXResolveNameServiceAddress(ctx contex
 	if err != nil {
 		return "", err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return "", errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return "", errors.New(parsedJson.Get("error").String())
 	}
 
-	return gjson.ParseBytes(respBytes).Get("result").String(), nil
+	return parsedJson.Get("result").String(), nil
 }
 
 // SuiXResolveNameServiceNames implements the method `suix_resolveNameServiceNames`, return the resolved names given address, if multiple names are resolved, the first one is the primary name.
@@ -50,10 +51,11 @@ func (s *suiReadNameServiceFromSuiImpl) SuiXResolveNameServiceNames(ctx context.
 	if err != nil {
 		return rsp, err
 	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
+	parsedJson := gjson.ParseBytes(respBytes)
+	if parsedJson.Get("error").Exists() {
+		return rsp, errors.New(parsedJson.Get("error").String())
 	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
+	err = json.Unmarshal([]byte(parsedJson.Get("result").String()), &rsp)
 	if err != nil {
 		return rsp, err
 	}
