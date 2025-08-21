@@ -52,29 +52,13 @@ func newClient(conn *httpconn.HttpConn) *Client {
 		IBaseAPI: &suiBaseImpl{
 			conn: conn,
 		},
-		IReadCoinFromSuiAPI: &suiReadCoinFromSuiImpl{
-			conn: conn,
-		},
-		IWriteTransactionAPI: &suiWriteTransactionImpl{
-			conn: conn,
-		},
-		IReadEventFromSuiAPI: &suiReadEventFromSuiImpl{
-			conn: conn,
-		},
-		IReadObjectFromSuiAPI: &suiReadObjectFromSuiImpl{
-			conn: conn,
-		},
-		IReadTransactionFromSuiAPI: &suiReadTransactionFromSuiImpl{
-			conn: conn,
-		},
-		IReadSystemFromSuiAPI: &suiReadSystemFromSuiImpl{
-			conn: conn,
-		},
-		IReadMoveFromSuiAPI: &suiReadMoveFromSuiImpl{
-			conn: conn,
-		},
-		IReadNameServiceFromSuiAPI: &suiReadNameServiceFromSuiImpl{
-			conn: conn,
-		},
+		IReadCoinFromSuiAPI:        newSuiReadCoinFromSuiImpl(conn),
+		IWriteTransactionAPI:       newSuiWriteTransactionImpl(conn),
+		IReadEventFromSuiAPI:       newSuiReadEventFromSuiImpl(conn),
+		IReadObjectFromSuiAPI:      newSuiReadObjectFromSuiImpl(conn),
+		IReadTransactionFromSuiAPI: newSuiReadTransactionFromSuiImpl(conn),
+		IReadSystemFromSuiAPI:      newSuiReadSystemFromSuiImpl(conn),
+		IReadMoveFromSuiAPI:        newSuiReadMoveFromSuiImpl(conn),
+		IReadNameServiceFromSuiAPI: newSuiReadNameServiceFromSuiImpl(conn),
 	}
 }

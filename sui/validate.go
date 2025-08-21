@@ -4,6 +4,7 @@
 package sui
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -39,12 +40,14 @@ func (v *defaultValidator) ValidateStruct(obj interface{}) error {
 }
 
 func (v *defaultValidator) handleErr(err error) error {
-	validationErrs := err.(validator.ValidationErrors)
-	for _, e := range validationErrs {
-		if e.Tag() == "lte" {
-			err = fmt.Errorf("%v, field `%s` must be less than or equal to %s", err, e.Field(), e.Param())
-		} else if e.Tag() == "gte" {
-			err = fmt.Errorf("%v, field `%s` must be greater than or equal to %s", err, e.Field(), e.Param())
+	var validationErrs validator.ValidationErrors
+	if errors.As(err, &validationErrs) {
+		for _, e := range validationErrs {
+			if e.Tag() == "lte" {
+				err = fmt.Errorf("%v, field `%s` must be less than or equal to %s", err, e.Field(), e.Param())
+			} else if e.Tag() == "gte" {
+				err = fmt.Errorf("%v, field `%s` must be greater than or equal to %s", err, e.Field(), e.Param())
+			}
 		}
 	}
 	return err
