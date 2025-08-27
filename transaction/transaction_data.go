@@ -228,7 +228,7 @@ type MergeCoins struct {
 }
 
 type Publish struct {
-	Modules      []models.SuiAddressBytes
+	Modules      [][]byte
 	Dependencies []models.SuiAddressBytes
 }
 
@@ -238,7 +238,7 @@ type MakeMoveVec struct {
 }
 
 type Upgrade struct {
-	Modules      []models.SuiAddressBytes
+	Modules      [][]byte
 	Dependencies []models.SuiAddressBytes
 	Package      models.SuiAddressBytes
 	Ticket       *Argument
