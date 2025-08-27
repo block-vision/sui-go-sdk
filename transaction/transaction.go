@@ -142,16 +142,7 @@ func (tx *Transaction) MergeCoins(destination Argument, sources []Argument) Argu
 	}))
 }
 
-func (tx *Transaction) Publish(modules []models.SuiAddress, dependencies []models.SuiAddress) Argument {
-	moduleAddress := make([]models.SuiAddressBytes, len(modules))
-	for i, module := range modules {
-		v, err := ConvertSuiAddressStringToBytes(module)
-		if err != nil {
-			panic(err)
-		}
-		moduleAddress[i] = *v
-	}
-
+func (tx *Transaction) Publish(modules [][]byte, dependencies []models.SuiAddress) Argument {
 	dependenciesAddress := make([]models.SuiAddressBytes, len(dependencies))
 	for i, dependency := range dependencies {
 		v, err := ConvertSuiAddressStringToBytes(dependency)
@@ -162,26 +153,17 @@ func (tx *Transaction) Publish(modules []models.SuiAddress, dependencies []model
 	}
 
 	return tx.Add(publish(Publish{
-		Modules:      moduleAddress,
+		Modules:      modules,
 		Dependencies: dependenciesAddress,
 	}))
 }
 
 func (tx *Transaction) Upgrade(
-	modules []models.SuiAddress,
+	modules [][]byte,
 	dependencies []models.SuiAddress,
 	packageId models.SuiAddress,
 	ticket Argument,
 ) Argument {
-	moduleAddress := make([]models.SuiAddressBytes, len(modules))
-	for i, module := range modules {
-		v, err := ConvertSuiAddressStringToBytes(module)
-		if err != nil {
-			panic(err)
-		}
-		moduleAddress[i] = *v
-	}
-
 	dependenciesAddress := make([]models.SuiAddressBytes, len(dependencies))
 	for i, dependency := range dependencies {
 		v, err := ConvertSuiAddressStringToBytes(dependency)
@@ -197,7 +179,7 @@ func (tx *Transaction) Upgrade(
 	}
 
 	return tx.Add(upgrade(Upgrade{
-		Modules:      moduleAddress,
+		Modules:      modules,
 		Dependencies: dependenciesAddress,
 		Package:      *packageIdBytes,
 		Ticket:       &ticket,
