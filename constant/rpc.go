@@ -14,6 +14,14 @@ const (
 	FaucetTestnetEndpoint  = "https://faucet.testnet.sui.io/v1/gas"
 	FaucetDevnetEndpoint   = "https://faucet.devnet.sui.io/v1/gas"
 	FaucetLocalnetEndpoint = "http://127.0.0.1:9123/gas"
+
+	// SuiMainnetGrpcEndpoint = "withered-falling-waterfall.sui-mainnet.quiknode.pro:9000"
+	// SuiMainnetGrpcToken    = "ced704a0660a98a4020a362f6f561366d01aeb86"
+	// SuiTestnetGrpcEndpoint = "withered-falling-waterfall.sui-testnet.quiknode.pro:9000"
+
+	SuiMainnetGrpcEndpoint = "127.0.0.1:9080"
+	SuiMainnetGrpcToken    = "2z2en5IpEWFifJ5xVVjBnOZzSgh"
+	SuiTestnetGrpcEndpoint = "sui-mainnet-grpc.blockvision.org"
 )
 
 const (

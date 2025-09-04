@@ -62,7 +62,7 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	// 尝试所有可用的 RPC URL
+	// Try all available RPC URLs
 	rpcURLs := append([]string{h.rpcUrl}, h.backupRPCURL...)
 	var lastErr error
 

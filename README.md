@@ -18,6 +18,7 @@ Powered by [SuiVision](https://suivision.xyz/) team.
 
 + Support the mainstream methods in the Object, Coin, Event, Read Transaction Blocks, System Data, and Write Transaction
   Blocks modules.
++ **gRPC Support**: Full support for Sui gRPC services including Ledger Service, Name Service, Transaction Execution Service, Subscription Service, Live Data Service, Move Package Service, and Signature Verification Service.
 + Customized request method `SuiCall`.
 + Unsigned methods can be executed without loading your keystore file.
 + Provide the method `SignAndExecuteTransactionBlock` to send signed transaction.
@@ -60,6 +61,50 @@ import (
 func main() {
 	// configure your endpoint here or use BlockVision's free Sui RPC endpoint
 	cli := sui.NewSuiClient("https://sui-testnet-endpoint.blockvision.org")
+}
+
+```
+
+### Connecting to Sui Network via gRPC
+
+You can also connect to the Sui network using gRPC for better performance and real-time data access:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/block-vision/sui-go-sdk/common/grpcconn"
+	"github.com/block-vision/sui-go-sdk/constant"
+	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+)
+
+func main() {
+	// Create gRPC client with authentication
+	client := grpcconn.NewSuiGrpcClientWithAuth(
+		constant.SuiMainnetGrpcEndpoint,
+		constant.SuiMainnetGrpcToken,
+	)
+	defer client.Close()
+
+	ctx := context.Background()
+
+	// Get ledger service
+	ledgerService, err := client.LedgerService(ctx)
+	if err != nil {
+		log.Fatalf("Failed to get ledger service: %v", err)
+	}
+
+	// Example: Get service info
+	info, err := ledgerService.GetServiceInfo(ctx, &v2beta2.GetServiceInfoRequest{})
+	if err != nil {
+		log.Fatalf("Failed to get service info: %v", err)
+	}
+
+	fmt.Printf("Service info: %+v\n", info)
 }
 
 ```
