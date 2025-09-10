@@ -27,18 +27,19 @@ func GetSharedObjectRef(ctx context.Context, client ObjectReader, objectId strin
 	if err != nil {
 		return nil, err
 	}
-	if value, ok := rsp.Data.Owner.(map[string]any)["Shared"]; ok {
-		rv := value.(map[string]interface{})["initial_shared_version"].(float64)
-		obj, _ := transaction.ConvertSuiAddressStringToBytes(models.SuiAddress(objectId))
-		sharedObj := transaction.SharedObjectRef{
-			ObjectId:             *obj,
-			InitialSharedVersion: uint64(rv),
-			Mutable:              mutable,
+	if owner, ok := rsp.Data.Owner.(map[string]any); ok {
+		if value, exists := owner["Shared"]; exists {
+			rv := value.(map[string]interface{})["initial_shared_version"].(float64)
+			obj, _ := transaction.ConvertSuiAddressStringToBytes(models.SuiAddress(objectId))
+			sharedObj := transaction.SharedObjectRef{
+				ObjectId:             *obj,
+				InitialSharedVersion: uint64(rv),
+				Mutable:              mutable,
+			}
+			return &sharedObj, nil
 		}
-		return &sharedObj, nil
-	} else {
-		return nil, fmt.Errorf("object is not a shared object")
 	}
+	return nil, fmt.Errorf("object is not a shared object")
 }
 
 // GetSuiObjectRef get sui object reference from sui object id
@@ -55,13 +56,14 @@ func GetSuiObjectRef(ctx context.Context, client ObjectReader, objectId string) 
 	if err != nil {
 		return nil, err
 	}
-	if _, ok := rsp.Data.Owner.(map[string]any)["Shared"]; ok {
-		return nil, fmt.Errorf("object is a shared object")
-	} else {
-		obj, err := transaction.NewSuiObjectRef(models.SuiAddress(objectId), rsp.Data.Version, models.ObjectDigest(rsp.Data.Digest))
-		if err != nil {
-			return nil, err
+	if owner, ok := rsp.Data.Owner.(map[string]any); ok {
+		if _, exists := owner["Shared"]; !exists {
+			obj, err := transaction.NewSuiObjectRef(models.SuiAddress(objectId), rsp.Data.Version, models.ObjectDigest(rsp.Data.Digest))
+			if err != nil {
+				return nil, err
+			}
+			return obj, nil
 		}
-		return obj, nil
 	}
+	return nil, fmt.Errorf("object is a shared object")
 }
