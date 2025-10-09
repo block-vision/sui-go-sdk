@@ -212,9 +212,7 @@ func VerifyMessage(message, signature string, scope constant.IntentScope) (signe
 	pass = ed25519.Verify(serializedSignature.PubKey[:], digest[:], serializedSignature.Signature)
 
 	signer = Ed25519PublicKeyToSuiAddress(serializedSignature.PubKey)
-	if err != nil {
-		return "", false, fmt.Errorf("invalid signer %v", err)
-	}
+
 
 	return
 }
