@@ -24,13 +24,22 @@ type defaultValidator struct {
 }
 
 func init() {
-	validate = &defaultValidator{
-		validate: validator.New(),
-	}
-	validate.registerCheckFn("checkAddress", checkAddress)
+	validate = &defaultValidator{}
+}
+
+func (v *defaultValidator) initialize() {
+	v.once.Do(func() {
+		// initialize validator
+		v.validate = validator.New()
+		// register checkAddress function
+		v.registerCheckFn("checkAddress", checkAddress)
+	})
 }
 
 func (v *defaultValidator) ValidateStruct(obj interface{}) error {
+	// initialize validator
+	v.initialize()
+
 	if kindOfData(obj) == reflect.Struct {
 		if err := v.validate.Struct(obj); err != nil {
 			return v.handleErr(err)
@@ -65,7 +74,7 @@ func kindOfData(data interface{}) reflect.Kind {
 
 func (v *defaultValidator) registerCheckFn(tag string, fn validator.Func) {
 	if err := v.validate.RegisterValidation(tag, fn); err != nil {
-		log.Fatalf("register validation %s failed", tag)
+		log.Fatalf("register validation %s failed: %v", tag, err)
 	}
 }
 
