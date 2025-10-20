@@ -103,10 +103,6 @@ func (e *Encoder) encode(v reflect.Value) error {
 		return e.encodeSlice(v)
 
 	case reflect.Array: // encode array
-		// check if the element is [n]byte
-		if byteSlice := fixedByteArrayToSlice(v); byteSlice != nil {
-			return e.encodeByteSlice(byteSlice)
-		}
 		return e.encodeArray(v)
 
 	case reflect.String:
