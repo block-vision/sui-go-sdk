@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
+	"github.com/block-vision/sui-go-sdk/common/sui_error"
 	"github.com/tidwall/gjson"
 )
 
@@ -94,6 +95,10 @@ func (h *BaseRequestHandler) parseResponse(respBytes []byte, method string, resu
 		jsonData = resultData.Raw
 	} else {
 		jsonData = resultData.String()
+	}
+
+	if jsonData == "" {
+		return sui_error.ErrEmptyResult
 	}
 
 	err := json.Unmarshal([]byte(jsonData), result)

@@ -9,4 +9,5 @@ var (
 	ErrNoKeyStoreInfo         = errors.New("no keystore info, make sure already loaded sui.keystore")
 	ErrAddressNotInKeyStore   = errors.New("address not in keystore, make sure already loaded sui.keystore")
 	ErrInvalidAddress         = errors.New("invalid address")
+	ErrEmptyResult            = errors.New("empty result")
 )
