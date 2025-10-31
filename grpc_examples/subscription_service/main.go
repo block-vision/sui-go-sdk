@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
@@ -32,12 +33,12 @@ func main() {
 }
 
 // SubscribeCheckpoints - Subscribe to the stream of checkpoints
-func exampleSubscribeCheckpoints(ctx context.Context, service v2beta2.SubscriptionServiceClient) {
+func exampleSubscribeCheckpoints(ctx context.Context, service v2.SubscriptionServiceClient) {
 	// Create context with timeout for the streaming operation
 	// streamCtx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	// defer cancel()
 
-	req := &v2beta2.SubscribeCheckpointsRequest{
+	req := &v2.SubscribeCheckpointsRequest{
 		ReadMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"*"}, // Get all fields
 		},

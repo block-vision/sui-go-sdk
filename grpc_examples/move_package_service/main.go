@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
@@ -39,9 +39,9 @@ func main() {
 }
 
 // GetPackage - Get Move package information
-func exampleGetPackage(ctx context.Context, service v2beta2.MovePackageServiceClient) {
+func exampleGetPackage(ctx context.Context, service v2.MovePackageServiceClient) {
 	packageId := "0x0000000000000000000000000000000000000000000000000000000000000002" // Standard library
-	req := &v2beta2.GetPackageRequest{
+	req := &v2.GetPackageRequest{
 		PackageId: &packageId,
 	}
 
@@ -55,11 +55,11 @@ func exampleGetPackage(ctx context.Context, service v2beta2.MovePackageServiceCl
 }
 
 // GetDatatype - Get Move datatype information
-func exampleGetDatatype(ctx context.Context, service v2beta2.MovePackageServiceClient) {
+func exampleGetDatatype(ctx context.Context, service v2.MovePackageServiceClient) {
 	packageId := "0x0000000000000000000000000000000000000000000000000000000000000002"
 	moduleName := "coin"
 	datatypeName := "Coin"
-	req := &v2beta2.GetDatatypeRequest{
+	req := &v2.GetDatatypeRequest{
 		PackageId:  &packageId,
 		ModuleName: &moduleName,
 		Name:       &datatypeName,
@@ -75,11 +75,11 @@ func exampleGetDatatype(ctx context.Context, service v2beta2.MovePackageServiceC
 }
 
 // GetFunction - Get Move function information
-func exampleGetFunction(ctx context.Context, service v2beta2.MovePackageServiceClient) {
+func exampleGetFunction(ctx context.Context, service v2.MovePackageServiceClient) {
 	packageId := "0x0000000000000000000000000000000000000000000000000000000000000002"
 	moduleName := "coin"
 	functionName := "supply_mut"
-	req := &v2beta2.GetFunctionRequest{
+	req := &v2.GetFunctionRequest{
 		PackageId:  &packageId,
 		ModuleName: &moduleName,
 		Name:       &functionName,
@@ -95,9 +95,9 @@ func exampleGetFunction(ctx context.Context, service v2beta2.MovePackageServiceC
 }
 
 // ListPackageVersions - List versions of a package
-func exampleListPackageVersions(ctx context.Context, service v2beta2.MovePackageServiceClient) {
+func exampleListPackageVersions(ctx context.Context, service v2.MovePackageServiceClient) {
 	packageId := "0x0000000000000000000000000000000000000000000000000000000000000002"
-	req := &v2beta2.ListPackageVersionsRequest{
+	req := &v2.ListPackageVersionsRequest{
 		PackageId: &packageId,
 	}
 

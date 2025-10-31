@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
@@ -33,9 +33,9 @@ func main() {
 }
 
 // LookupName - Look up a name to get the associated object
-func exampleLookupName(ctx context.Context, service v2beta2.NameServiceClient) {
+func exampleLookupName(ctx context.Context, service v2.NameServiceClient) {
 	name := "websui.sui"
-	req := &v2beta2.LookupNameRequest{
+	req := &v2.LookupNameRequest{
 		Name: &name,
 	}
 
@@ -49,9 +49,9 @@ func exampleLookupName(ctx context.Context, service v2beta2.NameServiceClient) {
 }
 
 // ReverseLookupName - Reverse lookup to get the name associated with an address
-func exampleReverseLookupName(ctx context.Context, service v2beta2.NameServiceClient) {
+func exampleReverseLookupName(ctx context.Context, service v2.NameServiceClient) {
 	address := "0xa1c56b400b57e9fca5011c80948a0f2fadbfc407470640dc7026eae575c93c7b"
-	req := &v2beta2.ReverseLookupNameRequest{
+	req := &v2.ReverseLookupNameRequest{
 		Address: &address,
 	}
 

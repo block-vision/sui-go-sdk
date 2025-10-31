@@ -1,6 +1,7 @@
 # gen by ide
 .idea
 .vscode
+.history
 # log files
 *.log*
 # gen by Makefile

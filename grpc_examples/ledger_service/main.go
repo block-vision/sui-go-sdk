@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("Failed to get ledger service: %v", err)
 	}
 
-	// Run all examples
+	//Run all examples
 	fmt.Println("\n1. Getting service info...")
 	exampleGetServiceInfo(ctx, ledgerService)
 
@@ -49,8 +49,8 @@ func main() {
 }
 
 // GetServiceInfo - Query the service for general information about its current state
-func exampleGetServiceInfo(ctx context.Context, service v2beta2.LedgerServiceClient) {
-	req := &v2beta2.GetServiceInfoRequest{}
+func exampleGetServiceInfo(ctx context.Context, service v2.LedgerServiceClient) {
+	req := &v2.GetServiceInfoRequest{}
 
 	resp, err := service.GetServiceInfo(ctx, req)
 	if err != nil {
@@ -62,9 +62,9 @@ func exampleGetServiceInfo(ctx context.Context, service v2beta2.LedgerServiceCli
 }
 
 // GetObject - Get a specific object by its ID
-func exampleGetObject(ctx context.Context, service v2beta2.LedgerServiceClient) {
+func exampleGetObject(ctx context.Context, service v2.LedgerServiceClient) {
 	objectId := "0x88683c72e030b07af3881a005f376c2af1c30f7eeb99719c29b9ba5f151d8255"
-	req := &v2beta2.GetObjectRequest{
+	req := &v2.GetObjectRequest{
 		ObjectId: &objectId,
 		ReadMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"*"}, // Get all fields
@@ -81,12 +81,12 @@ func exampleGetObject(ctx context.Context, service v2beta2.LedgerServiceClient) 
 }
 
 // BatchGetObjects - Get multiple objects by their IDs
-func exampleBatchGetObjects(ctx context.Context, service v2beta2.LedgerServiceClient) {
+func exampleBatchGetObjects(ctx context.Context, service v2.LedgerServiceClient) {
 	objectId1 := "0x88683c72e030b07af3881a005f376c2af1c30f7eeb99719c29b9ba5f151d8255"
 	objectId2 := "0x99694c72e030b07af3881a005f376c2af1c30f7eeb99719c29b9ba5f151d8256"
 
-	req := &v2beta2.BatchGetObjectsRequest{
-		Requests: []*v2beta2.GetObjectRequest{
+	req := &v2.BatchGetObjectsRequest{
+		Requests: []*v2.GetObjectRequest{
 			{ObjectId: &objectId1},
 			{ObjectId: &objectId2},
 		},
@@ -105,9 +105,9 @@ func exampleBatchGetObjects(ctx context.Context, service v2beta2.LedgerServiceCl
 }
 
 // GetTransaction - Get a specific transaction by its digest
-func exampleGetTransaction(ctx context.Context, service v2beta2.LedgerServiceClient) {
+func exampleGetTransaction(ctx context.Context, service v2.LedgerServiceClient) {
 	txDigest := "3CK7Fv9CUp3QetDhszToqwnDHgzpYPauP1H2N5iyuijh"
-	req := &v2beta2.GetTransactionRequest{
+	req := &v2.GetTransactionRequest{
 		Digest: &txDigest,
 		ReadMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"*"},
@@ -124,11 +124,11 @@ func exampleGetTransaction(ctx context.Context, service v2beta2.LedgerServiceCli
 }
 
 // BatchGetTransactions - Get multiple transactions by their digests
-func exampleBatchGetTransactions(ctx context.Context, service v2beta2.LedgerServiceClient) {
+func exampleBatchGetTransactions(ctx context.Context, service v2.LedgerServiceClient) {
 	digest1 := "3CK7Fv9CUp3QetDhszToqwnDHgzpYPauP1H2N5iyuijh"
 	digest2 := "29PhqkV8MkkDVDk2HLqsRZEUwTg7NgCgHvW7nVMUx2Xq"
 
-	req := &v2beta2.BatchGetTransactionsRequest{
+	req := &v2.BatchGetTransactionsRequest{
 		Digests: []string{digest1, digest2},
 		ReadMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"digest", "transaction"},
@@ -145,10 +145,10 @@ func exampleBatchGetTransactions(ctx context.Context, service v2beta2.LedgerServ
 }
 
 // GetCheckpoint - Get a specific checkpoint by sequence number
-func exampleGetCheckpoint(ctx context.Context, service v2beta2.LedgerServiceClient) {
+func exampleGetCheckpoint(ctx context.Context, service v2.LedgerServiceClient) {
 	checkpointSeq := uint64(179720286)
-	req := &v2beta2.GetCheckpointRequest{
-		CheckpointId: &v2beta2.GetCheckpointRequest_SequenceNumber{
+	req := &v2.GetCheckpointRequest{
+		CheckpointId: &v2.GetCheckpointRequest_SequenceNumber{
 			SequenceNumber: checkpointSeq,
 		},
 		ReadMask: &fieldmaskpb.FieldMask{
@@ -166,9 +166,9 @@ func exampleGetCheckpoint(ctx context.Context, service v2beta2.LedgerServiceClie
 }
 
 // GetEpoch - Get epoch information
-func exampleGetEpoch(ctx context.Context, service v2beta2.LedgerServiceClient) {
-	epochNumber := uint64(1)
-	req := &v2beta2.GetEpochRequest{
+func exampleGetEpoch(ctx context.Context, service v2.LedgerServiceClient) {
+	epochNumber := uint64(820)
+	req := &v2.GetEpochRequest{
 		Epoch: &epochNumber,
 		ReadMask: &fieldmaskpb.FieldMask{
 			Paths: []string{"*"},

@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
@@ -30,10 +30,10 @@ func main() {
 }
 
 // VerifySignature - Verify a signature against message
-func exampleVerifySignature(ctx context.Context, service v2beta2.SignatureVerificationServiceClient) {
+func exampleVerifySignature(ctx context.Context, service v2.SignatureVerificationServiceClient) {
 	// Example signature verification request
 	// Note: This is a simplified example with placeholder data
-	req := &v2beta2.VerifySignatureRequest{
+	req := &v2.VerifySignatureRequest{
 		// Message and signature would be properly constructed here
 		// For actual usage, you need to provide:
 		// - Proper message bytes

@@ -24,7 +24,7 @@ func NewDefaultConfig() *DefaultConfig {
 		Token:   constant.SuiMainnetGrpcToken,
 		Timeout: time.Second * 30,
 		Retries: 3,
-		UseTLS:  false,
+		UseTLS:  true,
 	}
 }
 
@@ -36,8 +36,7 @@ func CreateGrpcClient(config *DefaultConfig) *grpcconn.SuiGrpcClient {
 
 	if config.UseTLS {
 		opts = append(opts, grpcconn.WithDialOptions(
-			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})),
-		))
+			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{}))))
 	}
 
 	return grpcconn.NewSuiGrpcClientWithAuth(config.Target, config.Token, opts...)

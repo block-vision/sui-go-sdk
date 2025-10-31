@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
@@ -30,18 +30,18 @@ func main() {
 }
 
 // ExecuteTransaction - Execute a transaction on the Sui network
-func exampleExecuteTransaction(ctx context.Context, service v2beta2.TransactionExecutionServiceClient) {
+func exampleExecuteTransaction(ctx context.Context, service v2.TransactionExecutionServiceClient) {
 	// Note: This is a simplified example. In reality, you would need to:
 	// 1. Build a proper transaction using PTB (Programmable Transaction Block)
 	// 2. Sign the transaction with the appropriate private key
 	// 3. Provide valid transaction data and signatures
 
-	req := &v2beta2.ExecuteTransactionRequest{
-		Transaction: &v2beta2.Transaction{
+	req := &v2.ExecuteTransactionRequest{
+		Transaction: &v2.Transaction{
 			// Transaction data would go here
 			// This should be a properly constructed transaction
 		},
-		Signatures: []*v2beta2.UserSignature{
+		Signatures: []*v2.UserSignature{
 			// Valid signatures would go here
 			// Each signature should correspond to a required signer
 		},

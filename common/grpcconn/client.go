@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -11,13 +12,13 @@ import (
 
 type SuiGrpcClient struct {
 	conn                         *GrpcConn
-	nameService                  v2beta2.NameServiceClient
-	ledgerService                v2beta2.LedgerServiceClient
+	nameService                  v2.NameServiceClient
+	ledgerService                v2.LedgerServiceClient
 	liveDataService              v2beta2.LiveDataServiceClient
-	movePackageService           v2beta2.MovePackageServiceClient
-	subscriptionService          v2beta2.SubscriptionServiceClient
-	transactionExecutionService  v2beta2.TransactionExecutionServiceClient
-	signatureVerificationService v2beta2.SignatureVerificationServiceClient
+	movePackageService           v2.MovePackageServiceClient
+	subscriptionService          v2.SubscriptionServiceClient
+	transactionExecutionService  v2.TransactionExecutionServiceClient
+	signatureVerificationService v2.SignatureVerificationServiceClient
 }
 
 func NewSuiGrpcClient(target string, opts ...GrpcConnOption) *SuiGrpcClient {
@@ -39,6 +40,16 @@ func NewSuiGrpcClientWithAuth(target, token string, opts ...GrpcConnOption) *Sui
 				ctx = metadata.NewOutgoingContext(ctx, md)
 				return invoker(ctx, method, req, reply, cc, callOpts...)
 			}),
+
+			grpc.WithChainStreamInterceptor(func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+				md := metadata.Pairs(
+					"authorization", "Bearer "+token,
+					"x-api-key", token,
+					"x-token", token,
+				)
+				ctx = metadata.NewOutgoingContext(ctx, md)
+				return streamer(ctx, desc, cc, method, opts...)
+			}),
 		),
 	}
 
@@ -57,13 +68,13 @@ func (c *SuiGrpcClient) Connect(ctx context.Context) error {
 		return fmt.Errorf("failed to get connection: %v", err)
 	}
 
-	c.nameService = v2beta2.NewNameServiceClient(grpcConn)
-	c.ledgerService = v2beta2.NewLedgerServiceClient(grpcConn)
+	c.nameService = v2.NewNameServiceClient(grpcConn)
+	c.ledgerService = v2.NewLedgerServiceClient(grpcConn)
 	c.liveDataService = v2beta2.NewLiveDataServiceClient(grpcConn)
-	c.movePackageService = v2beta2.NewMovePackageServiceClient(grpcConn)
-	c.subscriptionService = v2beta2.NewSubscriptionServiceClient(grpcConn)
-	c.transactionExecutionService = v2beta2.NewTransactionExecutionServiceClient(grpcConn)
-	c.signatureVerificationService = v2beta2.NewSignatureVerificationServiceClient(grpcConn)
+	c.movePackageService = v2.NewMovePackageServiceClient(grpcConn)
+	c.subscriptionService = v2.NewSubscriptionServiceClient(grpcConn)
+	c.transactionExecutionService = v2.NewTransactionExecutionServiceClient(grpcConn)
+	c.signatureVerificationService = v2.NewSignatureVerificationServiceClient(grpcConn)
 	return nil
 }
 
@@ -71,7 +82,7 @@ func (c *SuiGrpcClient) Close() error {
 	return c.conn.Close()
 }
 
-func (c *SuiGrpcClient) NameService(ctx context.Context) (v2beta2.NameServiceClient, error) {
+func (c *SuiGrpcClient) NameService(ctx context.Context) (v2.NameServiceClient, error) {
 	if c.nameService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -80,7 +91,7 @@ func (c *SuiGrpcClient) NameService(ctx context.Context) (v2beta2.NameServiceCli
 	return c.nameService, nil
 }
 
-func (c *SuiGrpcClient) LedgerService(ctx context.Context) (v2beta2.LedgerServiceClient, error) {
+func (c *SuiGrpcClient) LedgerService(ctx context.Context) (v2.LedgerServiceClient, error) {
 	if c.ledgerService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -98,7 +109,7 @@ func (c *SuiGrpcClient) LiveDataService(ctx context.Context) (v2beta2.LiveDataSe
 	return c.liveDataService, nil
 }
 
-func (c *SuiGrpcClient) MovePackageService(ctx context.Context) (v2beta2.MovePackageServiceClient, error) {
+func (c *SuiGrpcClient) MovePackageService(ctx context.Context) (v2.MovePackageServiceClient, error) {
 	if c.movePackageService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -107,7 +118,7 @@ func (c *SuiGrpcClient) MovePackageService(ctx context.Context) (v2beta2.MovePac
 	return c.movePackageService, nil
 }
 
-func (c *SuiGrpcClient) SubscriptionService(ctx context.Context) (v2beta2.SubscriptionServiceClient, error) {
+func (c *SuiGrpcClient) SubscriptionService(ctx context.Context) (v2.SubscriptionServiceClient, error) {
 	if c.subscriptionService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -116,7 +127,7 @@ func (c *SuiGrpcClient) SubscriptionService(ctx context.Context) (v2beta2.Subscr
 	return c.subscriptionService, nil
 }
 
-func (c *SuiGrpcClient) TransactionExecutionService(ctx context.Context) (v2beta2.TransactionExecutionServiceClient, error) {
+func (c *SuiGrpcClient) TransactionExecutionService(ctx context.Context) (v2.TransactionExecutionServiceClient, error) {
 	if c.transactionExecutionService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -125,7 +136,7 @@ func (c *SuiGrpcClient) TransactionExecutionService(ctx context.Context) (v2beta
 	return c.transactionExecutionService, nil
 }
 
-func (c *SuiGrpcClient) SignatureVerificationService(ctx context.Context) (v2beta2.SignatureVerificationServiceClient, error) {
+func (c *SuiGrpcClient) SignatureVerificationService(ctx context.Context) (v2.SignatureVerificationServiceClient, error) {
 	if c.signatureVerificationService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
@@ -140,6 +151,15 @@ func (c *SuiGrpcClient) CallWithRetry(ctx context.Context, method string, req in
 
 func (c *SuiGrpcClient) GetConnection(ctx context.Context) (*grpc.ClientConn, error) {
 	return c.conn.GetConn(ctx)
+}
+
+func (c *SuiGrpcClient) GetMetadata(ctx context.Context) (metadata.MD, bool) {
+	return metadata.FromOutgoingContext(ctx)
+}
+
+func (c *SuiGrpcClient) CreateContextWithMetadata(ctx context.Context, pairs ...string) context.Context {
+	md := metadata.Pairs(pairs...)
+	return metadata.NewOutgoingContext(ctx, md)
 }
 
 type BatchRequest struct {
