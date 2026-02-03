@@ -30,7 +30,7 @@ type MoveModule struct {
 type MoveEventModule struct {
 	Package string `json:"package"`
 	Module  string `json:"module"`
-	Event   string `json:"event"`
+	Type    string `json:"type"`
 }
 
 type MoveEventField struct {

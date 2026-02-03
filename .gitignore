@@ -10,3 +10,4 @@
 sui.keystore.fortest
 /vendor/
 .Ds_Store
+.history/

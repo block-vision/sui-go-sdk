@@ -27,8 +27,9 @@ func (s *suiBaseImpl) SuiCall(ctx context.Context, method string, params ...inte
 	if err != nil {
 		return nil, err
 	}
-	if gjson.ParseBytes(resp).Get("error").Exists() {
-		return nil, errors.New(gjson.ParseBytes(resp).Get("error").String())
+	parsedJson := gjson.ParseBytes(resp)
+	if parsedJson.Get("error").Exists() {
+		return nil, errors.New(parsedJson.Get("error").String())
 	}
-	return gjson.ParseBytes(resp).String(), nil
+	return parsedJson.String(), nil
 }

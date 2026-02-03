@@ -5,12 +5,8 @@ package sui
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/tidwall/gjson"
 )
 
 type IReadTransactionFromSuiAPI interface {
@@ -23,148 +19,66 @@ type IReadTransactionFromSuiAPI interface {
 }
 
 type suiReadTransactionFromSuiImpl struct {
-	conn *httpconn.HttpConn
+	handler *BaseRequestHandler
+}
+
+func newSuiReadTransactionFromSuiImpl(conn *httpconn.HttpConn) *suiReadTransactionFromSuiImpl {
+	return &suiReadTransactionFromSuiImpl{
+		handler: NewBaseRequestHandler(conn),
+	}
 }
 
 // SuiGetTotalTransactionBlocks implements the method `sui_getTotalTransactionBlocks`, gets the total number of transactions known to the node.
 func (s *suiReadTransactionFromSuiImpl) SuiGetTotalTransactionBlocks(ctx context.Context) (uint64, error) {
 	var rsp uint64
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getTotalTransactionBlocks",
-		Params: []interface{}{},
-	})
-	if err != nil {
-		return rsp, err
-	}
-	rsp = gjson.ParseBytes(respBytes).Get("result").Uint()
-	return rsp, nil
+	err := s.handler.ExecuteRequest(ctx, "sui_getTotalTransactionBlocks", []interface{}{}, &rsp)
+	return rsp, err
 }
 
 // SuiGetTransactionBlock implements the method `sui_getTransactionBlock`, gets the transaction response object for a specified transaction digest.
 func (s *suiReadTransactionFromSuiImpl) SuiGetTransactionBlock(ctx context.Context, req models.SuiGetTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
 	var rsp models.SuiTransactionBlockResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getTransactionBlock",
-		Params: []interface{}{
-			req.Digest,
-			req.Options,
-		},
-	})
-	if err != nil {
-		return rsp, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
-	if err != nil {
-		return rsp, fmt.Errorf("unmarshal sui_getTransactionBlock err: %v response: %s", err, string(respBytes))
-	}
-	return rsp, nil
+	params := []interface{}{req.Digest, req.Options}
+	err := s.handler.ExecuteRequest(ctx, "sui_getTransactionBlock", params, &rsp)
+	return rsp, err
 }
 
 // SuiMultiGetTransactionBlocks implements the method `sui_multiGetTransactionBlocks`, gets an ordered list of transaction responses.
 func (s *suiReadTransactionFromSuiImpl) SuiMultiGetTransactionBlocks(ctx context.Context, req models.SuiMultiGetTransactionBlocksRequest) (models.SuiMultiGetTransactionBlocksResponse, error) {
 	var rsp models.SuiMultiGetTransactionBlocksResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_multiGetTransactionBlocks",
-		Params: []interface{}{
-			req.Digests,
-			req.Options,
-		},
-	})
-	if err != nil {
-		return rsp, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
-	if err != nil {
-		return rsp, fmt.Errorf("unmarshal sui_multiGetTransactionBlocks err: %v response: %s", err, string(respBytes))
-	}
-	return rsp, nil
+	params := []interface{}{req.Digests, req.Options}
+	err := s.handler.ExecuteRequest(ctx, "sui_multiGetTransactionBlocks", params, &rsp)
+	return rsp, err
 }
 
 // SuiXQueryTransactionBlocks implements the method `suix_queryTransactionBlocks`, gets list of transactions for a specified query criteria.
 func (s *suiReadTransactionFromSuiImpl) SuiXQueryTransactionBlocks(ctx context.Context, req models.SuiXQueryTransactionBlocksRequest) (models.SuiXQueryTransactionBlocksResponse, error) {
 	var rsp models.SuiXQueryTransactionBlocksResponse
-	if err := validate.ValidateStruct(req); err != nil {
-		return rsp, err
-	}
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "suix_queryTransactionBlocks",
-		Params: []interface{}{
-			req.SuiTransactionBlockResponseQuery,
-			req.Cursor,
-			req.Limit,
-			req.DescendingOrder,
-		},
-	})
-	if err != nil {
-		return rsp, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
-	if err != nil {
-		return rsp, fmt.Errorf("unmarshal suix_queryTransactionBlocks err: %v response: %s", err, string(respBytes))
-	}
-	return rsp, nil
+	params := []interface{}{req.SuiTransactionBlockResponseQuery, req.Cursor, req.Limit, req.DescendingOrder}
+	err := s.handler.ExecuteRequestWithValidation(ctx, "suix_queryTransactionBlocks", params, req, &rsp)
+	return rsp, err
 }
 
 // SuiDryRunTransactionBlock implements the method `sui_dryRunTransactionBlock`, gets transaction execution effects including the gas cost summary, while the effects are not committed to the chain.
 func (s *suiReadTransactionFromSuiImpl) SuiDryRunTransactionBlock(ctx context.Context, req models.SuiDryRunTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
 	var rsp models.SuiTransactionBlockResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_dryRunTransactionBlock",
-		Params: []interface{}{
-			req.TxBytes,
-		},
-	})
-	if err != nil {
-		return rsp, err
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").Raw), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
+	params := []interface{}{req.TxBytes}
+	err := s.handler.ExecuteRequest(ctx, "sui_dryRunTransactionBlock", params, &rsp)
+	return rsp, err
 }
 
 // SuiDevInspectTransactionBlock implements the method `sui_devInspectTransactionBlock`, runs the transaction in dev-inspect mode.
 // Which allows for nearly any transaction (or Move call) with any arguments.
 // Detailed results are provided, including both the transaction effects and any return values.
 func (s *suiReadTransactionFromSuiImpl) SuiDevInspectTransactionBlock(ctx context.Context, req models.SuiDevInspectTransactionBlockRequest) (models.SuiTransactionBlockResponse, error) {
-	params := []interface{}{
-		req.Sender,
-		req.TxBytes,
-	}
+	var rsp models.SuiTransactionBlockResponse
+	params := []interface{}{req.Sender, req.TxBytes}
 	if req.GasPrice != "" {
 		params = append(params, req.GasPrice)
 	}
 	if req.Epoch != "" {
 		params = append(params, req.Epoch)
 	}
-	var rsp models.SuiTransactionBlockResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_devInspectTransactionBlock",
-		Params: params,
-	})
-	if err != nil {
-		return rsp, err
-	}
-	parsedJson := gjson.ParseBytes(respBytes)
-	if parsedJson.Get("error").Exists() {
-		return rsp, errors.New(parsedJson.Get("error").String())
-	}
-	err = json.Unmarshal([]byte(parsedJson.Get("result").Raw), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
+	err := s.handler.ExecuteRequest(ctx, "sui_devInspectTransactionBlock", params, &rsp)
+	return rsp, err
 }

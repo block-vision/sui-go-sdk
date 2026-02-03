@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/gorilla/websocket"
 	"github.com/tidwall/gjson"
-	"log"
-	"time"
 )
 
 type WsConn struct {
@@ -60,7 +61,7 @@ func (w *WsConn) Call(ctx context.Context, op CallOp, receiveMsgCh chan []byte) 
 
 	var rsp SubscriptionResp
 	if gjson.ParseBytes(messageData).Get("error").Exists() {
-		return fmt.Errorf(gjson.ParseBytes(messageData).Get("error").String())
+		return fmt.Errorf("websocket error: %s", gjson.ParseBytes(messageData).Get("error").String())
 	}
 
 	err = json.Unmarshal([]byte(gjson.ParseBytes(messageData).String()), &rsp)

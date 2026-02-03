@@ -1,139 +1,68 @@
+// Copyright (c) BlockVision, Inc. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
 package sui
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"github.com/block-vision/sui-go-sdk/common/httpconn"
 	"github.com/block-vision/sui-go-sdk/models"
-	"github.com/tidwall/gjson"
 )
 
 type IReadMoveFromSuiAPI interface {
 	SuiGetMoveFunctionArgTypes(ctx context.Context, req models.GetMoveFunctionArgTypesRequest) (models.GetMoveFunctionArgTypesResponse, error)
-	SuiGetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest) (models.GetNormalizedMoveModulesByPackageResponse, error)
+	SuiGetNormalizedMoveFunction(ctx context.Context, req models.GetNormalizedMoveFunctionRequest) (models.GetNormalizedMoveFunctionResponse, error)
 	SuiGetNormalizedMoveModule(ctx context.Context, req models.GetNormalizedMoveModuleRequest) (models.GetNormalizedMoveModuleResponse, error)
 	SuiGetNormalizedMoveStruct(ctx context.Context, req models.GetNormalizedMoveStructRequest) (models.GetNormalizedMoveStructResponse, error)
-	SuiGetNormalizedMoveFunction(ctx context.Context, req models.GetNormalizedMoveFunctionRequest) (models.GetNormalizedMoveFunctionResponse, error)
+	SuiGetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest) (models.GetNormalizedMoveModulesByPackageResponse, error)
 }
 
 type suiReadMoveFromSuiImpl struct {
-	conn *httpconn.HttpConn
+	handler *BaseRequestHandler
 }
 
-// SuiGetMoveFunctionArgTypes implements method `sui_getMoveFunctionArgTypes`, return the argument types of a Move function based on normalized type.
+func newSuiReadMoveFromSuiImpl(conn *httpconn.HttpConn) *suiReadMoveFromSuiImpl {
+	return &suiReadMoveFromSuiImpl{
+		handler: NewBaseRequestHandler(conn),
+	}
+}
+
+// SuiGetMoveFunctionArgTypes implements the method `sui_getMoveFunctionArgTypes`, gets the argument types of a Move function, based on normalized Type.
 func (s *suiReadMoveFromSuiImpl) SuiGetMoveFunctionArgTypes(ctx context.Context, req models.GetMoveFunctionArgTypesRequest) (models.GetMoveFunctionArgTypesResponse, error) {
 	var rsp models.GetMoveFunctionArgTypesResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getMoveFunctionArgTypes",
-		Params: []interface{}{
-			req.Package,
-			req.Module,
-			req.Function,
-		},
-	})
-	if err != nil {
-		return rsp, nil
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
+	params := []interface{}{req.Package, req.Module, req.Function}
+	err := s.handler.ExecuteRequest(ctx, "sui_getMoveFunctionArgTypes", params, &rsp)
+	return rsp, err
 }
 
-// SuiGetNormalizedMoveModulesByPackage implements method `sui_getNormalizedMoveModulesByPackage`, return the structured representations of all modules in the given package.
-func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest) (models.GetNormalizedMoveModulesByPackageResponse, error) {
-	var rsp models.GetNormalizedMoveModulesByPackageResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getNormalizedMoveModulesByPackage",
-		Params: []interface{}{
-			req.Package,
-		},
-	})
-	if err != nil {
-		return rsp, nil
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
-}
-
-// SuiGetNormalizedMoveModule implements method `sui_getNormalizedMoveModule`, return a structured representation of a Move module.
-func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModule(ctx context.Context, req models.GetNormalizedMoveModuleRequest) (models.GetNormalizedMoveModuleResponse, error) {
-	var rsp models.GetNormalizedMoveModuleResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getNormalizedMoveModule",
-		Params: []interface{}{
-			req.Package,
-			req.ModuleName,
-		},
-	})
-	if err != nil {
-		return rsp, nil
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
-}
-
-// SuiGetNormalizedMoveStruct implements method `sui_getNormalizedMoveStruct`, return a structured representation of a Move struct.
-func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveStruct(ctx context.Context, req models.GetNormalizedMoveStructRequest) (models.GetNormalizedMoveStructResponse, error) {
-	var rsp models.GetNormalizedMoveStructResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getNormalizedMoveStruct",
-		Params: []interface{}{
-			req.Package,
-			req.ModuleName,
-			req.StructName,
-		},
-	})
-	if err != nil {
-		return rsp, nil
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
-}
-
-// SuiGetNormalizedMoveFunction implements method `sui_getNormalizedMoveFunction`, return a structured representation of a Move function.
+// SuiGetNormalizedMoveFunction implements the method `sui_getNormalizedMoveFunction`, gets a Move function's normalized representation.
 func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveFunction(ctx context.Context, req models.GetNormalizedMoveFunctionRequest) (models.GetNormalizedMoveFunctionResponse, error) {
 	var rsp models.GetNormalizedMoveFunctionResponse
-	respBytes, err := s.conn.Request(ctx, httpconn.Operation{
-		Method: "sui_getNormalizedMoveFunction",
-		Params: []interface{}{
-			req.Package,
-			req.ModuleName,
-			req.FunctionName,
-		},
-	})
-	if err != nil {
-		return rsp, nil
-	}
-	if gjson.ParseBytes(respBytes).Get("error").Exists() {
-		return rsp, errors.New(gjson.ParseBytes(respBytes).Get("error").String())
-	}
-	err = json.Unmarshal([]byte(gjson.ParseBytes(respBytes).Get("result").String()), &rsp)
-	if err != nil {
-		return rsp, err
-	}
-	return rsp, nil
+	params := []interface{}{req.Package, req.ModuleName, req.FunctionName}
+	err := s.handler.ExecuteRequest(ctx, "sui_getNormalizedMoveFunction", params, &rsp)
+	return rsp, err
+}
+
+// SuiGetNormalizedMoveModule implements the method `sui_getNormalizedMoveModule`, gets a Move module's normalized representation.
+func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModule(ctx context.Context, req models.GetNormalizedMoveModuleRequest) (models.GetNormalizedMoveModuleResponse, error) {
+	var rsp models.GetNormalizedMoveModuleResponse
+	params := []interface{}{req.Package, req.ModuleName}
+	err := s.handler.ExecuteRequest(ctx, "sui_getNormalizedMoveModule", params, &rsp)
+	return rsp, err
+}
+
+// SuiGetNormalizedMoveStruct implements the method `sui_getNormalizedMoveStruct`, gets a Move struct's normalized representation.
+func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveStruct(ctx context.Context, req models.GetNormalizedMoveStructRequest) (models.GetNormalizedMoveStructResponse, error) {
+	var rsp models.GetNormalizedMoveStructResponse
+	params := []interface{}{req.Package, req.ModuleName, req.StructName}
+	err := s.handler.ExecuteRequest(ctx, "sui_getNormalizedMoveStruct", params, &rsp)
+	return rsp, err
+}
+
+// SuiGetNormalizedMoveModulesByPackage implements the method `suix_getNormalizedMoveModulesByPackage`, gets normalized Move modules by package.
+func (s *suiReadMoveFromSuiImpl) SuiGetNormalizedMoveModulesByPackage(ctx context.Context, req models.GetNormalizedMoveModulesByPackageRequest) (models.GetNormalizedMoveModulesByPackageResponse, error) {
+	var rsp models.GetNormalizedMoveModulesByPackageResponse
+	params := []interface{}{req.Package}
+	err := s.handler.ExecuteRequest(ctx, "suix_getNormalizedMoveModulesByPackage", params, &rsp)
+	return rsp, err
 }

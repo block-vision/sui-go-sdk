@@ -5,10 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/block-vision/sui-go-sdk/models"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
+
+	"github.com/block-vision/sui-go-sdk/models"
 
 	"golang.org/x/time/rate"
 )
@@ -82,7 +83,7 @@ func (h *HttpConn) Request(ctx context.Context, op Operation) ([]byte, error) {
 		}
 		defer rsp.Body.Close()
 
-		bodyBytes, err := ioutil.ReadAll(rsp.Body)
+		bodyBytes, err := io.ReadAll(rsp.Body)
 		if err != nil {
 			lastErr = err
 			continue

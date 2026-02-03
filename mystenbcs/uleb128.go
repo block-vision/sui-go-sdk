@@ -12,7 +12,7 @@ import (
 // Go's widest integer is uint64, so the length is 10.
 const MaxUleb128Length = 10
 
-// ULEB128SupportedTypes is a contraint interface that limits the input to
+// ULEB128SupportedTypes is a constraint interface that limits the input to
 // [ULEB128Encode] and [ULEB128Decode] to signed and unsigned integers.
 type ULEB128SupportedTypes interface {
 	~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uint | ~int8 | ~int16 | ~int32 | ~int64 | ~int

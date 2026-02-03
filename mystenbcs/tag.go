@@ -17,8 +17,8 @@ const (
 
 func parseTagValue(tag string) (tagValue, error) {
 	var r tagValue
-	tagSegs := strings.Split(tag, ",")
-	for _, seg := range tagSegs {
+	tagSegs := strings.SplitSeq(tag, ",")
+	for seg := range tagSegs {
 		seg := strings.TrimSpace(seg)
 		if seg == "" {
 			continue
