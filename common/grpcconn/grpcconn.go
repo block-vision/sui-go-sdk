@@ -67,6 +67,7 @@ func defaultDialOptions() []grpc.DialOption {
 			Timeout:             defaultKeepaliveTimeout,
 			PermitWithoutStream: true,
 		}),
+		grpc.WithMaxMsgSize(20 * 1024 * 1024), // 20MB
 	}
 }
 

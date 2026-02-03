@@ -258,6 +258,18 @@ func (d *Decoder) decodeEnum(v reflect.Value) (int, error) {
 
 	field := v.Field(enumId)
 
+	// Handle interface{} fields (like None any in TransactionExpiration)
+	// For empty enum variants, BCS only encodes the enum ID, no data follows
+	if field.Kind() == reflect.Interface {
+		if field.IsNil() {
+			// For empty variants (like None), set to an empty struct as a marker
+			// and return immediately without decoding (no data to decode)
+			field.Set(reflect.ValueOf(struct{}{}))
+			return n, nil
+		}
+		// If field is not nil, it means it's a non-empty variant, decode normally
+	}
+
 	k, err := d.decode(field)
 	n += k
 

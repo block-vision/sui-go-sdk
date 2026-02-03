@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -14,7 +13,7 @@ type SuiGrpcClient struct {
 	conn                         *GrpcConn
 	nameService                  v2.NameServiceClient
 	ledgerService                v2.LedgerServiceClient
-	liveDataService              v2beta2.LiveDataServiceClient
+	stateService                 v2.StateServiceClient
 	movePackageService           v2.MovePackageServiceClient
 	subscriptionService          v2.SubscriptionServiceClient
 	transactionExecutionService  v2.TransactionExecutionServiceClient
@@ -70,7 +69,7 @@ func (c *SuiGrpcClient) Connect(ctx context.Context) error {
 
 	c.nameService = v2.NewNameServiceClient(grpcConn)
 	c.ledgerService = v2.NewLedgerServiceClient(grpcConn)
-	c.liveDataService = v2beta2.NewLiveDataServiceClient(grpcConn)
+	c.stateService = v2.NewStateServiceClient(grpcConn)
 	c.movePackageService = v2.NewMovePackageServiceClient(grpcConn)
 	c.subscriptionService = v2.NewSubscriptionServiceClient(grpcConn)
 	c.transactionExecutionService = v2.NewTransactionExecutionServiceClient(grpcConn)
@@ -100,13 +99,13 @@ func (c *SuiGrpcClient) LedgerService(ctx context.Context) (v2.LedgerServiceClie
 	return c.ledgerService, nil
 }
 
-func (c *SuiGrpcClient) LiveDataService(ctx context.Context) (v2beta2.LiveDataServiceClient, error) {
-	if c.liveDataService == nil {
+func (c *SuiGrpcClient) StateService(ctx context.Context) (v2.StateServiceClient, error) {
+	if c.stateService == nil {
 		if err := c.Connect(ctx); err != nil {
 			return nil, err
 		}
 	}
-	return c.liveDataService, nil
+	return c.stateService, nil
 }
 
 func (c *SuiGrpcClient) MovePackageService(ctx context.Context) (v2.MovePackageServiceClient, error) {

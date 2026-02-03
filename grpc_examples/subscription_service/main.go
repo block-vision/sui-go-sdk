@@ -8,7 +8,6 @@ import (
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
 	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -80,7 +79,7 @@ func exampleSubscribeCheckpoints(ctx context.Context, service v2.SubscriptionSer
 }
 
 // Example of handling subscription with error recovery
-func exampleSubscribeCheckpointsWithRetry(ctx context.Context, service v2beta2.SubscriptionServiceClient) {
+func exampleSubscribeCheckpointsWithRetry(ctx context.Context, service v2.SubscriptionServiceClient) {
 	fmt.Println("\n2. Subscribing to checkpoints with retry logic...")
 
 	maxRetries := 3
@@ -92,7 +91,7 @@ func exampleSubscribeCheckpointsWithRetry(ctx context.Context, service v2beta2.S
 		streamCtx, cancel := context.WithTimeout(ctx, time.Minute*2)
 		defer cancel()
 
-		req := &v2beta2.SubscribeCheckpointsRequest{
+		req := &v2.SubscribeCheckpointsRequest{
 			// Start from latest if this is a retry
 		}
 
@@ -137,13 +136,13 @@ func exampleSubscribeCheckpointsWithRetry(ctx context.Context, service v2beta2.S
 }
 
 // Example of subscription with filtering (if supported)
-func exampleSubscribeCheckpointsWithFilter(ctx context.Context, service v2beta2.SubscriptionServiceClient) {
+func exampleSubscribeCheckpointsWithFilter(ctx context.Context, service v2.SubscriptionServiceClient) {
 	fmt.Println("\n3. Subscribing to checkpoints with filtering...")
 
 	streamCtx, cancel := context.WithTimeout(ctx, time.Minute*2)
 	defer cancel()
 
-	req := &v2beta2.SubscribeCheckpointsRequest{
+	req := &v2.SubscribeCheckpointsRequest{
 		// Add any filtering options if supported by the service
 		// This would depend on the specific proto definition
 	}

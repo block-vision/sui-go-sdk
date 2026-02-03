@@ -36,7 +36,15 @@ func CreateGrpcClient(config *DefaultConfig) *grpcconn.SuiGrpcClient {
 
 	if config.UseTLS {
 		opts = append(opts, grpcconn.WithDialOptions(
-			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{}))))
+			grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{
+				InsecureSkipVerify: true,
+			})),
+			grpc.WithMaxMsgSize(20*1024*1024), // 20MB
+		))
+	} else {
+		opts = append(opts, grpcconn.WithDialOptions(
+			grpc.WithMaxMsgSize(20*1024*1024), // 20MB
+		))
 	}
 
 	return grpcconn.NewSuiGrpcClientWithAuth(config.Target, config.Token, opts...)

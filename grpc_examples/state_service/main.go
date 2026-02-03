@@ -6,11 +6,11 @@ import (
 	"log"
 
 	"github.com/block-vision/sui-go-sdk/grpc_examples/utils"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
-	fmt.Println("=== Sui gRPC Live Data Service Examples ===")
+	fmt.Println("=== Sui gRPC State Service Examples ===")
 
 	// Create authenticated gRPC client using common utility
 	client := utils.CreateGrpcClientWithDefaults()
@@ -18,37 +18,33 @@ func main() {
 
 	ctx := context.Background()
 
-	// Get live data service
-	liveDataService, err := client.LiveDataService(ctx)
+	// Get state service
+	stateService, err := client.StateService(ctx)
 	if err != nil {
-		log.Fatalf("Failed to get live data service: %v", err)
+		log.Fatalf("Failed to get state service: %v", err)
 	}
 
 	// Run all examples
 	fmt.Println("\n1. Listing dynamic fields...")
-	exampleListDynamicFields(ctx, liveDataService)
+	exampleListDynamicFields(ctx, stateService)
 
 	fmt.Println("\n2. Listing owned objects...")
-	exampleListOwnedObjects(ctx, liveDataService)
+	exampleListOwnedObjects(ctx, stateService)
 
 	fmt.Println("\n3. Getting coin info...")
-	exampleGetCoinInfo(ctx, liveDataService)
+	exampleGetCoinInfo(ctx, stateService)
 
 	fmt.Println("\n4. Getting balance...")
-	exampleGetBalance(ctx, liveDataService)
+	exampleGetBalance(ctx, stateService)
 
 	fmt.Println("\n5. Listing balances...")
-	exampleListBalances(ctx, liveDataService)
-
-	fmt.Println("\n6. Simulating transaction...")
-	exampleSimulateTransaction(ctx, liveDataService)
+	exampleListBalances(ctx, stateService)
 }
 
 // ListDynamicFields - List dynamic fields for an object
-func exampleListDynamicFields(ctx context.Context, service v2beta2.LiveDataServiceClient) {
+func exampleListDynamicFields(ctx context.Context, service v2.StateServiceClient) {
 	parent := "0x266f5a401df5fa40fc5ab2a1a8e74ac41fe5fb241e106eb608bf37c732c17e0e"
-	req := &v2beta2.ListDynamicFieldsRequest{
-		// Add proper request fields based on actual proto definition
+	req := &v2.ListDynamicFieldsRequest{
 		Parent: &parent,
 	}
 
@@ -62,9 +58,9 @@ func exampleListDynamicFields(ctx context.Context, service v2beta2.LiveDataServi
 }
 
 // ListOwnedObjects - List objects owned by an address
-func exampleListOwnedObjects(ctx context.Context, service v2beta2.LiveDataServiceClient) {
+func exampleListOwnedObjects(ctx context.Context, service v2.StateServiceClient) {
 	owner := "0xac5bceec1b789ff840d7d4e6ce4ce61c90d190a7f8c4f4ddf0bff6ee2413c33c"
-	req := &v2beta2.ListOwnedObjectsRequest{
+	req := &v2.ListOwnedObjectsRequest{
 		Owner: &owner,
 	}
 
@@ -78,9 +74,9 @@ func exampleListOwnedObjects(ctx context.Context, service v2beta2.LiveDataServic
 }
 
 // GetCoinInfo - Get coin information
-func exampleGetCoinInfo(ctx context.Context, service v2beta2.LiveDataServiceClient) {
+func exampleGetCoinInfo(ctx context.Context, service v2.StateServiceClient) {
 	coinType := "0x2::sui::SUI"
-	req := &v2beta2.GetCoinInfoRequest{
+	req := &v2.GetCoinInfoRequest{
 		CoinType: &coinType,
 	}
 
@@ -94,10 +90,10 @@ func exampleGetCoinInfo(ctx context.Context, service v2beta2.LiveDataServiceClie
 }
 
 // GetBalance - Get balance for an address and coin type
-func exampleGetBalance(ctx context.Context, service v2beta2.LiveDataServiceClient) {
+func exampleGetBalance(ctx context.Context, service v2.StateServiceClient) {
 	owner := "0xac5bceec1b789ff840d7d4e6ce4ce61c90d190a7f8c4f4ddf0bff6ee2413c33c"
 	coinType := "0x2::sui::SUI"
-	req := &v2beta2.GetBalanceRequest{
+	req := &v2.GetBalanceRequest{
 		Owner:    &owner,
 		CoinType: &coinType,
 	}
@@ -112,9 +108,9 @@ func exampleGetBalance(ctx context.Context, service v2beta2.LiveDataServiceClien
 }
 
 // ListBalances - List all balances for an address
-func exampleListBalances(ctx context.Context, service v2beta2.LiveDataServiceClient) {
+func exampleListBalances(ctx context.Context, service v2.StateServiceClient) {
 	owner := "0xac5bceec1b789ff840d7d4e6ce4ce61c90d190a7f8c4f4ddf0bff6ee2413c33c"
-	req := &v2beta2.ListBalancesRequest{
+	req := &v2.ListBalancesRequest{
 		Owner: &owner,
 	}
 
@@ -125,21 +121,4 @@ func exampleListBalances(ctx context.Context, service v2beta2.LiveDataServiceCli
 	}
 
 	fmt.Printf("✅ Balances response: %v\n", resp)
-}
-
-// SimulateTransaction - Simulate a transaction
-func exampleSimulateTransaction(ctx context.Context, service v2beta2.LiveDataServiceClient) {
-	req := &v2beta2.SimulateTransactionRequest{
-		Transaction: &v2beta2.Transaction{
-			// Transaction data would go here
-		},
-	}
-
-	resp, err := service.SimulateTransaction(ctx, req)
-	if err != nil {
-		fmt.Printf("❌ SimulateTransaction failed: %v\n", err)
-		return
-	}
-
-	fmt.Printf("✅ Simulation response: %v\n", resp)
 }

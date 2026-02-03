@@ -32,9 +32,9 @@ func main() {
 	fmt.Println("📚 Available Examples:")
 	fmt.Println("   1. Ledger Service      - go run grpc_examples/ledger_service/main.go")
 	fmt.Println("   2. Name Service        - go run grpc_examples/name_service/main.go")
-	fmt.Println("   3. Transaction Exec    - go run grpc_examples/transaction_execution_service/main.go")
-	fmt.Println("   4. Subscription        - go run grpc_examples/subscription_service/main.go")
-	fmt.Println("   5. Live Data           - go run grpc_examples/live_data_service/main.go")
+	fmt.Println("   3. State Service       - go run grpc_examples/state_service/main.go")
+	fmt.Println("   4. Transaction Exec    - go run grpc_examples/transaction_execution_service/main.go")
+	fmt.Println("   5. Subscription        - go run grpc_examples/subscription_service/main.go")
 	fmt.Println("   6. Move Package        - go run grpc_examples/move_package_service/main.go")
 	fmt.Println("   7. Signature Verify    - go run grpc_examples/signature_verification_service/main.go")
 	fmt.Println()
@@ -48,7 +48,7 @@ func testAllServices(ctx context.Context, client *grpcconn.SuiGrpcClient) {
 	}{
 		{"LedgerService", testLedgerService},
 		{"NameService", testNameService},
-		{"LiveDataService", testLiveDataService},
+		{"StateService", testStateService},
 		{"MovePackageService", testMovePackageService},
 		{"SubscriptionService", testSubscriptionService},
 		{"TransactionExecutionService", testTransactionExecutionService},
@@ -76,8 +76,8 @@ func testNameService(ctx context.Context, client *grpcconn.SuiGrpcClient) error 
 	return err
 }
 
-func testLiveDataService(ctx context.Context, client *grpcconn.SuiGrpcClient) error {
-	_, err := client.LiveDataService(ctx)
+func testStateService(ctx context.Context, client *grpcconn.SuiGrpcClient) error {
+	_, err := client.StateService(ctx)
 	return err
 }
 
