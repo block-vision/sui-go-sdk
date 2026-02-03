@@ -10,9 +10,9 @@
 
 ## Overview
 
-The Sui-Go-SDK aims to offer access to all Sui RPC methods with Golang and also offers some
-additional features that make the integration easier.
-Powered by [SuiVision](https://suivision.xyz/) team.
+The Sui-Go-SDK aims to offer access to all Sui RPC methods with Golang and also offers some additional features that make the integration easier. Powered by [SuiVision](https://suivision.xyz/) team.
+
+> Check this [doc](https://docs.blockvision.org/reference/grpc-for-sui) to get your API Key and tutorials for Sui gRPC integration.
 
 ### Features
 
