@@ -15,9 +15,7 @@ import (
 
 func NormalizeSuiAddress(input string) models.SuiAddress {
 	addr := strings.ToLower(string(input))
-	if strings.HasPrefix(addr, "0x") {
-		addr = addr[2:]
-	}
+	addr = strings.TrimPrefix(addr, "0x")
 
 	addr = strings.Repeat("0", 64-len(addr)) + addr
 	return models.SuiAddress("0x" + addr)
