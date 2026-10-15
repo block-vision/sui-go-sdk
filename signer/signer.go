@@ -10,9 +10,9 @@ import (
 
 	"github.com/block-vision/sui-go-sdk/common/keypair"
 	"github.com/block-vision/sui-go-sdk/constant"
+	"github.com/block-vision/sui-go-sdk/cryptography/scheme"
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
-	"github.com/btcsuite/btcutil/bech32"
 	"github.com/cosmos/go-bip39"
 	"golang.org/x/crypto/blake2b"
 )
@@ -47,25 +47,17 @@ func NewSigner(seed []byte) *Signer {
 	}
 }
 
+// NewSignerWithSecretKey creates an Ed25519 signer from a Bech32 "suiprivkey…" string.
+// It rejects Secp256k1/Secp256r1 keys instead of misreading them as Ed25519 seeds; use
+// NewKeypairFromSuiPrivateKey to accept any supported scheme.
 func NewSignerWithSecretKey(secret string) (*Signer, error) {
-	hrp, data, err := bech32.Decode(secret)
+	keyScheme, privKey, err := DecodeSuiPrivateKey(secret)
 	if err != nil {
 		return nil, err
 	}
-	if hrp != "suiprivkey" {
-		return nil, fmt.Errorf("Invalid bech32 prefix: %s", hrp)
+	if keyScheme != scheme.ED25519 {
+		return nil, fmt.Errorf("%s private key is not an Ed25519 key, use NewKeypairFromSuiPrivateKey", keyScheme)
 	}
-
-	// bech32 5bit to 8bit
-	decoded, err := bech32.ConvertBits(data, 5, 8, false)
-	if err != nil {
-		return nil, err
-	}
-	if len(decoded) < 2 {
-		return nil, fmt.Errorf("Invalid bech32 data length: %d", len(decoded))
-	}
-
-	privKey := decoded[1:]
 	return NewSigner(privKey), nil
 }
 
@@ -81,9 +73,15 @@ func NewSignertWithMnemonic(mnemonic string) (*Signer, error) {
 	return NewSigner(key.Key), nil
 }
 
-type SignedMessageSerializedSig struct {
-	Message   string `json:"message"`
-	Signature string `json:"signature"`
+func (s *Signer) GetAddress() string { return s.Address }
+
+func (s *Signer) PublicKeyBytes() []byte { return bytes.Clone(s.PubKey) }
+
+func (s *Signer) SignatureScheme() scheme.SignatureScheme { return scheme.ED25519 }
+
+// ExportSuiPrivateKey returns the key as a Bech32 "suiprivkey…" string.
+func (s *Signer) ExportSuiPrivateKey() (string, error) {
+	return EncodeSuiPrivateKey(scheme.ED25519, s.PriKey.Seed())
 }
 
 func (s *Signer) SignMessage(data string, scope constant.IntentScope) (*SignedMessageSerializedSig, error) {
@@ -103,8 +101,9 @@ func (s *Signer) SignMessage(data string, scope constant.IntentScope) (*SignedMe
 	return ret, nil
 }
 
+// SignTransaction signs base64 TransactionData BCS bytes with the TransactionData intent.
 func (s *Signer) SignTransaction(b64TxBytes string) (*models.SignedTransactionSerializedSig, error) {
-	result, err := s.SignMessage(b64TxBytes, constant.PersonalMessageIntentScope)
+	result, err := s.SignMessage(b64TxBytes, constant.TransactionDataIntentScope)
 	if err != nil {
 		return nil, err
 	}
@@ -115,6 +114,8 @@ func (s *Signer) SignTransaction(b64TxBytes string) (*models.SignedTransactionSe
 	}, nil
 }
 
+// Deprecated: the signature is over the raw message rather than its BCS encoding, so Sui
+// nodes and wallets do not accept it as a personal message signature. Use SignPersonalMessageV1.
 func (s *Signer) SignPersonalMessage(message string) (*SignedMessageSerializedSig, error) {
 	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
 	return s.SignMessage(b64Message, constant.PersonalMessageIntentScope)

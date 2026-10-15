@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"os"
 	"testing"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
+	"github.com/block-vision/sui-go-sdk/signer"
 )
 
 // mainnetChain is the mainnet chain identifier (genesis checkpoint digest).
@@ -290,4 +292,91 @@ func addr2() []byte {
 	b := make([]byte, 32)
 	b[31] = 2
 	return b
+}
+
+func TestKeypairSignersSignTransactions(t *testing.T) {
+	one := append(make([]byte, 31), 1)
+	two := append(make([]byte, 31), 2)
+	sender, err := signer.NewSecp256k1Signer(one)
+	require.NoError(t, err)
+	sponsor, err := signer.NewSecp256r1Signer(two)
+	require.NoError(t, err)
+
+	tx := NewTransaction().SetKeypairSigner(sender).SetKeypairSponsoredSigner(sponsor)
+	require.Nil(t, tx.Signer)
+	require.Nil(t, tx.SponsoredSigner)
+	tx.SetGasOwner(models.SuiAddress(sponsor.GetAddress())).SetGasPrice(1000).SetGasBudget(10_000_000)
+	ref, err := NewSuiObjectRef("0x5", "7", "1thX6LZfHDZZGkq4tt1q2yRAPVfCTpX99XN4RHFsxM")
+	require.NoError(t, err)
+	tx.SetGasPayment([]SuiObjectRef{*ref})
+	tx.TransferObjects([]Argument{tx.Gas()}, tx.Pure("0x9"))
+
+	req, err := tx.ToSuiExecuteTransactionBlockRequest(context.Background(), models.SuiTransactionBlockOptions{}, "")
+	require.NoError(t, err)
+	require.Len(t, req.Signature, 2)
+
+	var td TransactionData
+	raw, err := mystenbcs.FromBase64(req.TxBytes)
+	require.NoError(t, err)
+	_, err = mystenbcs.Unmarshal(raw, &td)
+	require.NoError(t, err)
+	require.Equal(t, models.SuiAddress(sender.GetAddress()), ConvertSuiAddressBytesToString(*td.V1.Sender))
+
+	for i, want := range []string{sponsor.GetAddress(), sender.GetAddress()} {
+		who, pass, err := models.VerifyTransaction(req.TxBytes, req.Signature[i])
+		require.NoError(t, err)
+		require.True(t, pass)
+		require.Equal(t, want, who)
+	}
+}
+
+func TestSignerSettersReplaceEachOther(t *testing.T) {
+	k1, err := signer.NewSecp256k1Signer(append(make([]byte, 31), 1))
+	require.NoError(t, err)
+	ed := signer.NewSigner(make([]byte, 32))
+
+	tx := NewTransaction().SetKeypairSigner(k1)
+	require.Equal(t, signer.Keypair(k1), tx.activeSigner())
+
+	tx.SetSigner(ed)
+	require.Nil(t, tx.KeypairSigner)
+	require.Equal(t, signer.Keypair(ed), tx.activeSigner())
+
+	// an Ed25519 *Signer passed as a Keypair lands in the legacy field
+	tx.SetKeypairSigner(ed)
+	require.Equal(t, ed, tx.Signer)
+	require.Nil(t, tx.KeypairSigner)
+
+	require.Nil(t, NewTransaction().activeSigner())
+	require.Nil(t, NewTransaction().activeSponsoredSigner())
+}
+
+// A nil signer pointer (e.g. from a constructor whose error was ignored) must read as
+// "not set" and fail with ErrSignerNotSet rather than panic.
+func TestNilKeypairPointerIsNotSet(t *testing.T) {
+	var k1 *signer.Secp256k1Signer
+	var r1 *signer.Secp256r1Signer
+	var ed *signer.Signer
+
+	for _, k := range []signer.Keypair{k1, r1, ed, nil} {
+		tx := NewTransaction().SetKeypairSigner(k).SetKeypairSponsoredSigner(k)
+		require.Nil(t, tx.activeSigner())
+		require.Nil(t, tx.activeSponsoredSigner())
+		_, err := tx.ToSuiExecuteTransactionBlockRequest(context.Background(), models.SuiTransactionBlockOptions{}, "")
+		require.ErrorIs(t, err, ErrSignerNotSet)
+		_, err = tx.BuildBCSBytes(context.Background())
+		require.ErrorIs(t, err, ErrSignerNotSet)
+	}
+
+	// so must a nil pointer assigned to the field directly
+	direct := NewTransaction()
+	direct.KeypairSigner, direct.KeypairSponsoredSigner = k1, r1
+	_, err := direct.ToSuiExecuteTransactionBlockRequest(context.Background(), models.SuiTransactionBlockOptions{}, "")
+	require.ErrorIs(t, err, ErrSignerNotSet)
+
+	// setting a nil keypair also clears a previously set one
+	real, err := signer.NewSecp256k1Signer(append(make([]byte, 31), 1))
+	require.NoError(t, err)
+	tx := NewTransaction().SetKeypairSigner(real).SetKeypairSigner(k1)
+	require.Nil(t, tx.activeSigner())
 }
