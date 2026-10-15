@@ -12,6 +12,7 @@ import (
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 )
 
+// Deprecated: use ParseZkLoginSignature.
 type SignaturePubkeyPair struct {
 	SerializedSignature string
 	SignatureScheme     scheme.SignatureScheme
@@ -20,15 +21,20 @@ type SignaturePubkeyPair struct {
 	PubKey              []byte
 }
 
+// Deprecated: only used by deprecated GraphQL verification; use the v2 gRPC client's
+// VerifyZkLoginSignature.
 type ZkLoginPublicIdentifierOptions struct {
 	Client *graphql.Client
 }
 
+// Deprecated: use ComputeZkLoginAddress to derive the address and the v2 gRPC client's
+// VerifyZkLoginSignature to verify a signature.
 type ZkLoginPublicIdentifier struct {
 	data    []byte
 	options *ZkLoginPublicIdentifierOptions
 }
 
+// Deprecated: it panics. Use ComputeZkLoginAddress or ParseZkLoginSignature.
 func NewZkLoginPublicIdentifier(data []byte, options *ZkLoginPublicIdentifierOptions) *ZkLoginPublicIdentifier {
 	panic("not implemented")
 }
@@ -40,6 +46,7 @@ func (p *ZkLoginPublicIdentifier) toRawBytes() []byte {
 	return p.data
 }
 
+// Deprecated: it panics. Use ComputeZkLoginAddress or ParsedZkLoginSignature.Address.
 func (p *ZkLoginPublicIdentifier) ToSuiAddress() string {
 	panic("not implemented")
 
@@ -52,6 +59,8 @@ func (p *ZkLoginPublicIdentifier) ToSuiAddress() string {
 	// return "0x" + mystenbcs.ToHex(mystenbcs.Blake2b(p.toSuiBytes(), 32))[:40]
 }
 
+// Deprecated: it panics. Use the v2 gRPC client's VerifyZkLoginSignature with
+// IntentScope PersonalMessage.
 func (pk *ZkLoginPublicIdentifier) VerifyPersonalMessage(message []byte, signature []byte, client *graphql.Client) (bool, error) {
 	// Parse the serialized zkLogin signature
 	parsedSignature, err := ParseSerializedZkLoginSignature(signature)
@@ -82,6 +91,7 @@ func toZkLoginPublicIdentifier(addressSeed *big.Int, iss string, options *ZkLogi
 	return NewZkLoginPublicIdentifier(tmp, options)
 }
 
+// Deprecated: see GraphqlVerifyZkLoginSignature.
 type VerifyZkloginSignatureResponse struct {
 	VerifyZkloginSignature struct {
 		Success bool     `json:"success"`
@@ -89,6 +99,8 @@ type VerifyZkloginSignatureResponse struct {
 	} `json:"verifyZkloginSignature"`
 }
 
+// Deprecated: the Sui GraphQL schema renamed the query to verifyZkLoginSignature, so this
+// request fails. Use the v2 gRPC client's VerifyZkLoginSignature.
 func GraphqlVerifyZkLoginSignature(address string, bytes string, signature string, intentScope string, client *graphql.Client) (bool, error) {
 	// Define the GraphQL request
 	req := graphql.NewRequest(`
@@ -125,6 +137,8 @@ func GraphqlVerifyZkLoginSignature(address string, bytes string, signature strin
 }
 
 // Function to parse the serialized ZkLoginSignature
+//
+// Deprecated: it cannot decode on-chain zkLogin signatures. Use ParseZkLoginSignature.
 func ParseSerializedZkLoginSignature(signature interface{}) (*SignaturePubkeyPair, error) {
 	var bytes []byte
 	var err error

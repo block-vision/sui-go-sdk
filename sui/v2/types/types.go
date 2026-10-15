@@ -1081,7 +1081,7 @@ const (
 
 // VerifyZkLoginSignatureOptions is the request for VerifyZkLoginSignature.
 type VerifyZkLoginSignatureOptions struct {
-	// Base64-encoded message bytes.
+	// Base64-encoded message bytes: the raw personal message, or the TransactionData BCS.
 	Bytes string `json:"bytes"`
 	// Base64-encoded signature bytes.
 	Signature   string             `json:"signature"`

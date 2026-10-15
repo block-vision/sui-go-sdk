@@ -101,3 +101,14 @@ func TestConvertGrpcBalance(t *testing.T) {
 		t.Fatalf("got %#v, want %#v", got, want)
 	}
 }
+
+func TestSignatureMessageValue(t *testing.T) {
+	personal, err := signatureMessageValue(ZkLoginIntentScopePersonalMessage, []byte("hi"))
+	if err != nil || !reflect.DeepEqual(personal, []byte{0x02, 'h', 'i'}) {
+		t.Fatalf("personal message must be BCS vector<u8>: %x %v", personal, err)
+	}
+	tx, err := signatureMessageValue(ZkLoginIntentScopeTransactionData, []byte{0x00, 0x01})
+	if err != nil || !reflect.DeepEqual(tx, []byte{0x00, 0x01}) {
+		t.Fatalf("transaction data must be sent as is: %x %v", tx, err)
+	}
+}

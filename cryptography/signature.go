@@ -9,6 +9,8 @@ import (
 	"github.com/block-vision/sui-go-sdk/zklogin"
 )
 
+// Deprecated: use models.FromSerializedSignature (Ed25519, Secp256k1, Secp256r1) or
+// zklogin.ParseZkLoginSignature.
 type SignaturePubkeyPair struct {
 	SignatureScheme scheme.SignatureScheme
 	Signature       []byte

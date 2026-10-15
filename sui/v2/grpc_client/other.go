@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/block-vision/sui-go-sdk/mystenbcs"
 	v2proto "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 	. "github.com/block-vision/sui-go-sdk/sui/v2/types"
 	"google.golang.org/grpc/codes"
@@ -108,6 +109,9 @@ func (c *Client) VerifyZkLoginSignature(ctx context.Context, options VerifyZkLog
 	}
 
 	intentScope := string(options.IntentScope)
+	if msgBytes, err = signatureMessageValue(options.IntentScope, msgBytes); err != nil {
+		return nil, err
+	}
 
 	resp, err := sigService.VerifySignature(ctx, &v2proto.VerifySignatureRequest{
 		Message: &v2proto.Bcs{
@@ -133,6 +137,16 @@ func (c *Client) VerifyZkLoginSignature(ctx context.Context, options VerifyZkLog
 		Success: resp.GetIsValid(),
 		Errors:  errs,
 	}, nil
+}
+
+// signatureMessageValue returns the Bcs value VerifySignature expects for the message: a
+// PersonalMessage is sent as its BCS encoding (vector<u8>), as the TypeScript SDK does;
+// TransactionData bytes are already BCS.
+func signatureMessageValue(scope ZkLoginIntentScope, message []byte) ([]byte, error) {
+	if scope == ZkLoginIntentScopePersonalMessage {
+		return mystenbcs.Marshal(message)
+	}
+	return message, nil
 }
 
 // DefaultNameServiceName resolves the primary .sui name for an address.
