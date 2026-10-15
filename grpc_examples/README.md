@@ -164,7 +164,7 @@ The Subscription Service demonstrates gRPC streaming:
 ## Related Documentation
 
 - [gRPC Client SDK](../common/grpcconn/README.md)
-- [Protocol Buffers](../pb/sui/rpc/v2beta2/)
+- [Protocol Buffers](../pb/sui/rpc/v2/)
 - [Sui gRPC API Documentation](https://docs.sui.io/)
 
 ## Contributing

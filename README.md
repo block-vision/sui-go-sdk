@@ -85,7 +85,7 @@ import (
 
 	"github.com/block-vision/sui-go-sdk/common/grpcconn"
 	"github.com/block-vision/sui-go-sdk/constant"
-	"github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2beta2"
+	v2 "github.com/block-vision/sui-go-sdk/pb/sui/rpc/v2"
 )
 
 func main() {
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	// Example: Get service info
-	info, err := ledgerService.GetServiceInfo(ctx, &v2beta2.GetServiceInfoRequest{})
+	info, err := ledgerService.GetServiceInfo(ctx, &v2.GetServiceInfoRequest{})
 	if err != nil {
 		log.Fatalf("Failed to get service info: %v", err)
 	}
