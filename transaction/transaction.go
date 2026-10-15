@@ -214,15 +214,64 @@ func (tx *Transaction) TransferObjects(objects []Argument, address Argument) Arg
 	}))
 }
 
+// MakeMoveVec builds a vector from elements. typeValue is the element type (e.g. "u64",
+// "0x2::sui::SUI"); pass nil when the elements are objects. It panics on an invalid type.
 func (tx *Transaction) MakeMoveVec(typeValue *string, elements []Argument) Argument {
+	var typeTag *TypeTag
+	if typeValue != nil {
+		var err error
+		typeTag, err = ParseTypeTag(*typeValue)
+		if err != nil {
+			panic(err)
+		}
+	}
 	return tx.Add(makeMoveVec(MakeMoveVec{
-		Type:     typeValue,
+		Type:     typeTag,
 		Elements: convertArgumentsToArgumentPtrs(elements),
 	}))
 }
 
+// FundsWithdrawal adds an input reserving amount of coinType (e.g. "0x2::sui::SUI")
+// from an address balance; redeem it with 0x2::balance::redeem_funds or
+// 0x2::coin::redeem_funds. It panics on an invalid coin type.
+func (tx *Transaction) FundsWithdrawal(amount uint64, coinType string, from WithdrawFrom) Argument {
+	typeTag, err := ParseTypeTag(coinType)
+	if err != nil {
+		panic(err)
+	}
+	return tx.Data.V1.AddInput(CallArg{FundsWithdrawal: &FundsWithdrawalArg{
+		Reservation:  &Reservation{MaxAmountU64: &amount},
+		TypeArg:      &WithdrawalTypeArg{Balance: typeTag},
+		WithdrawFrom: &from,
+	}})
+}
+
+// WithdrawFromSender withdraws from the transaction sender's address balance.
+func WithdrawFromSender() WithdrawFrom { return WithdrawFrom{Sender: struct{}{}} }
+
+// WithdrawFromSponsor withdraws from the gas sponsor's address balance.
+func WithdrawFromSponsor() WithdrawFrom { return WithdrawFrom{Sponsor: struct{}{}} }
+
+// WithdrawFromSenderAllowance withdraws from funder's address balance under the
+// allowance object granted to the sender.
+func WithdrawFromSenderAllowance(funder, allowance models.SuiAddress) (WithdrawFrom, error) {
+	funderBytes, err := ConvertSuiAddressStringToBytes(funder)
+	if err != nil {
+		return WithdrawFrom{}, err
+	}
+	allowanceBytes, err := ConvertSuiAddressStringToBytes(allowance)
+	if err != nil {
+		return WithdrawFrom{}, err
+	}
+	return WithdrawFrom{SenderAllowance: &SenderAllowance{Funder: *funderBytes, Allowance: *allowanceBytes}}, nil
+}
+
 // Object
 // - input: string | CallArg | Argument
+//
+// A string object id is not resolved to an object reference: the transaction then
+// fails to build with ErrUnresolvedInput. Pass a CallArg with a full ObjectArg
+// (ImmOrOwnedObject / SharedObject / Receiving) instead.
 func (tx *Transaction) Object(input any) Argument {
 	// string
 	if s, ok := input.(string); ok {
@@ -454,6 +503,12 @@ func (tx *Transaction) build(onlyTransactionKind bool) (string, error) {
 	}
 	if !tx.Data.V1.GasData.IsAllSet() {
 		return "", ErrGasDataNotAllSet
+	}
+	if len(*tx.Data.V1.GasData.Payment) == 0 {
+		exp := tx.Data.V1.Expiration
+		if exp == nil || (exp.ValidDuring == nil && exp.Validity == nil) {
+			return "", ErrAddressBalanceGasNeedsValidDuring
+		}
 	}
 
 	bcsEncodedMsg, err := tx.Data.Marshal()

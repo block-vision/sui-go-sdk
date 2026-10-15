@@ -152,7 +152,10 @@ func (e *Encoder) encodeEnum(v reflect.Value) error {
 				return err
 			}
 			if fieldKind == reflect.Pointer {
-				return e.encode(reflect.Indirect(field))
+				// pass the pointer itself: a variant whose payload is an enum
+				// declared on a pointer receiver (TypeTag inside TypeTag::Vector)
+				// would otherwise lose its enum encoding once dereferenced.
+				return e.encode(field)
 			} else {
 				// the variant index is already written, only the value the
 				// interface holds is left. an empty variant holds an empty
@@ -234,7 +237,13 @@ func (e *Encoder) encodeStruct(v reflect.Value) error {
 				if _, err := e.w.Write([]byte{1}); err != nil {
 					return err
 				}
-				if err := e.encode(field.Elem()); err != nil {
+				// keep the pointer so an enum declared on a pointer receiver
+				// (Option<TypeTag>) is still encoded as an enum.
+				inner := field
+				if field.Kind() == reflect.Interface {
+					inner = field.Elem()
+				}
+				if err := e.encode(inner); err != nil {
 					return err
 				}
 			}

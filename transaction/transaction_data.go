@@ -2,6 +2,8 @@ package transaction
 
 import (
 	"bytes"
+	"fmt"
+	"io"
 
 	"github.com/block-vision/sui-go-sdk/models"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
@@ -14,6 +16,17 @@ type TransactionData struct {
 func (*TransactionData) IsBcsEnum() {}
 
 func (td *TransactionData) Marshal() ([]byte, error) {
+	if td.V1 != nil {
+		if err := td.V1.Kind.checkResolved(); err != nil {
+			return nil, err
+		}
+		if td.V1.Expiration == nil {
+			v1 := *td.V1
+			v1.Expiration = &TransactionExpiration{None: struct{}{}}
+			td = &TransactionData{V1: &v1}
+		}
+	}
+
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
 	err := bcsEncoder.Encode(td)
@@ -26,10 +39,11 @@ func (td *TransactionData) Marshal() ([]byte, error) {
 
 // TransactionDataV1 https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1625
 type TransactionDataV1 struct {
-	Kind       *TransactionKind
-	Sender     *models.SuiAddressBytes
-	GasData    *GasData
-	Expiration *TransactionExpiration `bcs:"optional"`
+	Kind    *TransactionKind
+	Sender  *models.SuiAddressBytes
+	GasData *GasData
+	// Not an Option on chain; a nil Expiration is encoded as TransactionExpiration::None.
+	Expiration *TransactionExpiration
 }
 
 func (td *TransactionDataV1) AddCommand(command Command) (index uint16) {
@@ -101,15 +115,51 @@ func (gd *GasData) IsAllSet() bool {
 	return true
 }
 
-// TransactionExpiration https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L1608
+// TransactionExpiration https://github.com/MystenLabs/sui/blob/mainnet-v1.81.1/crates/sui-types/src/transaction.rs
 // - None
 // - Epoch
+// - ValidDuring
+// - Validity
 type TransactionExpiration struct {
-	None  any
-	Epoch *uint64
+	None        any
+	Epoch       *uint64
+	ValidDuring *ValidDuring
+	Validity    *Validity
 }
 
 func (*TransactionExpiration) IsBcsEnum() {}
+
+// ValidDuring bounds the epochs and timestamps (Unix milliseconds) a transaction may
+// execute in. Transactions that pay gas from an address balance (empty gas payment)
+// must use it, with a nonce to keep otherwise identical transactions distinct.
+type ValidDuring struct {
+	MinEpoch     *uint64 `bcs:"optional"`
+	MaxEpoch     *uint64 `bcs:"optional"`
+	MinTimestamp *uint64 `bcs:"optional"`
+	MaxTimestamp *uint64 `bcs:"optional"`
+	// Chain is the chain identifier (genesis checkpoint digest), 32 bytes.
+	Chain models.ObjectDigestBytes
+	Nonce uint32
+}
+
+// Validity is ValidDuring plus an optional restriction on which validators may
+// propose the transaction in consensus.
+type Validity struct {
+	MinEpoch         *uint64 `bcs:"optional"`
+	MaxEpoch         *uint64 `bcs:"optional"`
+	MinTimestamp     *uint64 `bcs:"optional"`
+	MaxTimestamp     *uint64 `bcs:"optional"`
+	Chain            models.ObjectDigestBytes
+	Nonce            uint32
+	AllowedProposers *AllowedProposers `bcs:"optional"`
+}
+
+// AllowedProposers holds committee indices, strictly increasing and non-empty,
+// into Epoch's committee.
+type AllowedProposers struct {
+	Epoch     uint64
+	Proposers []uint32
+}
 
 // ProgrammableTransaction https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L702
 type ProgrammableTransaction struct {
@@ -117,21 +167,56 @@ type ProgrammableTransaction struct {
 	Commands []*Command
 }
 
-// TransactionKind https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L303
-// - ProgrammableTransaction
-// - ChangeEpoch
-// - Genesis
-// - ConsensusCommitPrologue
+// TransactionKind https://github.com/MystenLabs/sui/blob/mainnet-v1.81.1/crates/sui-types/src/transaction.rs
+// Field order is the variant index. Only the programmable kinds can be encoded or
+// decoded; the other system kinds are placeholders that fail with
+// ErrUnsupportedTransactionKind instead of decoding into the wrong layout.
 type TransactionKind struct {
-	ProgrammableTransaction *ProgrammableTransaction
-	ChangeEpoch             any
-	Genesis                 any
-	ConsensusCommitPrologue any
+	ProgrammableTransaction       *ProgrammableTransaction
+	ChangeEpoch                   *UnsupportedTransactionKind
+	Genesis                       *UnsupportedTransactionKind
+	ConsensusCommitPrologue       *UnsupportedTransactionKind
+	AuthenticatorStateUpdate      *UnsupportedTransactionKind
+	EndOfEpochTransaction         *UnsupportedTransactionKind
+	RandomnessStateUpdate         *UnsupportedTransactionKind
+	ConsensusCommitPrologueV2     *UnsupportedTransactionKind
+	ConsensusCommitPrologueV3     *UnsupportedTransactionKind
+	ConsensusCommitPrologueV4     *UnsupportedTransactionKind
+	ProgrammableSystemTransaction *ProgrammableTransaction
 }
 
 func (*TransactionKind) IsBcsEnum() {}
 
+// checkResolved rejects SDK-only placeholder inputs, which have no on-chain encoding.
+func (tk *TransactionKind) checkResolved() error {
+	if tk == nil || tk.ProgrammableTransaction == nil {
+		return nil
+	}
+	for i, input := range tk.ProgrammableTransaction.Inputs {
+		if input != nil && (input.UnresolvedPure != nil || input.UnresolvedObject != nil) {
+			return fmt.Errorf("input %d: %w", i, ErrUnresolvedInput)
+		}
+	}
+	return nil
+}
+
+// UnsupportedTransactionKind stands in for system transaction kinds whose payload
+// this SDK does not model.
+type UnsupportedTransactionKind struct{}
+
+func (*UnsupportedTransactionKind) MarshalBCS() ([]byte, error) {
+	return nil, ErrUnsupportedTransactionKind
+}
+
+func (*UnsupportedTransactionKind) UnmarshalBCS(io.Reader) (int, error) {
+	return 0, ErrUnsupportedTransactionKind
+}
+
 func (tk *TransactionKind) Marshal() ([]byte, error) {
+	if err := tk.checkResolved(); err != nil {
+		return nil, err
+	}
+
 	bcsEncodedMsg := bytes.Buffer{}
 	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
 	err := bcsEncoder.Encode(tk)
@@ -142,16 +227,20 @@ func (tk *TransactionKind) Marshal() ([]byte, error) {
 	return bcsEncodedMsg.Bytes(), nil
 }
 
-// CallArg https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L80
+// CallArg https://github.com/MystenLabs/sui/blob/mainnet-v1.81.1/crates/sui-types/src/transaction.rs
 // - Pure
 // - Object
-// - UnresolvedPure
-// - UnresolvedObject
+// - FundsWithdrawal
+//
+// UnresolvedPure and UnresolvedObject are SDK-only placeholders, not on-chain variants:
+// they must come after the on-chain ones and are never encoded, so building a
+// transaction that still holds one fails with ErrUnresolvedInput.
 type CallArg struct {
 	Pure             *Pure
 	Object           *ObjectArg
-	UnresolvedPure   *UnresolvedPure
-	UnresolvedObject *UnresolvedObject
+	FundsWithdrawal  *FundsWithdrawalArg
+	UnresolvedPure   *UnresolvedPure   `bcs:"-"`
+	UnresolvedObject *UnresolvedObject `bcs:"-"`
 }
 
 func (*CallArg) IsBcsEnum() {}
@@ -169,6 +258,49 @@ type UnresolvedObject struct {
 	// Version
 	// Digest
 	// InitialSharedVersion
+}
+
+// FundsWithdrawalArg reserves funds from an address balance; the PTB redeems it
+// with 0x2::balance::redeem_funds or 0x2::coin::redeem_funds.
+type FundsWithdrawalArg struct {
+	Reservation  *Reservation
+	TypeArg      *WithdrawalTypeArg
+	WithdrawFrom *WithdrawFrom
+}
+
+// Reservation
+// - MaxAmountU64
+type Reservation struct {
+	MaxAmountU64 *uint64
+}
+
+func (*Reservation) IsBcsEnum() {}
+
+// WithdrawalTypeArg
+// - Balance: the T of Balance<T>
+type WithdrawalTypeArg struct {
+	Balance *TypeTag
+}
+
+func (*WithdrawalTypeArg) IsBcsEnum() {}
+
+// WithdrawFrom
+// - Sender
+// - Sponsor
+// - SenderAllowance
+type WithdrawFrom struct {
+	Sender          any
+	Sponsor         any
+	SenderAllowance *SenderAllowance
+}
+
+func (*WithdrawFrom) IsBcsEnum() {}
+
+// SenderAllowance withdraws from Funder's balance under the Allowance object
+// granted to the sender.
+type SenderAllowance struct {
+	Funder    models.SuiAddressBytes
+	Allowance models.SuiAddressBytes
 }
 
 // ObjectArg
@@ -233,9 +365,9 @@ type Publish struct {
 }
 
 // MakeMoveVec https://github.com/MystenLabs/sui/blob/fb27c6c7166f5e4279d5fd1b2ebc5580ca0e81b2/crates/sui-types/src/transaction.rs#L731
-// Type is an Option, it is nil when the vector holds objects.
+// Type is an Option<TypeInput> (same layout as TypeTag), it is nil when the vector holds objects.
 type MakeMoveVec struct {
-	Type     *string `bcs:"optional"`
+	Type     *TypeTag `bcs:"optional"`
 	Elements []*Argument
 }
 
@@ -271,6 +403,10 @@ type SuiObjectRef struct {
 	Digest   models.ObjectDigestBytes
 }
 
+// SharedObjectRef: on chain the last field is SharedObjectMutability
+// (Immutable=0, Mutable=1, NonExclusiveWrite=2). Immutable and Mutable encode exactly
+// like this bool; NonExclusiveWrite is only used by system settlement transactions
+// and is decoded as Mutable=true.
 type SharedObjectRef struct {
 	ObjectId             models.SuiAddressBytes
 	InitialSharedVersion uint64
@@ -286,18 +422,19 @@ type StructTag struct {
 
 // TypeTag https://github.com/MystenLabs/sui/blob/ece197ed5c414eb274f99afc52704664af8d0c38/external-crates/move/crates/move-core-types/src/language_storage.rs#L33
 // Do not reorder the fields, it will break the bcs encoding
+// Primitive variants carry no payload; set them to &struct{}{} (see ParseTypeTag).
 type TypeTag struct {
-	Bool    *bool
-	U8      *bool
-	U128    *bool
-	U256    *bool
-	Address *bool
-	Signer  *bool
+	Bool    *struct{}
+	U8      *struct{}
+	U128    *struct{}
+	U256    *struct{}
+	Address *struct{}
+	Signer  *struct{}
 	Vector  *TypeTag
 	Struct  *StructTag
-	U16     *bool
-	U32     *bool
-	U64     *bool
+	U16     *struct{}
+	U32     *struct{}
+	U64     *struct{}
 }
 
 func (*TypeTag) IsBcsEnum() {}

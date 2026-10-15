@@ -256,6 +256,19 @@ func (d *Decoder) decodeEnum(v reflect.Value) (int, error) {
 		return n, err
 	}
 
+	if enumId < 0 || enumId >= v.NumField() {
+		return n, fmt.Errorf("enum %s has no variant %d", v.Type().Name(), enumId)
+	}
+	// variant indices are field positions, so ignored and unexported fields
+	// still take an index but can never be a valid variant on the wire.
+	tag, err := parseTagValue(v.Type().Field(enumId).Tag.Get(tagName))
+	if err != nil {
+		return n, err
+	}
+	if tag.isIgnored() || !v.Field(enumId).CanInterface() {
+		return n, fmt.Errorf("enum %s has no variant %d", v.Type().Name(), enumId)
+	}
+
 	field := v.Field(enumId)
 
 	// Handle interface{} fields (like None any in TransactionExpiration)
