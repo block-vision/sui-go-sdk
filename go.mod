@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/cosmos/go-bip39 v1.0.0
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0
 	github.com/fardream/go-bcs v0.7.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/golang/protobuf v1.5.4

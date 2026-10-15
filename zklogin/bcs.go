@@ -18,6 +18,8 @@ type ZkLoginSignatureInputs struct {
 	AddressSeed      string           `bcs:"addressSeed"`
 }
 
+// Deprecated: its layout does not match the on-chain encoding. Use ParseZkLoginSignature,
+// which returns a ParsedZkLoginSignature.
 type ZkLoginSignature struct {
 	Inputs        ZkLoginSignatureInputs `bcs:"inputs"`
 	MaxEpoch      uint64                 `bcs:"maxEpoch"`

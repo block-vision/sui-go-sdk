@@ -157,6 +157,25 @@ func RequestDevNetSuiFromFaucet() {
 
 ### Writing Transaction Blocks to Sui
 
+#### Signing with Ed25519, Secp256k1 or Secp256r1 keys
+
+`signer.NewKeypairFromSuiPrivateKey` reads a `suiprivkey…` key (as exported by the Sui CLI or wallets) of any of the three schemes; `NewSecp256k1Signer` / `NewSecp256r1Signer` take a raw 32-byte private key. Every signer implements `signer.Keypair`.
+
+```go
+keypair, err := signer.NewKeypairFromSuiPrivateKey("suiprivkey1...")
+if err != nil {
+  panic(err)
+}
+fmt.Println(keypair.SignatureScheme(), keypair.GetAddress())
+
+tx := transaction.NewTransaction()
+tx.SetKeypairSigner(keypair) // SetKeypairSponsoredSigner for a gas sponsor
+// ... add commands, then tx.Execute(...) or tx.ToSuiExecuteTransactionBlockRequest(...)
+
+sig, err := keypair.SignPersonalMessageV1("hello sui")
+signerAddress, ok, err := models.VerifyPersonalMessage("hello sui", sig.Signature)
+```
+
 #### Transfer Object
 
 ```go

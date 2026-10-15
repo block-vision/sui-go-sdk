@@ -1,3 +1,7 @@
+// Package ed25519 holds an older Ed25519-only verification path.
+//
+// Deprecated: use models.VerifyMessage, models.VerifyPersonalMessage and
+// models.Ed25519PublicKeyToSuiAddress, which also support Secp256k1 and Secp256r1.
 package ed25519
 
 import (
@@ -15,20 +19,24 @@ import (
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
 )
 
+// Deprecated: use models.VerifyPersonalMessage and models.Ed25519PublicKeyToSuiAddress.
 type Ed25519PublicKey struct {
 	signature []byte
 }
 
+// Deprecated: use models.VerifyPersonalMessage and models.Ed25519PublicKeyToSuiAddress.
 func NewEd25519PublicKey(signature []byte) *Ed25519PublicKey {
 	return &Ed25519PublicKey{
 		signature: signature,
 	}
 }
 
+// Deprecated: it panics. Use models.Ed25519PublicKeyToSuiAddress.
 func (e *Ed25519PublicKey) ToSuiAddress() string {
 	panic("not implemented")
 }
 
+// Deprecated: use models.VerifyPersonalMessage.
 func (e *Ed25519PublicKey) VerifyPersonalMessage(message []byte, signature []byte, client *graphql.Client) (bool, error) {
 	b64Message := base64.StdEncoding.EncodeToString([]byte(message))
 	b64Signature := base64.StdEncoding.EncodeToString([]byte(signature))
@@ -36,6 +44,8 @@ func (e *Ed25519PublicKey) VerifyPersonalMessage(message []byte, signature []byt
 	return pass, err
 }
 
+// Deprecated: it BCS-encodes the message for every intent, so transaction signatures never
+// verify. Use models.VerifyMessage, which also supports Secp256k1 and Secp256r1.
 func VerifyMessage(message, signature string, scope constant.IntentScope) (signer string, pass bool, err error) {
 	b64Bytes, _ := base64.StdEncoding.DecodeString(message)
 
@@ -61,6 +71,7 @@ func VerifyMessage(message, signature string, scope constant.IntentScope) (signe
 	return
 }
 
+// Deprecated: use models.Ed25519PublicKeyToSuiAddress.
 func Ed25519PublicKeyToSuiAddress(pubKey []byte) string {
 	newPubkey := []byte{byte(models.SigFlagEd25519)}
 	newPubkey = append(newPubkey, pubKey...)

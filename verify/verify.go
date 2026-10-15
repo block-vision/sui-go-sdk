@@ -1,3 +1,7 @@
+// Package verify was an unfinished port of signature verification; its functions panic.
+//
+// Deprecated: use models.VerifyPersonalMessage / models.VerifyMessage for Ed25519, Secp256k1
+// and Secp256r1 signatures, and the v2 gRPC client's VerifyZkLoginSignature for zkLogin.
 package verify
 
 import (
@@ -10,6 +14,9 @@ import (
 	"github.com/block-vision/sui-go-sdk/zklogin"
 )
 
+// Deprecated: it panics for every input. Use models.VerifyPersonalMessage for Ed25519,
+// Secp256k1 and Secp256r1 signatures, and the v2 gRPC client's VerifyZkLoginSignature
+// (IntentScope PersonalMessage) for zkLogin signatures.
 func VerifyPersonalMessageSignature(message []byte, signature []byte, options *zklogin.ZkLoginPublicIdentifierOptions) (signer string, pass bool, err error) {
 	parsedSignature := parseSignature(signature, options)
 

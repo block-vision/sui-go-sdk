@@ -3,17 +3,23 @@ package models
 import (
 	"bytes"
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/elliptic"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"log"
+	"math/big"
 	"strings"
 
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/block-vision/sui-go-sdk/constant"
 	"github.com/block-vision/sui-go-sdk/mystenbcs"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4"
+	secp256k1ecdsa "github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
 )
 
 type InputObjectKind map[string]interface{}
@@ -38,6 +44,7 @@ type SigFlag byte
 const (
 	SigFlagEd25519   SigFlag = 0x00
 	SigFlagSecp256k1 SigFlag = 0x01
+	SigFlagSecp256r1 SigFlag = 0x02
 )
 
 type HexData struct {
@@ -137,35 +144,54 @@ func messageWithIntent(message []byte) []byte {
 	return intentMessage
 }
 
+// ToSerializedSignature serializes an Ed25519 signature as flag || signature || public key.
 func ToSerializedSignature(signature, pubKey []byte) string {
-	signatureLen := len(signature)
-	pubKeyLen := len(pubKey)
-	serializedSignature := make([]byte, 1+signatureLen+pubKeyLen)
-	serializedSignature[0] = byte(SigFlagEd25519)
-	copy(serializedSignature[1:], signature)
-	copy(serializedSignature[1+signatureLen:], pubKey)
+	return ToSerializedSignatureWithScheme(signature, pubKey, byte(SigFlagEd25519))
+}
+
+// ToSerializedSignatureWithScheme serializes a signature as flag || signature || public key
+// for the given Sui signature scheme flag.
+func ToSerializedSignatureWithScheme(signature, pubKey []byte, sigFlag byte) string {
+	serializedSignature := make([]byte, 0, 1+len(signature)+len(pubKey))
+	serializedSignature = append(serializedSignature, sigFlag)
+	serializedSignature = append(serializedSignature, signature...)
+	serializedSignature = append(serializedSignature, pubKey...)
 	return base64.StdEncoding.EncodeToString(serializedSignature)
 }
 
+// simpleSignatureSchemes maps the single-key signature flags to their scheme name and
+// public key length; every one of them has a 64-byte signature.
+var simpleSignatureSchemes = map[byte]struct {
+	name      string
+	pubKeyLen int
+}{
+	byte(SigFlagEd25519):   {"ED25519", ed25519.PublicKeySize},
+	byte(SigFlagSecp256k1): {"Secp256k1", 33},
+	byte(SigFlagSecp256r1): {"Secp256r1", 33},
+}
+
+// FromSerializedSignature parses a flag || signature || public key signature. Only the
+// single-key schemes (Ed25519, Secp256k1, Secp256r1) are supported.
 func FromSerializedSignature(serializedSignature string) (*SignaturePubkeyPair, error) {
 	_bytes, err := base64.StdEncoding.DecodeString(serializedSignature)
 	if err != nil {
 		return nil, err
 	}
-	signatureScheme := parseSignatureScheme(_bytes[0])
-	if strings.EqualFold(serializedSignature, "") {
-		return nil, fmt.Errorf("multiSig is not supported")
+	if len(_bytes) == 0 {
+		return nil, fmt.Errorf("serialized signature is empty")
 	}
-
-	signature := _bytes[1 : len(_bytes)-32]
-	pubKeyBytes := _bytes[1+len(signature):]
-
-	keyPair := &SignaturePubkeyPair{
-		SignatureScheme: signatureScheme,
-		Signature:       signature,
-		PubKey:          pubKeyBytes,
+	sigScheme, ok := simpleSignatureSchemes[_bytes[0]]
+	if !ok {
+		return nil, fmt.Errorf("signature flag 0x%02x (%s) is not supported", _bytes[0], parseSignatureScheme(_bytes[0]))
 	}
-	return keyPair, nil
+	if want := 1 + 64 + sigScheme.pubKeyLen; len(_bytes) != want {
+		return nil, fmt.Errorf("invalid %s serialized signature length: %d, want %d", sigScheme.name, len(_bytes), want)
+	}
+	return &SignaturePubkeyPair{
+		SignatureScheme: sigScheme.name,
+		Signature:       _bytes[1:65],
+		PubKey:          _bytes[65:],
+	}, nil
 }
 
 func parseSignatureScheme(scheme byte) string {
@@ -180,8 +206,10 @@ func parseSignatureScheme(scheme byte) string {
 		return "MultiSig"
 	case 5:
 		return "ZkLogin"
+	case 6:
+		return "Passkey"
 	default:
-		return "ED25519"
+		return "unknown"
 	}
 }
 
@@ -194,33 +222,86 @@ func VerifyTransaction(b64Message string, signature string) (signer string, pass
 	return VerifyMessage(b64Message, signature, constant.TransactionDataIntentScope)
 }
 
+// VerifyMessage verifies an Ed25519, Secp256k1 or Secp256r1 signature over the base64
+// message and returns the signer address. Personal messages are signed over their BCS
+// encoding (vector<u8>), every other intent over the raw bytes, as on Sui.
 func VerifyMessage(message, signature string, scope constant.IntentScope) (signer string, pass bool, err error) {
-	b64Bytes, _ := base64.StdEncoding.DecodeString(message)
-
-	bcsEncodedMsg := bytes.Buffer{}
-	bcsEncoder := mystenbcs.NewEncoder(&bcsEncodedMsg)
-	bcsEncoder.Encode(b64Bytes)
-
-	messageBytes := NewMessageWithIntent(bcsEncodedMsg.Bytes(), scope)
+	payload, err := base64.StdEncoding.DecodeString(message)
+	if err != nil {
+		return "", false, err
+	}
+	if scope == constant.PersonalMessageIntentScope {
+		bcsEncodedMsg := bytes.Buffer{}
+		if err := mystenbcs.NewEncoder(&bcsEncodedMsg).Encode(payload); err != nil {
+			return "", false, err
+		}
+		payload = bcsEncodedMsg.Bytes()
+	}
 
 	serializedSignature, err := FromSerializedSignature(signature)
 	if err != nil {
 		return "", false, err
 	}
-	digest := blake2b.Sum256(messageBytes)
+	digest := blake2b.Sum256(NewMessageWithIntent(payload, scope))
 
-	pass = ed25519.Verify(serializedSignature.PubKey[:], digest[:], serializedSignature.Signature)
-
-	signer = Ed25519PublicKeyToSuiAddress(serializedSignature.PubKey)
+	pass, err = verifyDigest(serializedSignature, digest)
 	if err != nil {
-		return "", false, fmt.Errorf("invalid signer %v", err)
+		return "", false, err
 	}
+	flag := byte(SigFlagEd25519)
+	for f, sigScheme := range simpleSignatureSchemes {
+		if sigScheme.name == serializedSignature.SignatureScheme {
+			flag = f
+		}
+	}
+	return PublicKeyToSuiAddress(serializedSignature.PubKey, flag), pass, nil
+}
 
-	return
+// verifyDigest checks the signature over the blake2b intent digest. ECDSA schemes sign
+// SHA-256(digest) and, as validators require when executing transactions, only the
+// low-S form is accepted.
+func verifyDigest(sig *SignaturePubkeyPair, digest [32]byte) (bool, error) {
+	switch sig.SignatureScheme {
+	case "ED25519":
+		return ed25519.Verify(sig.PubKey, digest[:], sig.Signature), nil
+	case "Secp256k1":
+		pubKey, err := secp256k1.ParsePubKey(sig.PubKey)
+		if err != nil {
+			return false, fmt.Errorf("invalid Secp256k1 public key: %w", err)
+		}
+		var r, s secp256k1.ModNScalar
+		if r.SetByteSlice(sig.Signature[:32]) || s.SetByteSlice(sig.Signature[32:]) || r.IsZero() || s.IsZero() {
+			return false, nil
+		}
+		if s.IsOverHalfOrder() {
+			return false, nil
+		}
+		hash := sha256.Sum256(digest[:])
+		return secp256k1ecdsa.NewSignature(&r, &s).Verify(hash[:], pubKey), nil
+	case "Secp256r1":
+		x, y := elliptic.UnmarshalCompressed(elliptic.P256(), sig.PubKey)
+		if x == nil {
+			return false, fmt.Errorf("invalid Secp256r1 public key")
+		}
+		r, s := new(big.Int).SetBytes(sig.Signature[:32]), new(big.Int).SetBytes(sig.Signature[32:])
+		// Validators (fastcrypto) reject the high-S form. The gRPC VerifySignature endpoint
+		// (sui-crypto) accepts it, but such a transaction would not execute.
+		if s.Cmp(new(big.Int).Rsh(elliptic.P256().Params().N, 1)) > 0 {
+			return false, nil
+		}
+		hash := sha256.Sum256(digest[:])
+		return ecdsa.Verify(&ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}, hash[:], r, s), nil
+	}
+	return false, fmt.Errorf("signature scheme %s is not supported", sig.SignatureScheme)
 }
 
 func Ed25519PublicKeyToSuiAddress(pubKey []byte) string {
-	newPubkey := []byte{byte(SigFlagEd25519)}
+	return PublicKeyToSuiAddress(pubKey, byte(SigFlagEd25519))
+}
+
+// PublicKeyToSuiAddress derives the Sui address blake2b256(flag || public key).
+func PublicKeyToSuiAddress(pubKey []byte, sigFlag byte) string {
+	newPubkey := []byte{sigFlag}
 	newPubkey = append(newPubkey, pubKey...)
 
 	addrBytes := blake2b.Sum256(newPubkey)

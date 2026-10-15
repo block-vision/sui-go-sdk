@@ -21,11 +21,10 @@ func TestSuiAddressConversion(t *testing.T) {
 	assert.Equal(t, original, back)
 }
 
-func TestSuiAddressInvalidLength(t *testing.T) {
-	// Invalid address (not 32 bytes after decoding)
-	invalid := models.SuiAddress("0x1234")
-	_, err := ConvertSuiAddressStringToBytes(invalid)
-	assert.Error(t, err)
+func TestSuiAddressShortFormIsNormalized(t *testing.T) {
+	bytes, err := ConvertSuiAddressStringToBytes(models.SuiAddress("0x1234"))
+	assert.NoError(t, err)
+	assert.Equal(t, models.SuiAddress("0x0000000000000000000000000000000000000000000000000000000000001234"), ConvertSuiAddressBytesToString(*bytes))
 }
 
 func TestObjectDigestConversion(t *testing.T) {
