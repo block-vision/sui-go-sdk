@@ -41,12 +41,13 @@ func TestMakeMoveVecBcs(t *testing.T) {
 			want: []byte{0x05, 0x00, 0x02, 0x01, 0x00, 0x00, 0x01, 0x01, 0x00},
 		},
 		{
+			// the type is an Option<TypeInput>: Some, then TypeInput::U64 (variant 2)
 			name: "with type",
 			command: Command{MakeMoveVec: &MakeMoveVec{
-				Type:     lo.ToPtr("u64"),
+				Type:     &TypeTag{U64: &struct{}{}},
 				Elements: []*Argument{{Input: lo.ToPtr(uint16(0))}},
 			}},
-			want: []byte{0x05, 0x01, 0x03, 0x75, 0x36, 0x34, 0x01, 0x01, 0x00, 0x00},
+			want: []byte{0x05, 0x01, 0x02, 0x01, 0x01, 0x00, 0x00},
 		},
 	}
 

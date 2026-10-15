@@ -60,7 +60,10 @@ func (d *Decoder) decode(v reflect.Value) (int, error) {
 		return 0, nil
 	}
 
-	// Unmarshaler
+	// Unmarshaler; allocate a nil pointer first so the method has a value to fill.
+	if v.Kind() == reflect.Pointer && v.IsNil() && v.CanSet() && v.Type().Implements(unmarshalerType) {
+		v.Set(reflect.New(v.Type().Elem()))
+	}
 	if i, isUnmarshaler := v.Interface().(Unmarshaler); isUnmarshaler {
 		return i.UnmarshalBCS(d.reader)
 	}
@@ -169,21 +172,36 @@ func (d *Decoder) decodeString(v reflect.Value) (int, error) {
 		return n, nil
 	}
 
-	tmp := make([]byte, size)
-
-	read, err := d.reader.Read(tmp)
+	tmp, read, err := d.readN(size)
 	n += read
 	if err != nil {
-		return n, err
-	}
-
-	if size != read {
-		return n, fmt.Errorf("wrong number of bytes read for string, want: %d, got %d", size, read)
+		return n, fmt.Errorf("wrong number of bytes read for string, want: %d, got %d: %w", size, read, err)
 	}
 
 	v.SetString(string(tmp))
 
 	return n, nil
+}
+
+var unmarshalerType = reflect.TypeOf((*Unmarshaler)(nil)).Elem()
+
+// maxPrealloc caps allocations sized by a length read from the input, so a corrupt
+// or hostile length fails with an EOF error instead of exhausting memory.
+const maxPrealloc = 1 << 16
+
+// readN reads exactly size bytes, growing the buffer as data actually arrives.
+func (d *Decoder) readN(size int) ([]byte, int, error) {
+	buf := make([]byte, 0, min(size, maxPrealloc))
+	for len(buf) < size {
+		chunk := min(size-len(buf), maxPrealloc)
+		start := len(buf)
+		buf = append(buf, make([]byte, chunk)...)
+		read, err := io.ReadFull(d.reader, buf[start:])
+		if err != nil {
+			return nil, start + read, err
+		}
+	}
+	return buf, size, nil
 }
 
 // readByte reads one byte from the input, error if no byte is read.
@@ -229,7 +247,9 @@ fieldLoop:
 				field.Set(reflect.Zero(field.Type()))
 			} else {
 				field.Set(reflect.New(field.Type().Elem()))
-				k, err := d.decode(field.Elem())
+				// decode through the pointer so an enum declared on a pointer
+				// receiver (Option<TypeTag>) is still decoded as an enum.
+				k, err := d.decode(field)
 				n += k
 				if err != nil {
 					return n, err
@@ -254,6 +274,19 @@ func (d *Decoder) decodeEnum(v reflect.Value) (int, error) {
 	enumId, n, err := ULEB128Decode[int](d.reader)
 	if err != nil {
 		return n, err
+	}
+
+	if enumId < 0 || enumId >= v.NumField() {
+		return n, fmt.Errorf("enum %s has no variant %d", v.Type().Name(), enumId)
+	}
+	// variant indices are field positions, so ignored and unexported fields
+	// still take an index but can never be a valid variant on the wire.
+	tag, err := parseTagValue(v.Type().Field(enumId).Tag.Get(tagName))
+	if err != nil {
+		return n, err
+	}
+	if tag.isIgnored() || !v.Field(enumId).CanInterface() {
+		return n, fmt.Errorf("enum %s has no variant %d", v.Type().Name(), enumId)
 	}
 
 	field := v.Field(enumId)
@@ -286,16 +319,10 @@ func (d *Decoder) decodeByteSlice(v reflect.Value) (int, error) {
 		return n, nil
 	}
 
-	tmp := make([]byte, size)
-
-	read, err := d.reader.Read(tmp)
+	tmp, read, err := d.readN(size)
 	n += read
 	if err != nil {
-		return n, err
-	}
-
-	if size != read {
-		return n, fmt.Errorf("wrong number of bytes read for []byte, want: %d, got %d", size, read)
+		return n, fmt.Errorf("wrong number of bytes read for []byte, want: %d, got %d: %w", size, read, err)
 	}
 
 	v.Set(reflect.ValueOf(tmp))
@@ -312,13 +339,9 @@ func (d *Decoder) decodeByteArray(v reflect.Value) (int, error) {
 
 	tmp := make([]byte, arraySize)
 
-	read, err := d.reader.Read(tmp)
+	read, err := io.ReadFull(d.reader, tmp)
 	if err != nil {
-		return read, err
-	}
-
-	if arraySize != read {
-		return read, fmt.Errorf("wrong number of bytes read for [%d]byte, want: %d, got %d", arraySize, arraySize, read)
+		return read, fmt.Errorf("wrong number of bytes read for [%d]byte, want: %d, got %d: %w", arraySize, arraySize, read, err)
 	}
 
 	for i := 0; i < arraySize; i++ {
@@ -337,7 +360,7 @@ func (d *Decoder) decodeArray(v reflect.Value) (int, error) {
 	if elementType.Kind() == reflect.Pointer {
 		for i := 0; i < size; i++ {
 			idx := reflect.New(elementType.Elem())
-			k, err := d.decode(idx.Elem())
+			k, err := d.decode(idx)
 			n += k
 			if err != nil {
 				return n, err
@@ -369,7 +392,8 @@ func (d *Decoder) decodeSlice(v reflect.Value) (int, error) {
 	// element type of the slice
 	elementType := v.Type().Elem()
 	// make a new slice
-	tmp := reflect.MakeSlice(v.Type(), 0, size)
+	// the length comes from the input; don't trust it for the allocation.
+	tmp := reflect.MakeSlice(v.Type(), 0, min(size, maxPrealloc))
 
 	if elementType.Kind() == reflect.Pointer {
 		for i := 0; i < size; i++ {
