@@ -103,16 +103,16 @@ func (c *Client) GetBalance(ctx context.Context, options GetBalanceOptions) (*Ge
 		}, nil
 	}
 
-	bal := resp.Balance
-	balStr := fmt.Sprintf("%d", bal.GetBalance())
-	return &GetBalanceResponse{
-		Balance: Balance{
-			CoinType:       bal.GetCoinType(),
-			Balance_:       balStr,
-			CoinBalance:    balStr,
-			AddressBalance: "0",
-		},
-	}, nil
+	return &GetBalanceResponse{Balance: convertGrpcBalance(resp.Balance)}, nil
+}
+
+func convertGrpcBalance(bal *v2proto.Balance) Balance {
+	return Balance{
+		CoinType:       bal.GetCoinType(),
+		Balance_:       fmt.Sprintf("%d", bal.GetBalance()),
+		CoinBalance:    fmt.Sprintf("%d", bal.GetCoinBalance()),
+		AddressBalance: fmt.Sprintf("%d", bal.GetAddressBalance()),
+	}
 }
 
 // GetCoinMetadata returns on-chain metadata for the given coin type.
@@ -182,13 +182,7 @@ func (c *Client) ListBalances(ctx context.Context, options ListBalancesOptions) 
 
 	balances := make([]Balance, len(resp.Balances))
 	for i, bal := range resp.Balances {
-		balStr := fmt.Sprintf("%d", bal.GetBalance())
-		balances[i] = Balance{
-			CoinType:       bal.GetCoinType(),
-			Balance_:       balStr,
-			CoinBalance:    balStr,
-			AddressBalance: "0",
-		}
+		balances[i] = convertGrpcBalance(bal)
 	}
 
 	var cursor *string

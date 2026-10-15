@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"math/big"
 	"strconv"
 
 	"github.com/block-vision/sui-go-sdk/models"
@@ -69,14 +70,30 @@ func (c *Client) GetBalance(ctx context.Context, options types.GetBalanceOptions
 		return nil, wrapTransportError("GetBalance", "suix_getBalance", err)
 	}
 
-	return &types.GetBalanceResponse{
-		Balance: types.Balance{
-			CoinType:       normalizeCoinType(rsp.CoinType),
-			Balance_:       rsp.TotalBalance,
-			CoinBalance:    rsp.TotalBalance,
-			AddressBalance: "0",
-		},
-	}, nil
+	return &types.GetBalanceResponse{Balance: convertBalance(rsp)}, nil
+}
+
+// convertBalance splits the JSON-RPC balance: totalBalance already includes
+// fundsInAddressBalance, so the Coin<T> part is the difference.
+func convertBalance(b models.CoinBalanceResponse) types.Balance {
+	total, ok := new(big.Int).SetString(b.TotalBalance, 10)
+	if !ok {
+		total = new(big.Int)
+	}
+	address, ok := new(big.Int).SetString(b.FundsInAddressBalance, 10)
+	if !ok {
+		address = new(big.Int)
+	}
+	coin := new(big.Int).Sub(total, address)
+	if coin.Sign() < 0 {
+		coin.SetInt64(0)
+	}
+	return types.Balance{
+		CoinType:       normalizeCoinType(b.CoinType),
+		Balance_:       total.String(),
+		CoinBalance:    coin.String(),
+		AddressBalance: address.String(),
+	}
 }
 
 // GetCoinMetadata returns on-chain metadata for the given coin type.
@@ -119,12 +136,7 @@ func (c *Client) ListBalances(ctx context.Context, options types.ListBalancesOpt
 
 	balances := make([]types.Balance, len(rsp))
 	for i, b := range rsp {
-		balances[i] = types.Balance{
-			CoinType:       normalizeCoinType(b.CoinType),
-			Balance_:       b.TotalBalance,
-			CoinBalance:    b.TotalBalance,
-			AddressBalance: "0",
-		}
+		balances[i] = convertBalance(b)
 	}
 
 	limit := 50

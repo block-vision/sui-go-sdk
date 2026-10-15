@@ -254,11 +254,11 @@ type GetDynamicFieldResponse struct {
 // Balance represents the aggregated balance of one coin type for an address.
 type Balance struct {
 	CoinType string `json:"coinType"`
-	// Total balance across all Coin<T> objects owned by the address.
+	// Total spendable balance: CoinBalance + AddressBalance.
 	Balance_ string `json:"balance"`
-	// Balance held in Coin<T> objects (same as Balance for most coins).
+	// Balance held in Coin<T> objects owned by the address.
 	CoinBalance string `json:"coinBalance"`
-	// Balance held directly at the address level (e.g., SUI gas balance).
+	// Balance held in the address's Address Balance (Balance<T> accumulator).
 	AddressBalance string `json:"addressBalance"`
 }
 
@@ -615,7 +615,7 @@ type ObjectRef struct {
 }
 
 // TransactionExpiration is the transaction expiration; use type assertion to distinguish.
-// Implementations: *NoExpiration, *EpochExpiration
+// Implementations: *NoExpiration, *EpochExpiration, *ValidDuringExpiration
 type TransactionExpiration interface {
 	isTransactionExpiration()
 }
@@ -631,6 +631,30 @@ type EpochExpiration struct {
 }
 
 func (*EpochExpiration) isTransactionExpiration() {}
+
+// ValidDuringExpiration bounds the epochs and timestamps a transaction may execute in.
+// Required for transactions that pay gas from an address balance. Optional bounds are
+// nil when unset; timestamps are Unix milliseconds.
+// AllowedProposers is only set for the VALIDITY kind, which additionally restricts
+// the validators allowed to propose the transaction in consensus.
+type ValidDuringExpiration struct {
+	MinEpoch         *string           `json:"minEpoch,omitempty"`
+	MaxEpoch         *string           `json:"maxEpoch,omitempty"`
+	MinTimestamp     *string           `json:"minTimestamp,omitempty"`
+	MaxTimestamp     *string           `json:"maxTimestamp,omitempty"`
+	Chain            string            `json:"chain"`
+	Nonce            uint32            `json:"nonce"`
+	AllowedProposers *AllowedProposers `json:"allowedProposers,omitempty"`
+}
+
+func (*ValidDuringExpiration) isTransactionExpiration() {}
+
+// AllowedProposers lists the committee indices (in Epoch's committee) of the
+// validators allowed to propose a transaction.
+type AllowedProposers struct {
+	Epoch     string   `json:"epoch"`
+	Proposers []uint32 `json:"proposers"`
+}
 
 // Command is a PTB command; use type assertion to distinguish.
 // Implementations: *MoveCallCommand, *TransferObjectsCmd, *SplitCoinsCmd, *MergeCoinsCmd, *PublishCmd, *MakeMoveVectorCmd, *UpgradeCmd
@@ -739,7 +763,7 @@ type ResultArg struct {
 func (ResultArg) isArgument() {}
 
 // Input is a programmable transaction input; use type assertion to distinguish.
-// Implementations: various *Pure*Input, *SharedObjectInput, *ImmutableOrOwnedInput, *ReceivingInput
+// Implementations: various *Pure*Input, *SharedObjectInput, *ImmutableOrOwnedInput, *ReceivingInput, *FundsWithdrawalInput
 type Input interface {
 	isInput()
 }
@@ -872,6 +896,28 @@ type ReceivingInput struct {
 }
 
 func (*ReceivingInput) isInput() {}
+
+// FundsWithdrawalSource identifies whose address balance a FundsWithdrawalInput debits.
+type FundsWithdrawalSource string
+
+const (
+	FundsWithdrawalSourceUnknown         FundsWithdrawalSource = "Unknown"
+	FundsWithdrawalSourceSender          FundsWithdrawalSource = "Sender"
+	FundsWithdrawalSourceSponsor         FundsWithdrawalSource = "Sponsor"
+	FundsWithdrawalSourceSenderAllowance FundsWithdrawalSource = "SenderAllowance"
+)
+
+// FundsWithdrawalInput reserves Amount of CoinType from an address balance.
+// Funder and Allowance are set only when Source is SenderAllowance.
+type FundsWithdrawalInput struct {
+	Amount    string                `json:"amount"`
+	CoinType  string                `json:"coinType"`
+	Source    FundsWithdrawalSource `json:"source"`
+	Funder    string                `json:"funder,omitempty"`
+	Allowance string                `json:"allowance,omitempty"`
+}
+
+func (*FundsWithdrawalInput) isInput() {}
 
 // Transaction is an executed (or simulated) Sui transaction with optional
 // fields controlled by TransactionInclude.
