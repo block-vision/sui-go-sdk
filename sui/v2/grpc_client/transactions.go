@@ -345,6 +345,8 @@ func convertGrpcTransactionData(tx *v2proto.Transaction) *TransactionData {
 			out.Expiration = NoExpiration{}
 		case v2proto.TransactionExpiration_EPOCH:
 			out.Expiration = &EpochExpiration{Epoch: fmt.Sprintf("%d", exp.GetEpoch())}
+		case v2proto.TransactionExpiration_VALID_DURING, v2proto.TransactionExpiration_VALIDITY:
+			out.Expiration = convertGrpcValidDuringExpiration(exp)
 		default:
 			out.Expiration = NoExpiration{}
 		}
@@ -377,6 +379,38 @@ func convertGrpcTransactionData(tx *v2proto.Transaction) *TransactionData {
 	}
 
 	return out
+}
+
+// convertGrpcValidDuringExpiration converts a VALID_DURING or VALIDITY expiration;
+// allowed proposers are only carried by VALIDITY.
+func convertGrpcValidDuringExpiration(exp *v2proto.TransactionExpiration) *ValidDuringExpiration {
+	e := &ValidDuringExpiration{
+		Chain: exp.GetChain(),
+		Nonce: exp.GetNonce(),
+	}
+	if exp.MinEpoch != nil {
+		s := strconv.FormatUint(exp.GetMinEpoch(), 10)
+		e.MinEpoch = &s
+	}
+	if exp.Epoch != nil { // max_epoch
+		s := strconv.FormatUint(exp.GetEpoch(), 10)
+		e.MaxEpoch = &s
+	}
+	if ts := exp.GetMinTimestamp(); ts != nil {
+		s := strconv.FormatInt(ts.AsTime().UnixMilli(), 10)
+		e.MinTimestamp = &s
+	}
+	if ts := exp.GetMaxTimestamp(); ts != nil {
+		s := strconv.FormatInt(ts.AsTime().UnixMilli(), 10)
+		e.MaxTimestamp = &s
+	}
+	if ap := exp.GetAllowedProposers(); ap != nil {
+		e.AllowedProposers = &AllowedProposers{
+			Epoch:     strconv.FormatUint(ap.GetEpoch(), 10),
+			Proposers: ap.GetProposers(),
+		}
+	}
+	return e
 }
 
 // commandKeyNames: raw proto command type names used as map keys
@@ -545,8 +579,32 @@ func convertGrpcInput(in *v2proto.Input) Input {
 			Version:  strconv.FormatUint(in.GetVersion(), 10),
 			Digest:   in.GetDigest(),
 		}
+	case v2proto.Input_FUNDS_WITHDRAWAL:
+		fw := in.GetFundsWithdrawal()
+		return &FundsWithdrawalInput{
+			Amount:    strconv.FormatUint(fw.GetAmount(), 10),
+			CoinType:  fw.GetCoinType(),
+			Source:    grpcFundsWithdrawalSource(fw.GetSource()),
+			Funder:    fw.GetFunder(),
+			Allowance: fw.GetAllowance(),
+		}
 	default:
-		return nil
+		// Keep a placeholder for kinds this SDK doesn't know yet: dropping the
+		// input would shift every later index that InputArg refers to.
+		return RawInput{Data: map[string]interface{}{"kind": in.GetKind().String()}}
+	}
+}
+
+func grpcFundsWithdrawalSource(s v2proto.FundsWithdrawal_Source) FundsWithdrawalSource {
+	switch s {
+	case v2proto.FundsWithdrawal_SENDER:
+		return FundsWithdrawalSourceSender
+	case v2proto.FundsWithdrawal_SPONSOR:
+		return FundsWithdrawalSourceSponsor
+	case v2proto.FundsWithdrawal_SENDER_ALLOWANCE:
+		return FundsWithdrawalSourceSenderAllowance
+	default:
+		return FundsWithdrawalSourceUnknown
 	}
 }
 
@@ -650,6 +708,8 @@ func grpcOutputState(s v2proto.ChangedObject_OutputObjectState) ChangedObjectOut
 		return ChangedObjectOutputObjectWrite
 	case v2proto.ChangedObject_OUTPUT_OBJECT_STATE_PACKAGE_WRITE:
 		return ChangedObjectOutputPackageWrite
+	case v2proto.ChangedObject_OUTPUT_OBJECT_STATE_ACCUMULATOR_WRITE:
+		return ChangedObjectOutputAccumulatorWriteV1
 	default:
 		return ChangedObjectOutputUnknown
 	}
