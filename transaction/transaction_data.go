@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"io"
 
@@ -404,13 +405,50 @@ type SuiObjectRef struct {
 }
 
 // SharedObjectRef: on chain the last field is SharedObjectMutability
-// (Immutable=0, Mutable=1, NonExclusiveWrite=2). Immutable and Mutable encode exactly
-// like this bool; NonExclusiveWrite is only used by system settlement transactions
-// and is decoded as Mutable=true.
+// (Immutable=0, Mutable=1, NonExclusiveWrite=2). Mutable keeps the original bool API;
+// NonExclusiveWrite (used by system settlement transactions to add disjoint dynamic
+// fields concurrently) is decoded as Mutable=true plus NonExclusiveWrite=true.
 type SharedObjectRef struct {
 	ObjectId             models.SuiAddressBytes
 	InitialSharedVersion uint64
 	Mutable              bool
+	NonExclusiveWrite    bool
+}
+
+func (r *SharedObjectRef) MarshalBCS() ([]byte, error) {
+	out := make([]byte, 0, len(r.ObjectId)+9)
+	out = append(out, r.ObjectId[:]...)
+	out = binary.LittleEndian.AppendUint64(out, r.InitialSharedVersion)
+	switch {
+	case r.NonExclusiveWrite:
+		out = append(out, 2)
+	case r.Mutable:
+		out = append(out, 1)
+	default:
+		out = append(out, 0)
+	}
+	return out, nil
+}
+
+func (r *SharedObjectRef) UnmarshalBCS(reader io.Reader) (int, error) {
+	var buf [len(models.SuiAddressBytes{}) + 9]byte
+	n, err := io.ReadFull(reader, buf[:])
+	if err != nil {
+		return n, err
+	}
+	copy(r.ObjectId[:], buf[:32])
+	r.InitialSharedVersion = binary.LittleEndian.Uint64(buf[32:40])
+	switch buf[40] {
+	case 0:
+		r.Mutable, r.NonExclusiveWrite = false, false
+	case 1:
+		r.Mutable, r.NonExclusiveWrite = true, false
+	case 2:
+		r.Mutable, r.NonExclusiveWrite = true, true
+	default:
+		return n, fmt.Errorf("invalid SharedObjectMutability %d", buf[40])
+	}
+	return n, nil
 }
 
 type StructTag struct {
@@ -420,21 +458,22 @@ type StructTag struct {
 	TypeParams []*TypeTag
 }
 
-// TypeTag https://github.com/MystenLabs/sui/blob/ece197ed5c414eb274f99afc52704664af8d0c38/external-crates/move/crates/move-core-types/src/language_storage.rs#L33
-// Do not reorder the fields, it will break the bcs encoding
+// TypeTag https://github.com/MystenLabs/sui/blob/mainnet-v1.81.1/external-crates/move/crates/move-core-types/src/language_storage.rs
+// Also used for TypeInput (MoveCall type arguments, MakeMoveVec), which has the same layout.
+// Field order is the variant index: Bool, U8, U64, U128, Address, Signer, Vector, Struct, U16, U32, U256.
 // Primitive variants carry no payload; set them to &struct{}{} (see ParseTypeTag).
 type TypeTag struct {
 	Bool    *struct{}
 	U8      *struct{}
+	U64     *struct{}
 	U128    *struct{}
-	U256    *struct{}
 	Address *struct{}
 	Signer  *struct{}
 	Vector  *TypeTag
 	Struct  *StructTag
 	U16     *struct{}
 	U32     *struct{}
-	U64     *struct{}
+	U256    *struct{}
 }
 
 func (*TypeTag) IsBcsEnum() {}

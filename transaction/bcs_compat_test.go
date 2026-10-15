@@ -59,6 +59,112 @@ func TestMainnetTransactionRoundTrip(t *testing.T) {
 	}
 }
 
+// One mainnet transaction per layout the old types got wrong; each must decode,
+// re-encode byte-identically and hash to its digest.
+func TestMainnetTransactionVariantsRoundTrip(t *testing.T) {
+	commands := func(td *TransactionData) []*Command { return td.V1.Kind.ProgrammableTransaction.Commands }
+	inputs := func(td *TransactionData) []*CallArg { return td.V1.Kind.ProgrammableTransaction.Inputs }
+	cases := []struct {
+		digest string
+		check  func(t *testing.T, td *TransactionData)
+	}{
+		{"2RAkH6NNXzGZacRxaHKXJX3kQhDC9pomavcwhC3YzMn1", func(t *testing.T, td *TransactionData) {
+			require.NotNil(t, td.V1.Expiration.Epoch, "Epoch expiration")
+		}},
+		{"2FN28ZkiPbsvJELxsJGpfuuFEpByZ9vYeFPu88GWHx5i", func(t *testing.T, td *TransactionData) {
+			require.True(t, lo.ContainsBy(commands(td), func(c *Command) bool {
+				return c.MakeMoveVec != nil && c.MakeMoveVec.Type != nil && c.MakeMoveVec.Type.U64 != nil
+			}), "typed MakeMoveVec<u64>")
+		}},
+		{"6zBQYzPfCaqVjqCFYYXwSXnooLRpJTaf92gXs1RmLPi5", func(t *testing.T, td *TransactionData) {
+			require.True(t, lo.ContainsBy(inputs(td), func(in *CallArg) bool {
+				return in.Object != nil && in.Object.Receiving != nil
+			}), "Receiving input")
+		}},
+		{"85N9ByQ3GL3U5ypiRpHjTtZY6TYYd4qYdVjtUx6f73JV", func(t *testing.T, td *TransactionData) {
+			require.NotNil(t, td.V1.Expiration.Validity, "Validity expiration")
+			require.NotNil(t, td.V1.Expiration.Validity.AllowedProposers)
+			require.NotEmpty(t, td.V1.Expiration.Validity.AllowedProposers.Proposers)
+		}},
+		{"DffW3F5BYQD7Fke67rnMrRcLBKkPurVc2e2zus28uupj", func(t *testing.T, td *TransactionData) {
+			in, ok := lo.Find(inputs(td), func(in *CallArg) bool { return in.FundsWithdrawal != nil })
+			require.True(t, ok, "FundsWithdrawal input")
+			sa := in.FundsWithdrawal.WithdrawFrom.SenderAllowance
+			require.NotNil(t, sa, "SenderAllowance source")
+			require.Equal(t, models.SuiAddress("0xec1dd42c6d20c43c8d00fdbbf18e737c779e45c887e203dc9a2d4d0485b00d40"), ConvertSuiAddressBytesToString(sa.Funder))
+			require.Equal(t, models.SuiAddress("0xdd2cb366f6a0a36c524d7071ceee3d97002b5fb04e06fc58a3eb97d26e23962a"), ConvertSuiAddressBytesToString(sa.Allowance))
+			require.Equal(t, uint64(949239), *in.FundsWithdrawal.Reservation.MaxAmountU64)
+		}},
+		{"7tD8myHtKqZaY9ZRsorCubvRTbn5ZaBEC6BTcLi5Ztv", func(t *testing.T, td *TransactionData) {
+			pst := td.V1.Kind.ProgrammableSystemTransaction
+			require.NotNil(t, pst, "ProgrammableSystemTransaction")
+			require.True(t, lo.ContainsBy(pst.Inputs, func(in *CallArg) bool {
+				return in.Object != nil && in.Object.SharedObject != nil && in.Object.SharedObject.NonExclusiveWrite
+			}), "NonExclusiveWrite shared input")
+		}},
+	}
+	for _, c := range cases {
+		t.Run(c.digest, func(t *testing.T) {
+			raw, err := os.ReadFile("testdata/" + c.digest + ".bcs")
+			require.NoError(t, err)
+
+			var td TransactionData
+			n, err := mystenbcs.Unmarshal(raw, &td)
+			require.NoError(t, err)
+			require.Equal(t, len(raw), n)
+			c.check(t, &td)
+
+			encoded, err := td.Marshal()
+			require.NoError(t, err)
+			require.Equal(t, raw, encoded)
+			require.Equal(t, c.digest, txDigest(encoded))
+		})
+	}
+}
+
+// ConsensusCommitPrologueV4 is one of the system kinds the SDK does not model.
+func TestMainnetUnsupportedSystemTransaction(t *testing.T) {
+	raw, err := os.ReadFile("testdata/CcL9155Q47BeQJUrRjg6o4fa2vxTVWdQQLSuvCKQpjcV.bcs")
+	require.NoError(t, err)
+	var td TransactionData
+	_, err = mystenbcs.Unmarshal(raw, &td)
+	require.ErrorIs(t, err, ErrUnsupportedTransactionKind)
+}
+
+func TestSharedObjectMutabilityEncoding(t *testing.T) {
+	id := models.SuiAddressBytes{31: 6}
+	for _, c := range []struct {
+		ref  SharedObjectRef
+		last byte
+	}{
+		{SharedObjectRef{ObjectId: id, InitialSharedVersion: 1}, 0},
+		{SharedObjectRef{ObjectId: id, InitialSharedVersion: 1, Mutable: true}, 1},
+		{SharedObjectRef{ObjectId: id, InitialSharedVersion: 1, Mutable: true, NonExclusiveWrite: true}, 2},
+	} {
+		bz, err := mystenbcs.Marshal(&ObjectArg{SharedObject: &c.ref})
+		require.NoError(t, err)
+		require.Equal(t, append(append([]byte{0x01}, id[:]...), 1, 0, 0, 0, 0, 0, 0, 0, c.last), bz)
+
+		var back ObjectArg
+		_, err = mystenbcs.Unmarshal(bz, &back)
+		require.NoError(t, err)
+		require.Equal(t, c.ref, *back.SharedObject)
+	}
+
+	bad := append(append([]byte{0x01}, id[:]...), 1, 0, 0, 0, 0, 0, 0, 0, 3)
+	var back ObjectArg
+	_, err := mystenbcs.Unmarshal(bad, &back)
+	require.Error(t, err)
+}
+
+// A corrupt length prefix must fail on EOF instead of allocating the claimed size.
+func TestDecodeHugeLengthFails(t *testing.T) {
+	var move ProgrammableMoveCall
+	data := append(make([]byte, 32), 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f) // module name of ~4 TiB
+	_, err := mystenbcs.Unmarshal(data, &move)
+	require.Error(t, err)
+}
+
 // The builder must produce the exact input and expiration bytes found on chain
 // in G8BBZ82t… .
 func TestFundsWithdrawalAndValidDuringEncoding(t *testing.T) {
@@ -138,8 +244,17 @@ func TestTypeTagEncoding(t *testing.T) {
 		in   string
 		want []byte
 	}{
+		// variant indices from move-core-types TypeTag:
+		// Bool, U8, U64, U128, Address, Signer, Vector, Struct, U16, U32, U256
+		{"bool", []byte{0x00}},
 		{"u8", []byte{0x01}},
-		{"u64", []byte{0x0a}},
+		{"u64", []byte{0x02}},
+		{"u128", []byte{0x03}},
+		{"address", []byte{0x04}},
+		{"signer", []byte{0x05}},
+		{"u16", []byte{0x08}},
+		{"u32", []byte{0x09}},
+		{"u256", []byte{0x0a}},
 		{"vector<u8>", []byte{0x06, 0x01}},
 		{"vector<vector<address>>", []byte{0x06, 0x06, 0x04}},
 		{
